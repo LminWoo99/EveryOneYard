@@ -3,7 +3,7 @@ os: linux
 # S3에 있는 zip 파일이 EC2에 배포될 위치를 지정
 files:
   - source: / # CodeDeploy에서 전달해 준 파일 중 destination으로 이동시킬 대상을 루트로 지정(전체파일)
-    destination: /home/ec2-user/action/ # source에서 지정된 파일을 받을 위치, 이후 jar를 실행하는 등은 destination에서 옮긴 파일들로 진행
+    destination: /home/ec2-user/VideoChatting/ # source에서 지정된 파일을 받을 위치, 이후 jar를 실행하는 등은 destination에서 옮긴 파일들로 진행
     overwrite: yes
 
 permissions: # CodeDeploy에서 EC2서버로 넘겨준 파일들을 모두 ec2-user권한을 갖도록 합니다.
