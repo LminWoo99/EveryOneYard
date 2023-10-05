@@ -57,7 +57,7 @@ jobs:
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name video-prod \
           --file-exists-behavior OVERWRITE \
-          --s3-location bucket=videochat-bucket,bundleType=zip,key=VideoChatting.zip \
+          --s3-location bucket=videochat-bucket,bundleType=zip,key=VideoChatting/$GITHUB_SHA.zip \
           --region ap-northeast-2 \
       
       # S3에 업로드
