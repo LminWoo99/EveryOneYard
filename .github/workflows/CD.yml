@@ -49,7 +49,7 @@ jobs:
           host: ${{ secrets.HOST }} # EC2 인스턴스 퍼블릭 DNS
           username: ec2-user
           key: ${{ secrets.PRIVATE_KEY }} # pem 키
-          # 도커 작업
+
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/chat
             docker stop $(docker ps -a -q)
