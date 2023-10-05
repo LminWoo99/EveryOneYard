@@ -44,7 +44,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}
 
       - name: Deploy
-        uses: LminWoo99/VideoChatting@master
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }} # EC2 인스턴스 퍼블릭 DNS
           username: ec2-user
