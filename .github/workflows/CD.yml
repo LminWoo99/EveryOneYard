@@ -1,65 +1,58 @@
-# workflow의 이름
 name: CD
 
-# 해당 workflow가 언제 실행될 것인지에 대한 트리거를 지정
 on:
   push:
-    branches: [ master ] # main branch로 push 될 때 실행됩니다.
+    branches: [ "master"]
+  pull_request:
+    branches: [ "master" ]
 
-# 해당 yml 내에서 사용할 key - value
-env:
-  S3_BUCKET_NAME: videochat-bucket
-  PROJECT_NAME: VideoChatting
-  
-# workflow는 한개 이상의 job을 가지며, 각 job은 여러 step에 따라 단계를 나눌 수 있습니다.
+permissions:
+  contents: read
+
 jobs:
   build:
-    name: CD
-    # 해당 jobs에서 아래의 steps들이 어떠한 환경에서 실행될 것인지를 지정합니다.
+
     runs-on: ubuntu-latest
 
     steps:
-     # 작업에서 액세스할 수 있도록 $GITHUB_WORKSPACE에서 저장소를 체크아웃합니다.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'temurin'
+
+
+      - name: make application-prod.yml
+        run: |
+          cd ./src/main/resources
+          touch ./application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
+
 
       - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-        shell: bash
-      
-      - name: Build with Gradle
-        run: ./gradlew build
-        shell: bash
-        
-      - name: Make zip file
-        run: zip -r ./$GITHUB_SHA.zip .
-        shell: bash
+        run: chmod +x gradlew
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          
-      # script files 복사
-      - name: Copy script
-        run: cp ./scripts/*.sh ./deploy
- #Deploy
-      - name: Deploy
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
+      - name: Docker build
         run: |
-          aws deploy create-deployment \
-          --application-name videochat-codedeploy \
-          --deployment-config-name CodeDeployDefault.AllAtOnce \
-          --deployment-group-name video-prod \
-          --file-exists-behavior OVERWRITE \
-          --s3-location bucket=videochat-bucket,bundleType=zip,key=VideoChatting/$GITHUB_SHA.zip \
-          --region ap-northeast-2 \
-      
-      # S3에 업로드
-      - name: Upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$S3_BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -t app .
+          docker tag app ${{ secrets.DOCKER_USERNAME }}/sejongmate:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/sejongmate:latest
+
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }} # EC2 인스턴스 퍼블릭 DNS
+          username: ec2-user
+          key: ${{ secrets.PRIVATE_KEY }} # pem 키
+          # 도커 작업
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}
+            docker stop $(docker ps -a -q)
+            docker run -d --log-driver=syslog -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/sejongmate:latest
+            docker rm $(docker ps --filter 'status=exited' -a -q)
+            docker image prune -a -f
