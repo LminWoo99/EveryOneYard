@@ -26,8 +26,8 @@ jobs:
       - name: make application-prod.yml
         run: |
           cd ./src/main/resources
-          touch ./application-prod.yml
-          echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
+          touch ./application.yml
+          echo "${{ secrets.APPLICATION_PROD }}" > ./application.yml
 
 
       - name: Grant execute permission for gradlew
@@ -40,11 +40,11 @@ jobs:
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -t app .
-          docker tag app ${{ secrets.DOCKER_USERNAME }}/sejongmate:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/sejongmate:latest
+          docker tag app ${{ secrets.DOCKER_USERNAME }}
+          docker push ${{ secrets.DOCKER_USERNAME }}
 
       - name: Deploy
-        uses: appleboy/ssh-action@master
+        uses: LminWoo99/VideoChatting@master
         with:
           host: ${{ secrets.HOST }} # EC2 인스턴스 퍼블릭 DNS
           username: ec2-user
@@ -53,6 +53,6 @@ jobs:
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}
             docker stop $(docker ps -a -q)
-            docker run -d --log-driver=syslog -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/sejongmate:latest
+            docker run -d --log-driver=syslog -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}
             docker rm $(docker ps --filter 'status=exited' -a -q)
             docker image prune -a -f
