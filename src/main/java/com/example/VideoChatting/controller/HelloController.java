@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HelloController {
-    @GetMapping("")
+    @GetMapping("/ver")
     public String hello() {
-        return "hello ec2 & docker ver5";
+        return "hello ec2 & docker ver4";
     }
 }
