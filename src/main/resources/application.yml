@@ -3,19 +3,17 @@ spring:
     active: local
 
   datasource:
-    url: jdbc:mysql://localhost:3306/videochat?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/videochat?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: test_user
     password: admin
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
+    hibernate:
+      ddl-auto: create
     database: mysql
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    properties:
+      hibernate:
+        format_sql: True
 
-  properties:
-    hibernate:
-      show_sql: true
-      format_sql: true
-      use_sql_comments: true
-      hbm2ddl:
-        auto: create
