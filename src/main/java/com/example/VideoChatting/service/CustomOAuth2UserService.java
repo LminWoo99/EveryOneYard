@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.util.Collections;
+import java.util.Map;
 
 @Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User>  {
@@ -30,20 +31,20 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
-
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
+
+
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
-        System.out.println("attributes ds= " + attributes.getNameAttributeKey());
         ChatUser chatUser = saveOrUpdate(attributes);
         httpSession.setAttribute("user", new SessionUser(chatUser));
-
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(chatUser.getRoleKey())),
                 attributes.getAttributes(),
                 attributes.getNameAttributeKey()
         );
+
     }
 
     private ChatUser saveOrUpdate(OAuthAttributes attributes) {
