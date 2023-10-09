@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '2.7.16'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'jacoco'
 }
 
 group = 'com.example'
@@ -26,10 +27,11 @@ dependencies {
 	implementation 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	implementation 'org.springframework.security:spring-security-oauth2-client:5.7.5'
-	compileOnly "org.springframework.boot:spring-boot-starter-security"
+	implementation "org.springframework.boot:spring-boot-starter-security"
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.mockito:mockito-core:4.8.0'
 	// WebSocket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
@@ -43,4 +45,34 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+tasks.register('applicationCodeCoverageReport', JacocoReport) {
+	executionData run
+	sourceSets sourceSets.main
+}
+jacocoTestReport {
+	dependsOn test // tests are required to run before generating the report
+	reports {
+		xml.required = false
+		csv.required = false
+		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+
+		// 리포트의 저장 경로를 설정합니다.
+		html.destination file("jacoco/jacocoHtml")
+		xml.destination file("jacoco/jacoco.xml")
+	}
+}
+jacocoTestCoverageVerification {
+
+	violationRules { // 커버리지의 범위와 퍼센테이지를 설정합니다.
+		rule {
+			element = 'CLASS'
+
+			limit {
+				counter = 'BRANCH'
+				value = 'COVEREDRATIO'
+				minimum = 0.90
+			}
+		}
+	}
 }

@@ -27,7 +27,7 @@ public class SwaggerConfig {
     public ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("SpringBoot Rest API Documentation")
-                .description("3rd UMC Server: BAEMIN Clone coding - ?조")
+                .description("화상채팅 서비스 -copyright@Lee")
                 .version("0.1")
                 .build();
     }
