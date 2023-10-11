@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatRoom.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.entity</a> &gt; <span class="el_source">ChatRoom.java</span></div><h1>ChatRoom.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.entity;
+
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.util.HashMap;
+import java.util.UUID;
+// Stomp 를 통해 pub/sub 를 사용하면 구독자 관리가 알아서 된다!!
+// 따라서 따로 세션 관리를 하는 코드를 작성할 필도 없고,
+// 메시지를 다른 세션의 클라이언트에게 발송하는 것도 구현 필요가 없다!
+@Entity
+@Getter
+<span class="fc" id="L16">@NoArgsConstructor</span>
+public class ChatRoom {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="fc" id="L20">    private Long id;</span>
+
+<span class="fc" id="L22">    private String roomId; // 채팅방 아이디</span>
+<span class="fc" id="L23">    private String roomName; // 채팅방 이름</span>
+    @Column(columnDefinition = &quot;integer default 0&quot;, nullable = false)
+<span class="fc" id="L25">    private int userCount; // 채팅방 인원수</span>
+
+<span class="fc" id="L27">    private HashMap&lt;String, String&gt; userList = new HashMap&lt;String, String&gt;();</span>
+
+    public ChatRoom create(String roomName){
+<span class="fc" id="L30">        ChatRoom chatRoom = new ChatRoom();</span>
+<span class="fc" id="L31">        chatRoom.roomId = UUID.randomUUID().toString();</span>
+<span class="fc" id="L32">        chatRoom.roomName = roomName;</span>
+
+<span class="fc" id="L34">        return chatRoom;</span>
+    }
+        public static ChatRoom createChatRoom(String roomId, String roomName, int userCount) {
+<span class="nc" id="L37">        ChatRoom chatRoom = new ChatRoom();</span>
+<span class="nc" id="L38">        chatRoom.roomId = roomId;</span>
+<span class="nc" id="L39">        chatRoom.roomName = roomName;</span>
+<span class="nc" id="L40">        chatRoom.userCount = userCount;</span>
+<span class="nc" id="L41">        return chatRoom;</span>
+    }
+
+    public void setUserCount(int userCount) {
+<span class="fc" id="L45">        this.userCount = userCount;</span>
+<span class="fc" id="L46">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
