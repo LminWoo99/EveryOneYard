@@ -20,5 +20,20 @@ spring:
     properties:
       hibernate:
         format_sql: True
+  aws:
+    s3:
+      credentials:
+        accessKey: AKIA2PMNLBYQIY3AIBWB
+        secretKey: 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
+      bucket: minuawsbucket
+      region:
+        static: ap-northeast-2
+      stack:
+        auto: false
+      end-point: s3.ap-northeast-2.amazonaws.com
 
-
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: "*"

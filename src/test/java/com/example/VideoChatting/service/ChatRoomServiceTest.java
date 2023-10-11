@@ -3,9 +3,7 @@ package com.example.VideoChatting.service;
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.exception.ChatRoomNotFoundException;
 import com.example.VideoChatting.repository.ChatRoomRepository;
-import com.example.VideoChatting.repository.ChatUserRepository;
-import org.aspectj.lang.annotation.Before;
-import org.assertj.core.api.Assertions;
+import com.example.VideoChatting.service.chat.ChatRoomService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -83,7 +81,6 @@ class ChatRoomServiceTest {
         String roomName = "방1";
         //when
         ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
-
         // Then
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
 
@@ -110,30 +107,131 @@ class ChatRoomServiceTest {
     }
 
     @Test
-    void plusUserCnt() {
+    @DisplayName("채팅방 참가후 유저수 증가")
+    void 채팅방유저_증가_테스트() {
+        //given
+        String roomName = "방21";
+
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+        //when
+        chatRoomService.plusUserCnt(createdChatRoom.getRoomId());
+        //then
+        assertThat(createdChatRoom.getUserCount()).isEqualTo(1);
+        verify(chatRoomRepository, times(2)).save(any(ChatRoom.class));
     }
 
     @Test
-    void minusUserCnt() {
+    @DisplayName("채팅방 퇴장시 유저수 체크")
+    void 채팅방_유저_감소_테스트() {
+        String roomName = "방감소";
+
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+
+        chatRoomService.plusUserCnt(createdChatRoom.getRoomId());
+        chatRoomService.minusUserCnt(createdChatRoom.getRoomId());
+
+        assertThat(createdChatRoom.getUserCount()).isEqualTo(0);
+        verify(chatRoomRepository, times(3)).save(any(ChatRoom.class));
+    }
+    @Test
+    @DisplayName("채팅방 유저수가 0일떄 minusUserCnt메서드를 호출해도 -1이 안되는지 체크")
+    void 채팅방_유저_감소_예외테스트() {
+        String roomName = "방감소";
+
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+
+        chatRoomService.minusUserCnt(createdChatRoom.getRoomId());
+
+        assertThat(createdChatRoom.getUserCount()).isEqualTo(0);
+        verify(chatRoomRepository, times(2)).save(any(ChatRoom.class));
     }
 
     @Test
+    @DisplayName("해당 채팅방 유저 참가")
     void addUser() {
+        //given
+        String roomName = "채팅방 유저 참가";
+        String username = "이민우";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+
+        //when
+        String uuid = chatRoomService.addUser(createdChatRoom.getRoomId(), username);
+        //then
+        assertThat(createdChatRoom.getUserList().get(uuid)).isEqualTo(username);
+        verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
 
     @Test
+    @DisplayName("채팅방 유저 이름 중복 확인-중복이 되면 둘 중 하나의 유저이름에게 랜덤으로 숫자 붙이는지 확인")
     void isDuplicateName() {
+        //given
+        String roomName = "채팅방 중복체크";
+        String username = "이민우";
+        String username1 = "이민우";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        //when
+        chatRoomService.addUser(createdChatRoom.getRoomId(), username);
+        chatRoomService.addUser(createdChatRoom.getRoomId(), username1);
+
+        String duplicateName = chatRoomService.isDuplicateName(createdChatRoom.getRoomId(), username1);
+
+        //then
+        assertThat(username).isNotEqualTo(duplicateName);
+        verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
 
     @Test
+    @DisplayName("채팅방 유저리스트에서 특정 유저 삭제")
     void delUser() {
+        //given
+        String roomName = "채팅방 유저 삭제";
+        String username = "이민우";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        String uuid = chatRoomService.addUser(createdChatRoom.getRoomId(), username);
+        //when
+        chatRoomService.delUser(createdChatRoom.getRoomId(), uuid);
+        //then
+        assertThat(createdChatRoom.getUserList().get(uuid)).isEqualTo(null);
+        verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
 
     @Test
+    @DisplayName("채팅방 유저리스트에서 특정 유저 조회")
     void getUserName() {
+        //given
+        String roomName = "채팅방 유저 조회";
+        String username = "이민우";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        String uuid = chatRoomService.addUser(createdChatRoom.getRoomId(), username);
+        //when
+        String getUserName = chatRoomService.getUserName(createdChatRoom.getRoomId(), uuid);
+        //then
+        assertThat(getUserName).isEqualTo(username);
+        verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
 
     @Test
+    @DisplayName("채팅방 유저리스트에서 전체 유저 조회")
     void getUserList() {
+        //given
+        String roomName = "채팅방 전체 유저 조회";
+        String username = "이민우";
+        String username1 = "이민";
+        String username2 = "김민우";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+
+        chatRoomService.addUser(createdChatRoom.getRoomId(), username);
+        chatRoomService.addUser(createdChatRoom.getRoomId(), username1);
+        chatRoomService.addUser(createdChatRoom.getRoomId(), username2);
+        //when
+        ArrayList<String> userList = chatRoomService.getUserList(createdChatRoom.getRoomId());
+        //then
+
+        assertThat(userList.size()).isEqualTo(3);
+
+        verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
 }

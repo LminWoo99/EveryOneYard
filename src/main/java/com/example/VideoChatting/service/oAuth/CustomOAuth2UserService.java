@@ -1,4 +1,4 @@
-package com.example.VideoChatting.service;
+package com.example.VideoChatting.service.oAuth;
 
 import com.example.VideoChatting.entity.ChatUser;
 import com.example.VideoChatting.entity.SessionUser;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.util.Collections;
-import java.util.Map;
 
 @Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User>  {

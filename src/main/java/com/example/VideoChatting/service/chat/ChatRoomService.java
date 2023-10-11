@@ -1,4 +1,4 @@
-package com.example.VideoChatting.service;
+package com.example.VideoChatting.service.chat;
 
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.exception.ChatRoomNotFoundException;
@@ -55,8 +55,11 @@ public class ChatRoomService {
 
     public void minusUserCnt(String roomId) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId);
-        if (room != null) {
+        if (room != null && room.getUserCount()!=0) {
             room.setUserCount(room.getUserCount() - 1);
+            chatRoomRepository.save(room);
+        } else if (room.getUserCount()==0) {
+            room.setUserCount(0);
             chatRoomRepository.save(room);
         }
     }

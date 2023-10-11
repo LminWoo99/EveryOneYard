@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatRoomDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.dto</a> &gt; <span class="el_source">ChatRoomDto.java</span></div><h1>ChatRoomDto.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.dto;
+
+import com.example.VideoChatting.entity.ChatRoom;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+<span class="nc bnc" id="L9" title="All 46 branches missed.">@Data</span>
+<span class="nc" id="L10">@Builder</span>
+<span class="nc" id="L11">@AllArgsConstructor</span>
+<span class="nc" id="L12">@NoArgsConstructor</span>
+public class ChatRoomDto {
+     /*메시지  타입 : 입장, 채팅
+       메시지 타입에 따라서 동작하는 구조가 달라진다.
+       입장과 퇴장 ENTER 과 LEAVE 의 경우 입장/퇴장 이벤트 처리가 실행되고,
+       TALK 는 말 그대로 내용이 해당 채팅방을 SUB 하고 있는 모든 클라이언트에게 전달된다.*/
+<span class="nc" id="L18">     public enum MessageType{</span>
+<span class="nc" id="L19">         ENTER, TALK, LEAVE;</span>
+     }
+<span class="nc" id="L21">    private MessageType type; // 메시지 타입</span>
+<span class="nc" id="L22">    private String roomId; // 방 번호</span>
+<span class="nc" id="L23">    private String sender; // 채팅을 보낸 사람</span>
+<span class="nc" id="L24">    private String message; // 메시지</span>
+<span class="nc" id="L25">    private String time; // 채팅 발송 시간</span>
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -1,10 +1,9 @@
-package com.example.VideoChatting.service;
+package com.example.VideoChatting.service.oAuth;
 
 import com.example.VideoChatting.entity.ChatUser;
 import com.example.VideoChatting.entity.Role;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Map;
 

@@ -1,7 +1,7 @@
 package com.example.VideoChatting.controller;
 
 import com.example.VideoChatting.entity.ChatRoom;
-import com.example.VideoChatting.service.ChatRoomService;
+import com.example.VideoChatting.service.chat.ChatRoomService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class ChatRoomController {
         ChatRoom chatRoom = chatRoomService.createChatRoom(name);
         return ResponseEntity.ok().body(chatRoom);
     }
-    @GetMapping("/room")
+    @GetMapping("/{roomId}")
     @ApiOperation(value = "채팅방 입장 ", notes = "파라미터로 넘어오는 ROOMID 기준으로 채팅방을 찾음 ")
     public ResponseEntity<ChatRoom> roomDetail(@PathVariable("roomId") String roomId){
         return ResponseEntity.ok().body(chatRoomService.findRoomById(roomId));

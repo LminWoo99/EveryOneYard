@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatRoomController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.controller</a> &gt; <span class="el_source">ChatRoomController.java</span></div><h1>ChatRoomController.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.controller;
+
+import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.service.chat.ChatRoomService;
+import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+<span class="fc" id="L14">@Slf4j</span>
+<span class="fc" id="L15">@RequiredArgsConstructor</span>
+@RequestMapping(&quot;/chat&quot;)
+public class ChatRoomController {
+    private final ChatRoomService chatRoomService;
+
+    @GetMapping(&quot;/&quot;)
+    @ApiOperation(value = &quot;채팅방 리스트 조회 &quot;, notes = &quot;전체 채팅방 목록을 조회한다&quot;)
+    public ResponseEntity&lt;List&lt;ChatRoom&gt;&gt; chatRoomList() {
+<span class="fc" id="L23">        List&lt;ChatRoom&gt; allRooms = chatRoomService.findAllRooms();</span>
+<span class="fc" id="L24">        return ResponseEntity.ok().body(allRooms);</span>
+    }
+    @PostMapping(&quot;/createRoom&quot;)
+    @ApiOperation(value = &quot;채팅방 생성 &quot;, notes = &quot;채팅방을 생성한다&quot;)
+    public ResponseEntity&lt;ChatRoom&gt; createRoom(@RequestParam String name) {
+<span class="fc" id="L29">        ChatRoom chatRoom = chatRoomService.createChatRoom(name);</span>
+<span class="fc" id="L30">        return ResponseEntity.ok().body(chatRoom);</span>
+    }
+    @GetMapping(&quot;/{roomId}&quot;)
+    @ApiOperation(value = &quot;채팅방 입장 &quot;, notes = &quot;파라미터로 넘어오는 ROOMID 기준으로 채팅방을 찾음 &quot;)
+    public ResponseEntity&lt;ChatRoom&gt; roomDetail(@PathVariable(&quot;roomId&quot;) String roomId){
+<span class="fc" id="L35">        return ResponseEntity.ok().body(chatRoomService.findRoomById(roomId));</span>
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

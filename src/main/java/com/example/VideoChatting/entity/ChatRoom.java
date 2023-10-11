@@ -5,10 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.HashMap;
 import java.util.UUID;
 // Stomp 를 통해 pub/sub 를 사용하면 구독자 관리가 알아서 된다!!
@@ -24,7 +21,8 @@ public class ChatRoom {
 
     private String roomId; // 채팅방 아이디
     private String roomName; // 채팅방 이름
-    private Long userCount; // 채팅방 인원수
+    @Column(columnDefinition = "integer default 0", nullable = false)
+    private int userCount; // 채팅방 인원수
 
     private HashMap<String, String> userList = new HashMap<String, String>();
 
@@ -35,7 +33,7 @@ public class ChatRoom {
 
         return chatRoom;
     }
-        public static ChatRoom createChatRoom(String roomId, String roomName, Long userCount) {
+        public static ChatRoom createChatRoom(String roomId, String roomName, int userCount) {
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.roomId = roomId;
         chatRoom.roomName = roomName;
@@ -43,7 +41,7 @@ public class ChatRoom {
         return chatRoom;
     }
 
-    public void setUserCount(Long userCount) {
+    public void setUserCount(int userCount) {
         this.userCount = userCount;
     }
 }
