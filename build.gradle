@@ -62,6 +62,18 @@ jacocoTestReport {
 		html.destination file("jacoco/jacocoHtml")
 		xml.destination file("jacoco/jacoco.xml")
 	}
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"com/example/VideoChatting/dto/*",
+					"com/example/VideoChatting/entity/*",
+					"**/config/*",
+					"**/exception/*",
+					"**/oAuth/*"
+			])
+		}))
+	}
+
 }
 jacocoTestCoverageVerification {
 

@@ -23,13 +23,12 @@ cloud:
   aws:
     s3:
       bucket: minuawsbucket
-      bucketUrl: s3://minuawsbucket/image/
+      bucketUrl: https://minuawsbucket.s3.ap-northeast-2.amazonaws.com/
     credentials:
-      access-key: AKIA2PMNLBYQIY3AIBWB
-      secret-key: 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
+      accessKey: AKIA2PMNLBYQAEWU5RVG
+      secretKey: 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
     region:
       static: ap-northeast-2
-      auto: false
     stack:
       auto: false
 

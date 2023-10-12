@@ -33,6 +33,7 @@ import java.io.IOException;
 public class S3FileService implements FileService {
     // AmazonS3 주입받기
 
+
     private final AmazonS3 amazonS3;
 
     // S3 bucket 이름

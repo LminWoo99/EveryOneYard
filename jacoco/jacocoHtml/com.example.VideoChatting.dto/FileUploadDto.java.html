@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FileUploadDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.dto</a> &gt; <span class="el_source">FileUploadDto.java</span></div><h1>FileUploadDto.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
+
+<span class="fc" id="L9">@AllArgsConstructor</span>
+<span class="fc" id="L10">@NoArgsConstructor</span>
+<span class="pc bnc" id="L11" title="All 54 branches missed.">@Data</span>
+<span class="nc" id="L12">@Builder</span>
+public class FileUploadDto {
+
+<span class="fc" id="L15">    private MultipartFile file; // MultipartFile</span>
+
+<span class="nc" id="L17">    private String originFileName; // 파일 원본 이름</span>
+
+<span class="nc" id="L19">    private String transaction; // UUID 를 활용한 랜덤한 파일 위치</span>
+
+<span class="nc" id="L21">    private String chatRoom; // 파일이 올라간 채팅방 ID</span>
+
+<span class="nc" id="L23">    private String s3DataUrl; // 파일 링크</span>
+
+<span class="nc" id="L25">    private String fileDir; // S3 파일 경로</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

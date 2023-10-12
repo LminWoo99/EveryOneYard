@@ -32,7 +32,7 @@ public class ChatRoomController {
     }
     @GetMapping("/{roomId}")
     @ApiOperation(value = "채팅방 입장 ", notes = "파라미터로 넘어오는 ROOMID 기준으로 채팅방을 찾음 ")
-    public String roomDetail(Model model, String roomId){
+    public String roomDetail(Model model, @PathVariable String roomId){
         model.addAttribute("room", chatRoomService.findRoomById(roomId));
         return "chatroom";
     }

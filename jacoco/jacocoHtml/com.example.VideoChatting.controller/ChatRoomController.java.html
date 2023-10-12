@@ -5,12 +5,12 @@ import com.example.VideoChatting.service.chat.ChatRoomService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-
-@RestController
+@Controller
 <span class="fc" id="L14">@Slf4j</span>
 <span class="fc" id="L15">@RequiredArgsConstructor</span>
 @RequestMapping(&quot;/chat&quot;)
@@ -19,21 +19,22 @@ public class ChatRoomController {
 
     @GetMapping(&quot;/&quot;)
     @ApiOperation(value = &quot;채팅방 리스트 조회 &quot;, notes = &quot;전체 채팅방 목록을 조회한다&quot;)
-    public ResponseEntity&lt;List&lt;ChatRoom&gt;&gt; chatRoomList() {
-<span class="fc" id="L23">        List&lt;ChatRoom&gt; allRooms = chatRoomService.findAllRooms();</span>
-<span class="fc" id="L24">        return ResponseEntity.ok().body(allRooms);</span>
+    public String chatRoomList(Model model) {
+<span class="fc" id="L23">        model.addAttribute(&quot;list&quot;,chatRoomService.findAllRooms());</span>
+<span class="fc" id="L24">        return &quot;roomList&quot;;</span>
     }
     @PostMapping(&quot;/createRoom&quot;)
     @ApiOperation(value = &quot;채팅방 생성 &quot;, notes = &quot;채팅방을 생성한다&quot;)
-    public ResponseEntity&lt;ChatRoom&gt; createRoom(@RequestParam String name) {
-<span class="fc" id="L29">        ChatRoom chatRoom = chatRoomService.createChatRoom(name);</span>
-<span class="fc" id="L30">        return ResponseEntity.ok().body(chatRoom);</span>
+    public String createRoom(@RequestParam String roomName, RedirectAttributes rttr) {
+<span class="fc" id="L29">        ChatRoom room = chatRoomService.createChatRoom(roomName);</span>
+<span class="fc" id="L30">        rttr.addFlashAttribute(&quot;roomName&quot;, room);</span>
+<span class="fc" id="L31">        return &quot;redirect:/chat/&quot;;</span>
     }
     @GetMapping(&quot;/{roomId}&quot;)
     @ApiOperation(value = &quot;채팅방 입장 &quot;, notes = &quot;파라미터로 넘어오는 ROOMID 기준으로 채팅방을 찾음 &quot;)
-    public ResponseEntity&lt;ChatRoom&gt; roomDetail(@PathVariable(&quot;roomId&quot;) String roomId){
-<span class="fc" id="L35">        return ResponseEntity.ok().body(chatRoomService.findRoomById(roomId));</span>
-
+    public String roomDetail(Model model, @PathVariable String roomId){
+<span class="fc" id="L36">        model.addAttribute(&quot;room&quot;, chatRoomService.findRoomById(roomId));</span>
+<span class="fc" id="L37">        return &quot;chatroom&quot;;</span>
     }
 
 }

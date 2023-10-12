@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomOAuth2UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.oAuth</a> &gt; <span class="el_source">CustomOAuth2UserService.java</span></div><h1>CustomOAuth2UserService.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.service.oAuth;
+
+import com.example.VideoChatting.entity.ChatUser;
+import com.example.VideoChatting.entity.SessionUser;
+import com.example.VideoChatting.repository.ChatUserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpSession;
+import java.util.Collections;
+
+@Service
+public class CustomOAuth2UserService implements OAuth2UserService&lt;OAuth2UserRequest, OAuth2User&gt;  {
+
+    private final ChatUserRepository chatUserRepository;
+    private final HttpSession httpSession;
+
+<span class="fc" id="L24">    public CustomOAuth2UserService(ChatUserRepository chatUserRepository, HttpSession httpSession) {</span>
+<span class="fc" id="L25">        this.chatUserRepository = chatUserRepository;</span>
+<span class="fc" id="L26">        this.httpSession = httpSession;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+<span class="nc" id="L31">        OAuth2UserService&lt;OAuth2UserRequest, OAuth2User&gt; delegate = new DefaultOAuth2UserService();</span>
+<span class="nc" id="L32">        OAuth2User oAuth2User = delegate.loadUser(userRequest);</span>
+<span class="nc" id="L33">        String registrationId = userRequest.getClientRegistration().getRegistrationId();</span>
+<span class="nc" id="L34">        String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();</span>
+
+
+
+<span class="nc" id="L38">        OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());</span>
+<span class="nc" id="L39">        ChatUser chatUser = saveOrUpdate(attributes);</span>
+<span class="nc" id="L40">        httpSession.setAttribute(&quot;user&quot;, new SessionUser(chatUser));</span>
+<span class="nc" id="L41">        return new DefaultOAuth2User(</span>
+<span class="nc" id="L42">                Collections.singleton(new SimpleGrantedAuthority(chatUser.getRoleKey())),</span>
+<span class="nc" id="L43">                attributes.getAttributes(),</span>
+<span class="nc" id="L44">                attributes.getNameAttributeKey()</span>
+        );
+
+    }
+
+    private ChatUser saveOrUpdate(OAuthAttributes attributes) {
+<span class="nc" id="L50">        ChatUser chatUser = chatUserRepository.findByEmail(attributes.getEmail())</span>
+<span class="nc" id="L51">                .map(entity -&gt; entity.update(attributes.getName()))</span>
+<span class="nc" id="L52">                .orElse(attributes.toEntity());</span>
+
+<span class="nc" id="L54">        return chatUserRepository.save(chatUser);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

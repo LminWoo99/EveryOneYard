@@ -29,7 +29,7 @@ class ChatRoomControllerTest {
     private ChatRoomController chatRoomController;
     @Mock
     private ChatRoomService chatRoomService;
-    private Map<String, ChatRoom> chatRoomMap;
+
     private MockMvc mockMvc;
     @BeforeEach
     public void init() { // mockMvc 초기화, 각메서드가 실행되기전에 초기화 되게 함
@@ -51,9 +51,9 @@ class ChatRoomControllerTest {
         when(chatRoomService.findAllRooms()).thenReturn(chatRoomList);
 
         ResultActions perform = mockMvc.perform(get("/chat/").contentType(MediaType.APPLICATION_JSON));
-         //then
-        perform.andExpect(status().isOk())
-                .andExpect(content().json("[{\"roomName\":\"방1\"},{\"roomName\":\"방2\"}]"));
+        //then
+        perform.andExpect(status().isOk());
+
     }
     @Test
     @DisplayName("채팅방 생성 요청시 컨트롤러 테스트")
@@ -64,12 +64,13 @@ class ChatRoomControllerTest {
         when(chatRoomService.createChatRoom(roomName)).thenReturn(chatRoom);
         //when
         ResultActions perform = mockMvc.perform(post("/chat/createRoom")
-                .param("name", roomName)
-                .contentType(MediaType.APPLICATION_JSON));
+                .param("roomName", roomName)
+
+        );
+
 
         //then
-        perform.andExpect(status().isOk())
-                .andExpect(content().json("{\"roomName\":\"방생성요청\"}"));
+        perform.andExpect(status().is3xxRedirection());
     }
     @Test
     @DisplayName("채팅방 생성 요청시 이름 파라미터 안넘기는 컨트롤러 실패 테스트")
@@ -97,7 +98,7 @@ class ChatRoomControllerTest {
         ResultActions perform = mockMvc.perform(get("/chat/"+chatRoom.getRoomId())
                 .contentType(MediaType.APPLICATION_JSON));
         //then
-        perform.andExpect(status().isOk())
-                .andExpect(content().json("{\"roomName\":\"채팅방 입장\"}"));
+        perform.andExpect(status().isOk());
+
     }
 }

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OAuthAttributes.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.oAuth</a> &gt; <span class="el_source">OAuthAttributes.java</span></div><h1>OAuthAttributes.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.service.oAuth;
+
+import com.example.VideoChatting.entity.ChatUser;
+import com.example.VideoChatting.entity.Role;
+import lombok.Builder;
+import lombok.Getter;
+
+import java.util.Map;
+
+@Getter
+<span class="nc" id="L11">@Builder</span>
+public class OAuthAttributes {
+<span class="nc" id="L13">    private Map&lt;String, Object&gt; attributes;</span>
+<span class="nc" id="L14">    private String nameAttributeKey;</span>
+<span class="nc" id="L15">    private String name;</span>
+<span class="nc" id="L16">    private String email;</span>
+
+    public void setNameAttributeKey(String nameAttributeKey) {
+<span class="nc" id="L19">        this.nameAttributeKey = nameAttributeKey;</span>
+<span class="nc" id="L20">    }</span>
+
+    public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map&lt;String, Object&gt; attributes) {
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if(&quot;naver&quot;.equals(registrationId)) {</span>
+<span class="nc" id="L24">            return ofNaver(&quot;id&quot;, attributes);</span>
+        }
+
+<span class="nc" id="L27">        return ofGoogle(userNameAttributeName, attributes);</span>
+    }
+
+    private static OAuthAttributes ofGoogle(String userNameAttributeName, Map&lt;String, Object&gt; attributes) {
+<span class="nc" id="L31">        return OAuthAttributes.builder()</span>
+<span class="nc" id="L32">                .name((String) attributes.get(&quot;name&quot;))</span>
+<span class="nc" id="L33">                .email((String) attributes.get(&quot;email&quot;))</span>
+<span class="nc" id="L34">                .attributes(attributes)</span>
+<span class="nc" id="L35">                .nameAttributeKey(userNameAttributeName)</span>
+<span class="nc" id="L36">                .build();</span>
+    }
+
+    private static OAuthAttributes ofNaver(String userNameAttributeName, Map&lt;String, Object&gt; attributes) {
+<span class="nc" id="L40">        Map&lt;String, Object&gt; response = (Map&lt;String, Object&gt;) attributes.get(&quot;response&quot;);</span>
+<span class="nc" id="L41">        return OAuthAttributes.builder()</span>
+<span class="nc" id="L42">                .name((String) response.get(&quot;name&quot;))</span>
+<span class="nc" id="L43">                .email((String) response.get(&quot;email&quot;))</span>
+<span class="nc" id="L44">                .attributes(response)</span>
+<span class="nc" id="L45">                .nameAttributeKey(userNameAttributeName)</span>
+<span class="nc" id="L46">                .build();</span>
+    }
+    public ChatUser toEntity() {
+<span class="nc" id="L49">        return ChatUser.builder()</span>
+<span class="nc" id="L50">                .nickname(name)</span>
+<span class="nc" id="L51">                .email(email)</span>
+<span class="nc" id="L52">                .role(Role.USER)</span>
+<span class="nc" id="L53">                .build();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
