@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FileService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.file</a> &gt; <span class="el_source">FileService.java</span></div><h1>FileService.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.service.file;
+
+import com.example.VideoChatting.dto.FileUploadDto;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public interface FileService {
+    // 파일 업로드를 위한 메서드 선언
+    FileUploadDto uploadFile(MultipartFile file, String transaction, String roomId);
+
+    // 현재 방에 업로드된 모든 파일 삭제 메서드
+    void deleteFileDir(String path);
+
+    // 컨트롤러에서 받아온 multipartFile 을 File 로 변환시켜서 저장하기 위한 메서드
+    default File convertMultipartFileToFile(MultipartFile mfile, String tmpPath) throws IOException {
+<span class="nc" id="L20">        File file = new File(tmpPath);</span>
+
+<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (file.createNewFile()) {</span>
+<span class="nc" id="L23">            try (FileOutputStream fos = new FileOutputStream(file)) {</span>
+<span class="nc" id="L24">                fos.write(mfile.getBytes());</span>
+            }
+<span class="nc" id="L26">            return file;</span>
+        }
+<span class="nc" id="L28">        throw new IOException();</span>
+    }
+
+    // 파일 삭제
+    default void removeFile(File file){
+<span class="nc" id="L33">        file.delete();</span>
+<span class="nc" id="L34">    }</span>
+
+    ResponseEntity&lt;byte[]&gt; getObject(String fileDir, String fileName) throws IOException;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

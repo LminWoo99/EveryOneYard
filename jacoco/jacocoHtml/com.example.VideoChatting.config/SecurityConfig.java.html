@@ -34,7 +34,7 @@ public class SecurityConfig {
 <span class="fc" id="L34">                .formLogin().disable()</span>
 <span class="fc" id="L35">                .httpBasic().disable()</span>
 <span class="fc" id="L36">                .authorizeRequests()</span>
-<span class="fc" id="L37">                .antMatchers(&quot;/api/user&quot;, &quot;/login/*&quot;).permitAll()</span>
+<span class="fc" id="L37">                .antMatchers(&quot;/api/user&quot;, &quot;/login/*&quot;, &quot;/chat/*&quot;, &quot;/s3/*&quot;, &quot;/chat/createRoom&quot;).permitAll()</span>
 <span class="fc" id="L38">                .and()</span>
 <span class="fc" id="L39">                .oauth2Login().userInfoEndpoint().userService(customOAuth2UserService);</span>
 <span class="fc" id="L40">        return http.build();</span>

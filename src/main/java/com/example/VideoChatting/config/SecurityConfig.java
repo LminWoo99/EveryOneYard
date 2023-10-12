@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authorizeRequests()
-                .antMatchers("/api/user", "/login/*").permitAll()
+                .antMatchers("/api/user", "/login/*", "/chat/*", "/s3/*", "/chat/createRoom").permitAll()
                 .and()
                 .oauth2Login().userInfoEndpoint().userService(customOAuth2UserService);
         return http.build();

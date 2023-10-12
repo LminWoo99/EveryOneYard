@@ -5,7 +5,6 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-
   datasource:
     url: jdbc:mysql://localhost:3306/videochat?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: test_user
@@ -20,20 +19,19 @@ spring:
     properties:
       hibernate:
         format_sql: True
+cloud:
   aws:
     s3:
-      credentials:
-        accessKey: AKIA2PMNLBYQIY3AIBWB
-        secretKey: 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
       bucket: minuawsbucket
-      region:
-        static: ap-northeast-2
-      stack:
-        auto: false
-      end-point: s3.ap-northeast-2.amazonaws.com
+      bucketUrl: https://minuawsbucket.s3.ap-northeast-2.amazonaws.com/
+    credentials:
+      accessKey: AKIA2PMNLBYQAEWU5RVG
+      secretKey: 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
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
 
-  management:
-    endpoints:
-      web:
-        exposure:
-          include: "*"
+
+
+

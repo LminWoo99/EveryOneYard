@@ -23,4 +23,6 @@ public class FileUploadDto {
     private String s3DataUrl; // 파일 링크
 
     private String fileDir; // S3 파일 경로
+
+
 }
