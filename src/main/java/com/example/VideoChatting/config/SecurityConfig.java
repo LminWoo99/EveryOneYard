@@ -1,6 +1,6 @@
 package com.example.VideoChatting.config;
 
-import com.example.VideoChatting.service.CustomOAuth2UserService;
+import com.example.VideoChatting.service.oAuth.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authorizeRequests()
-                .antMatchers("/api/user", "/login/*").permitAll()
+                .antMatchers("/api/user", "/login/*", "/chat/*", "/s3/*", "/chat/createRoom").permitAll()
                 .and()
                 .oauth2Login().userInfoEndpoint().userService(customOAuth2UserService);
         return http.build();

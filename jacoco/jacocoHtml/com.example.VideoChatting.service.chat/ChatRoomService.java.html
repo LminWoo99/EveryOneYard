@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatRoomService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.chat</a> &gt; <span class="el_source">ChatRoomService.java</span></div><h1>ChatRoomService.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.service.chat;
+
+import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.exception.ChatRoomNotFoundException;
+import com.example.VideoChatting.repository.ChatRoomRepository;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.*;
+
+@Service
+<span class="fc" id="L15">@Slf4j</span>
+<span class="fc" id="L16">@RequiredArgsConstructor</span>
+public class ChatRoomService {
+
+    private final ChatRoomRepository chatRoomRepository;
+    private Map&lt;String, ChatRoom&gt; chatRoomMap;
+    @PostConstruct
+    private void init() {
+<span class="fc" id="L23">        chatRoomMap = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L24">    }</span>
+    //채팅방
+    public List&lt;ChatRoom&gt; findAllRooms() {
+<span class="fc" id="L27">        List&lt;ChatRoom&gt; chatRooms = chatRoomRepository.findAll();</span>
+<span class="fc" id="L28">        Collections.reverse(chatRooms);</span>
+<span class="fc" id="L29">        return chatRooms;</span>
+    }
+    //방 아이디로 검색
+    public ChatRoom findRoomById(String roomId) {
+<span class="fc" id="L33">        return chatRoomRepository.findByRoomId(roomId);</span>
+    }
+
+    public ChatRoom createChatRoom(String roomName) {
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (chatRoomRepository.existsByRoomName(roomName)) {</span>
+<span class="fc" id="L38">            throw new ChatRoomNotFoundException(&quot;채팅방 이름이 존재합니다&quot;);</span>
+        } else {
+<span class="fc" id="L40">            ChatRoom chatRoom = new ChatRoom().create(roomName);</span>
+<span class="fc" id="L41">            chatRoomRepository.save(chatRoom);</span>
+<span class="fc" id="L42">            chatRoomMap.put(chatRoom.getRoomId(), chatRoom);</span>
+<span class="fc" id="L43">            return chatRoom;</span>
+        }
+
+    }
+
+    public void plusUserCnt(String roomId) {
+<span class="fc" id="L49">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if (room != null) {</span>
+<span class="fc" id="L51">            room.setUserCount(room.getUserCount() + 1);</span>
+<span class="fc" id="L52">            chatRoomRepository.save(room);</span>
+        }
+<span class="fc" id="L54">    }</span>
+
+    public void minusUserCnt(String roomId) {
+<span class="fc" id="L57">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
+<span class="pc bpc" id="L58" title="1 of 4 branches missed.">        if (room != null &amp;&amp; room.getUserCount()!=0) {</span>
+<span class="fc" id="L59">            room.setUserCount(room.getUserCount() - 1);</span>
+<span class="fc" id="L60">            chatRoomRepository.save(room);</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        } else if (room.getUserCount()==0) {</span>
+<span class="fc" id="L62">            room.setUserCount(0);</span>
+<span class="fc" id="L63">            chatRoomRepository.save(room);</span>
+        }
+<span class="fc" id="L65">    }</span>
+    public String addUser(String roomId, String username) {
+<span class="fc" id="L67">        ChatRoom room = chatRoomMap.get(roomId);</span>
+<span class="fc" id="L68">        String userUUID = UUID.randomUUID().toString();</span>
+<span class="fc" id="L69">        room.getUserList().put(userUUID, username);</span>
+
+<span class="fc" id="L71">        return userUUID;</span>
+    }
+    //채팅방 유저 이름 중복 확인
+    public String isDuplicateName(String roomId, String username) {
+<span class="fc" id="L75">        ChatRoom room = chatRoomMap.get(roomId);</span>
+<span class="fc" id="L76">        String temp = username;</span>
+        // 만약 userName 이 중복이라면 랜덤한 숫자를 붙임
+        // 이때 랜덤한 숫자를 붙였을 때 getUserlist 안에 있는 네임이라면 다시 랜덤한 숫자 붙이기!
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        while(room.getUserList().containsValue(temp)){</span>
+<span class="fc" id="L80">            int ranNum = (int) (Math.random()*100)+1;</span>
+<span class="fc" id="L81">            temp = username+ranNum;</span>
+<span class="fc" id="L82">        }</span>
+<span class="fc" id="L83">        return temp;</span>
+    }
+    // 채팅방 유저 리스트 삭제
+    public void delUser(String roomId, String userUUID){
+<span class="fc" id="L87">        ChatRoom room = chatRoomMap.get(roomId);</span>
+<span class="fc" id="L88">        room.getUserList().remove(userUUID);</span>
+<span class="fc" id="L89">    }</span>
+    // 채팅방 userName 조회
+    public String getUserName(String roomId, String userUUID){
+<span class="fc" id="L92">        ChatRoom room = chatRoomMap.get(roomId);</span>
+<span class="fc" id="L93">        return room.getUserList().get(userUUID);</span>
+    }
+
+    // 채팅방 전체 userlist 조회
+    public ArrayList&lt;String&gt; getUserList(String roomId){
+<span class="fc" id="L98">        ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L100">        ChatRoom room = chatRoomMap.get(roomId);</span>
+
+        // hashmap 을 for 문을 돌린 후
+        // value 값만 뽑아내서 list 에 저장 후 reutrn
+<span class="fc" id="L104">        room.getUserList().forEach((key, value) -&gt; list.add(value));</span>
+<span class="fc" id="L105">        return list;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
