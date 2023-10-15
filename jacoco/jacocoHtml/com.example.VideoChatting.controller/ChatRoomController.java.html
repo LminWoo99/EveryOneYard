@@ -21,7 +21,7 @@ public class ChatRoomController {
     @ApiOperation(value = &quot;채팅방 리스트 조회 &quot;, notes = &quot;전체 채팅방 목록을 조회한다&quot;)
     public String chatRoomList(Model model) {
 <span class="fc" id="L23">        model.addAttribute(&quot;list&quot;,chatRoomService.findAllRooms());</span>
-<span class="fc" id="L24">        return &quot;roomList&quot;;</span>
+<span class="fc" id="L24">        return &quot;roomlist&quot;;</span>
     }
     @PostMapping(&quot;/createRoom&quot;)
     @ApiOperation(value = &quot;채팅방 생성 &quot;, notes = &quot;채팅방을 생성한다&quot;)
@@ -30,11 +30,12 @@ public class ChatRoomController {
 <span class="fc" id="L30">        rttr.addFlashAttribute(&quot;roomName&quot;, room);</span>
 <span class="fc" id="L31">        return &quot;redirect:/chat/&quot;;</span>
     }
-    @GetMapping(&quot;/{roomId}&quot;)
+    @GetMapping(&quot;/room&quot;)
     @ApiOperation(value = &quot;채팅방 입장 &quot;, notes = &quot;파라미터로 넘어오는 ROOMID 기준으로 채팅방을 찾음 &quot;)
-    public String roomDetail(Model model, @PathVariable String roomId){
-<span class="fc" id="L36">        model.addAttribute(&quot;room&quot;, chatRoomService.findRoomById(roomId));</span>
-<span class="fc" id="L37">        return &quot;chatroom&quot;;</span>
+    public String roomDetail(Model model,  String roomId){
+<span class="fc" id="L36">        log.info(&quot;roomId {}&quot;, roomId);</span>
+<span class="fc" id="L37">        model.addAttribute(&quot;room&quot;, chatRoomService.findRoomById(roomId));</span>
+<span class="fc" id="L38">        return &quot;chatroom&quot;;</span>
     }
 
 }

@@ -91,12 +91,17 @@ class ChatRoomControllerTest {
     void roomDetail() throws Exception {
         //given
         String roomName = "채팅방 입장";
+        String roomId="방1";
         ChatRoom chatRoom = new ChatRoom().create(roomName);
-        when(chatRoomService.findRoomById(chatRoom.getRoomId())).thenReturn(chatRoom);
+        chatRoomService.createChatRoom(roomId);
+
+        when(chatRoomService.findRoomById(roomId)).thenReturn(chatRoom);
 
         //when
-        ResultActions perform = mockMvc.perform(get("/chat/"+chatRoom.getRoomId())
+        ResultActions perform = mockMvc.perform(get("/chat/room")
+                .param("roomId", roomId)
                 .contentType(MediaType.APPLICATION_JSON));
+
         //then
         perform.andExpect(status().isOk());
 

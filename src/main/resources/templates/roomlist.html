@@ -111,7 +111,7 @@
             let name = $("#roomName").val();
             let pwd = $("#roomPwd").val();
             let secret = $("#secret").is(':checked');
-            let secretChk = $("#secretChk");
+            let secretCheck = $("#secretCheck");
             let $rtcType = $("#rtcType");
             let $msgType = $("#msgType");
 
@@ -154,9 +154,9 @@
             }
 
             if (secret) {
-                secretChk.attr('value', true);
+                secretCheck.attr('value', true);
             } else {
-                secretChk.attr('value', false);
+                secretCheck.attr('value', false);
             }
 
             if(!numberChk()){
@@ -276,15 +276,15 @@
 
                 <tr th:each="room : ${list}">
                     <span class="hidden" th:id="${room.roomName}"></span>
-<!--                    <td th:if="${room.secretChk}">-->
+                    <td th:if="${room.secretCheck}">
                         <a href="#enterRoomModal" data-bs-toggle="modal" data-target="#enterRoomModal" th:data-id="${room.roomId}">[[${room.roomName}]]</a>
-<!--                    </td>-->
-<!--                    <td th:if="${!room.secretChk}">-->
+                    </td>
+                    <td th:if="${!room.secretCheck}">
                         <!-- thymeleaf 의 변수를 onclick 에 넣는 방법 -->
                         <a th:href="@{/chat/room(roomId=${room.roomId})}" th:roomId="${room.roomId}" onclick="return chkRoomUserCnt(this.getAttribute('roomId'));">[[${room.roomName}]]</a>
-<!--                    </td>-->
+                    </td>
                     <td>
-<!--                        <span th:if="${room.secretChk}">-->
+                        <span th:if="${room.secretCheck}">
                             🔒︎
                         </span>
                     </td>
@@ -350,7 +350,7 @@
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="secret">
-                        <input type="hidden" name="secretChk" id="secretChk" value="">
+                        <input type="hidden" name="secretCheck" id="secretCheck" value="">
                         <label class="form-check-label" for="secret">
                             채팅방 잠금
                         </label>
@@ -443,7 +443,7 @@
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="chSecret">
-                    <input type="hidden" name="secretChk" id="chSecretChk" value="">
+                    <input type="hidden" name="secretCheck" id="chSecretCheck" value="">
                     <label class="form-check-label" for="secret">
                         채팅방 잠금
                     </label>

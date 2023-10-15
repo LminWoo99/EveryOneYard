@@ -3,6 +3,7 @@ package com.example.VideoChatting.service.chat;
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.exception.ChatRoomNotFoundException;
 import com.example.VideoChatting.repository.ChatRoomRepository;
+import com.example.VideoChatting.service.file.FileService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import java.util.*;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final FileService fileService;
     private Map<String, ChatRoom> chatRoomMap;
     @PostConstruct
     private void init() {
@@ -104,5 +106,30 @@ public class ChatRoomService {
         room.getUserList().forEach((key, value) -> list.add(value));
         return list;
     }
+    // 채팅방 최대 인원 체크
+    public boolean checkRoomUserCnt(String roomId) {
+        ChatRoom room = chatRoomMap.get(roomId);
+        log.info("참여인원 확인 [{}, {}]", room.getUserCount(), room.getMaxUserCnt());
+
+        if (room.getUserCount() + 1 > room.getUserCount()) {
+            return false;
+        }
+        return true;
+    }
+    //비밀번호 조회
+    public boolean confirmPwd(String roomId, String roomPwd) {
+        return roomPwd.equals(chatRoomMap.get(roomId).getRoomPwd());
+    }
+
+    public void deleteChatRoom(String roomId) {
+        try {
+            chatRoomMap.remove(roomId);
+            fileService.deleteFileDir(roomId);
+            log.info("삭제 완료 roomId : {}", roomId);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
 
 }

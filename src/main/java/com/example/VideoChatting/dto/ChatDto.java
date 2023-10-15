@@ -1,6 +1,5 @@
 package com.example.VideoChatting.dto;
 
-import com.example.VideoChatting.entity.ChatRoom;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatRoomDto {
+public class ChatDto {
      /*메시지  타입 : 입장, 채팅
        메시지 타입에 따라서 동작하는 구조가 달라진다.
        입장과 퇴장 ENTER 과 LEAVE 의 경우 입장/퇴장 이벤트 처리가 실행되고,
@@ -24,6 +23,9 @@ public class ChatRoomDto {
     private String message; // 메시지
     private String time; // 채팅 발송 시간
 
-
+    /* 파일 업로드 관련 변수 */
+    private String s3DataUrl; // 파일 업로드 url
+    private String fileName; // 파일이름
+    private String fileDir; // s3 파일 경로
 
 }

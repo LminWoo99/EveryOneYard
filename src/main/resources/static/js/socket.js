@@ -36,6 +36,7 @@ function onMessageReceived(payload) {
 
     // 만약 s3DataUrl 의 값이 null 이 아니라면 => chat 내용이 파일 업로드와 관련된 내용이라면
     // img 를 채팅에 보여주는 작업
+    console.log(chat.s3DataUrl)
     if(chat.s3DataUrl != null){
         var imgElement = document.createElement('img');
         imgElement.setAttribute("src", chat.s3DataUrl);
@@ -103,7 +104,7 @@ function uploadFile(){
         processData: false,
         contentType: false
     }).done(function (data){
-        // console.log("업로드 성공")
+        console.log("업로드 성공")
 
         var chatMessage = {
             "roomId": roomId,

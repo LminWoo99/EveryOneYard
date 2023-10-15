@@ -21,7 +21,7 @@ public class ChatRoomController {
     @ApiOperation(value = "채팅방 리스트 조회 ", notes = "전체 채팅방 목록을 조회한다")
     public String chatRoomList(Model model) {
         model.addAttribute("list",chatRoomService.findAllRooms());
-        return "roomList";
+        return "roomlist";
     }
     @PostMapping("/createRoom")
     @ApiOperation(value = "채팅방 생성 ", notes = "채팅방을 생성한다")
@@ -30,9 +30,10 @@ public class ChatRoomController {
         rttr.addFlashAttribute("roomName", room);
         return "redirect:/chat/";
     }
-    @GetMapping("/{roomId}")
+    @GetMapping("/room")
     @ApiOperation(value = "채팅방 입장 ", notes = "파라미터로 넘어오는 ROOMID 기준으로 채팅방을 찾음 ")
-    public String roomDetail(Model model, @PathVariable String roomId){
+    public String roomDetail(Model model,  String roomId){
+        log.info("roomId {}", roomId);
         model.addAttribute("room", chatRoomService.findRoomById(roomId));
         return "chatroom";
     }

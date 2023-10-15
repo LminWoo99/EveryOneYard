@@ -24,13 +24,20 @@ public class ChatRoom {
     @Column(columnDefinition = "integer default 0", nullable = false)
     private int userCount; // 채팅방 인원수
 
+    private int maxUserCnt;
+
+    private String roomPwd;
+
+    private boolean secretCheck;
+
     private HashMap<String, String> userList = new HashMap<String, String>();
 
     public ChatRoom create(String roomName){
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.roomId = UUID.randomUUID().toString();
         chatRoom.roomName = roomName;
-
+        chatRoom.maxUserCnt = maxUserCnt;
+        chatRoom.roomPwd = roomPwd;
         return chatRoom;
     }
         public static ChatRoom createChatRoom(String roomId, String roomName, int userCount) {
