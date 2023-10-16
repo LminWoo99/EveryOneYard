@@ -41,6 +41,8 @@ dependencies {
 	implementation 'org.webjars:sockjs-client:1.5.1'
 	// stomp
 	implementation 'org.webjars:stomp-websocket:2.3.4'
+	//redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	// gson
 	implementation 'com.google.code.gson:gson:2.9.0'
 }

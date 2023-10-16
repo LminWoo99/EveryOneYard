@@ -1,12 +1,17 @@
 package com.example.VideoChatting.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 // Stomp 를 통해 pub/sub 를 사용하면 구독자 관리가 알아서 된다!!
 // 따라서 따로 세션 관리를 하는 코드를 작성할 필도 없고,
@@ -14,7 +19,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor
-public class ChatRoom {
+public class ChatRoom implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +33,13 @@ public class ChatRoom {
 
     private String roomPwd;
 
+    private static final long serialVersionUID = 6494678977089006639L;
+
     private boolean secretCheck;
+
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<ChatMessage> chatMessageList = new ArrayList<>();
 
     private HashMap<String, String> userList = new HashMap<String, String>();
 
@@ -40,15 +51,12 @@ public class ChatRoom {
         chatRoom.roomPwd = roomPwd;
         return chatRoom;
     }
-        public static ChatRoom createChatRoom(String roomId, String roomName, int userCount) {
-        ChatRoom chatRoom = new ChatRoom();
-        chatRoom.roomId = roomId;
-        chatRoom.roomName = roomName;
-        chatRoom.userCount = userCount;
-        return chatRoom;
-    }
+
 
     public void setUserCount(int userCount) {
         this.userCount = userCount;
+    }
+    public void addChatMessages(ChatMessage chatMessage) {
+        this.chatMessageList.add(chatMessage);
     }
 }

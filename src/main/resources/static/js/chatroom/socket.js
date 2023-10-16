@@ -173,7 +173,7 @@ function onMessageReceived(payload) {
     }
 
     var contentElement = document.createElement('p');
-
+    console.log(chat)
     // 만약 s3DataUrl 의 값이 null 이 아니라면 => chat 내용이 파일 업로드와 관련된 내용이라면
     // img 를 채팅에 보여주는 작업
     if(chat.s3DataUrl != null){
