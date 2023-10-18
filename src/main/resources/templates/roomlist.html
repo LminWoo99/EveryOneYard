@@ -220,7 +220,10 @@
             })
             return chk;
         }
-
+        var user = /*[[${user}]]*/ null;
+        if (user !== null) {
+            localStorage.setItem('nickname', user.nickname); // 'nickname'은 sessionUser.getAttributes()에 있는 실제 필드 이름에 따라 변경해야 합니다.
+        }
 
     </script>
     <style>
@@ -261,7 +264,7 @@
             </div>
         </div>
         <h5 th:if="${user != null}">
-            [[${user.nickName}]]
+            [[${user.nickname}]]
         </h5>
 
         <table class="table table-hover" id="table">
@@ -443,7 +446,7 @@
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="chSecret">
-                    <input type="hidden" name="secretCheck" id="chSecretCheck" value="">
+                    <input type="hidden" name="secretCheck" id="chSecretChk" value="">
                     <label class="form-check-label" for="secret">
                         채팅방 잠금
                     </label>

@@ -16,8 +16,7 @@ var messageArea = document.querySelector('#messageArea');
 var connectingElement = document.querySelector('.connecting');
 
 var stompClient = null;
-var username = null;
-var globalChatMessage=null;
+var username = localStorage.getItem("nickname")
 
 
 var colors = [
@@ -30,10 +29,10 @@ const url = new URL(location.href).searchParams;
 const roomId = url.get('roomId');
 
 function connect(event) {
-    username = document.querySelector('#name').value.trim();
-
-    // username 중복 확인
-    isDuplicateName();
+    // username = document.querySelector('#name').value.trim();
+    //
+    // // username 중복 확인
+    // isDuplicateName();
 
     // usernamePage 에 hidden 속성 추가해서 가리고
     // chatPage 를 등장시킴
@@ -173,7 +172,7 @@ function onMessageReceived(payload) {
     }
 
     var contentElement = document.createElement('p');
-
+    console.log(chat)
     // 만약 s3DataUrl 의 값이 null 이 아니라면 => chat 내용이 파일 업로드와 관련된 내용이라면
     // img 를 채팅에 보여주는 작업
     if(chat.s3DataUrl != null){

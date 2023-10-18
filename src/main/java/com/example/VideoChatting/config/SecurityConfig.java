@@ -29,14 +29,17 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .and()
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authorizeRequests()
-                .antMatchers("/api/user", "/login/*", "/chat/*", "/s3/*", "/chat/createRoom").permitAll()
+                .antMatchers("/api/user", "/login/*", "/s3/*", "/chat/createRoom", "/chat/*", "/").permitAll() // /chat 경로는 허용
                 .and()
-                .oauth2Login().userInfoEndpoint().userService(customOAuth2UserService);
+                .oauth2Login()
+                .userInfoEndpoint().userService(customOAuth2UserService)
+                .and()
+                .defaultSuccessUrl("/chat"); // 소셜 로그인 성공 시 /chat 경로로 리다이렉션
         return http.build();
     }
 }

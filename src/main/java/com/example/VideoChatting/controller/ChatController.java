@@ -2,7 +2,10 @@ package com.example.VideoChatting.controller;
 
 
 import com.example.VideoChatting.dto.ChatDto;
+import com.example.VideoChatting.entity.ChatMessage;
+import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.service.chat.ChatRoomService;
+import com.example.VideoChatting.service.chat.RedisPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -23,7 +26,7 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 @Controller
 public class ChatController {
-
+    private final RedisPublisher redisPublisher;
     private final SimpMessageSendingOperations template;
 
     private final ChatRoomService chatRoomService;
@@ -43,7 +46,7 @@ public class ChatController {
         // 반환 결과를 socket session 에 userUUID 로 저장
         headerAccessor.getSessionAttributes().put("userUUID", userUUID);
         headerAccessor.getSessionAttributes().put("roomId", chat.getRoomId());
-
+        chatRoomService.enterChatRoom(chat.getRoomId());
         chat.setMessage(chat.getSender() + " 님 입장!!");
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
 
@@ -53,8 +56,14 @@ public class ChatController {
     @MessageMapping("/chat/sendMessage")
     public void sendMessage(@Payload ChatDto chat) {
         log.info("CHAT {}", chat);
-        chat.setMessage(chat.getMessage());
-        template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
+        ChatRoom chatRoom=chatRoomService.findRoomById(chat.getRoomId());
+
+        ChatMessage message1=ChatMessage.createChatMessage(chatRoom, chat.getSender(), chat.getMessage(), chat.getType(), chat.getS3DataUrl());
+
+        chatRoomService.createChatMessage(chatRoom, message1);
+        // Websocket에 발행된 메시지를 redis로 발행(publish)
+        redisPublisher.publish(chatRoomService.getTopic(chat.getRoomId()), message1);
+//        template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
 
     }
 
