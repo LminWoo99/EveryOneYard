@@ -9,6 +9,7 @@ import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 @SpringBootApplication
 @EnableJpaAuditing
+@EnableCaching
 public class VideoChattingApplication {
 	@Bean
 	public HiddenHttpMethodFilter hiddenHttpMethodFilter(){

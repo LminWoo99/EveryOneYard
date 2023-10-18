@@ -9,6 +9,8 @@ import com.example.VideoChatting.service.file.S3FileService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -45,12 +47,16 @@ public class ChatRoomService {
         topics = new HashMap<>();
     }
     //채팅방
+    //방 아이디로 검색
+//    @Cacheable(value = "ChatRoom", cacheManager = "testCacheManager")
     public List<ChatRoom> findAllRooms() {
         List<ChatRoom> chatRooms = chatRoomRepository.findAll();
         Collections.reverse(chatRooms);
+        log.info(String.valueOf(chatRooms.size()));
         return chatRooms;
+//      return  opsHashChatRoom.values(CHAT_ROOMS);
     }
-    //방 아이디로 검색
+
     public ChatRoom findRoomById(String roomId) {
         return chatRoomRepository.findByRoomId(roomId);
     }
@@ -161,7 +167,7 @@ public class ChatRoomService {
     public boolean confirmPwd(String roomId, String roomPwd) {
         return roomPwd.equals(opsHashChatRoom.get(ENTER_INFO, roomId).getRoomPwd());
     }
-
+    @CacheEvict(value = "ChatRoom", key = "#roomId", cacheManager = "testCacheManager")
     public void deleteChatRoom(String roomId) {
         try {
             opsHashChatRoom.delete(roomId);

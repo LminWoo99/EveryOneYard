@@ -9,7 +9,7 @@ import javax.persistence.*;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class ChatUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
