@@ -3,7 +3,15 @@ package com.example.VideoChatting.service.oAuth;
 import com.example.VideoChatting.entity.ChatUser;
 import com.example.VideoChatting.entity.SessionUser;
 import com.example.VideoChatting.repository.ChatUserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -14,9 +22,11 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
-public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User>  {
+@Slf4j
+public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User>{
 
     private final ChatUserRepository chatUserRepository;
     private final HttpSession httpSession;
@@ -37,12 +47,16 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
         ChatUser chatUser = saveOrUpdate(attributes);
-        httpSession.setAttribute("user", new SessionUser(chatUser));
-        return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(chatUser.getRoleKey())),
-                attributes.getAttributes(),
-                attributes.getNameAttributeKey()
-        );
+
+        log.info("custon 부분 유저: "+chatUser);
+        log.info("custon 부분 유저2: "+httpSession.getId());
+
+        SessionUser sessionUser = new SessionUser(chatUser);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(sessionUser, null, sessionUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return sessionUser;
 
     }
 
@@ -53,4 +67,5 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         return chatUserRepository.save(chatUser);
     }
+
 }

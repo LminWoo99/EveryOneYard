@@ -4,6 +4,7 @@ import com.example.VideoChatting.dto.FileUploadDto;
 import com.example.VideoChatting.service.file.S3FileService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/s3")
+@Slf4j
 @RequiredArgsConstructor
 public class FileController {
 
@@ -23,8 +25,9 @@ public class FileController {
     @PostMapping("/upload")
     @ApiOperation(value = "채팅시 파일 업로드 ", notes = "MultipartFile 형태로 파일과 roomId 를 전달받고 s3에 업로드")
     public FileUploadDto uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("roomId") String roomId) {
-        FileUploadDto fileReq = fileService.uploadFile(file, UUID.randomUUID().toString(), roomId);
-        return fileReq;
+        FileUploadDto formData = fileService.uploadFile(file, UUID.randomUUID().toString(), roomId);
+
+        return formData;
     }
     // get 으로 요청이 오면 아래 download 메서드를 실행한다.
     // fileName 과 파라미터로 넘어온 fileDir 을 getObject 메서드에 매개변수로 넣는다.

@@ -16,7 +16,8 @@ var messageArea = document.querySelector('#messageArea');
 var connectingElement = document.querySelector('.connecting');
 
 var stompClient = null;
-var username = null;
+var username = localStorage.getItem("nickname")
+
 
 var colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -28,10 +29,10 @@ const url = new URL(location.href).searchParams;
 const roomId = url.get('roomId');
 
 function connect(event) {
-    username = document.querySelector('#name').value.trim();
-
-    // username 중복 확인
-    isDuplicateName();
+    // username = document.querySelector('#name').value.trim();
+    //
+    // // username 중복 확인
+    // isDuplicateName();
 
     // usernamePage 에 hidden 속성 추가해서 가리고
     // chatPage 를 등장시킴
@@ -67,9 +68,23 @@ function onConnected() {
     )
 
     connectingElement.classList.add('hidden');
+    loadPreviousMessages();
 
 }
-
+function loadPreviousMessages() {
+    $.ajax({
+        type: "GET",
+        url: "/chat/room/" + roomId + "/message",
+        success: function (data) {
+            // 이전 메시지를 화면에 출력
+            for (var i = 0; i < data.length; i++) {
+                onMessageReceived({
+                    body: JSON.stringify(data[i])
+                });
+            }
+        }
+    });
+}
 // 유저 닉네임 중복 확인
 function isDuplicateName() {
 
@@ -138,7 +153,8 @@ function sendMessage(event) {
 // 메시지를 받을 때도 마찬가지로 JSON 타입으로 받으며,
 // 넘어온 JSON 형식의 메시지를 parse 해서 사용한다.
 function onMessageReceived(payload) {
-    //console.log("payload 들어오냐? :"+payload);
+    console.log("payload 들어오냐? :"+payload);
+    console.log(payload.body)
     var chat = JSON.parse(payload.body);
 
     var messageElement = document.createElement('li');
@@ -170,7 +186,7 @@ function onMessageReceived(payload) {
     }
 
     var contentElement = document.createElement('p');
-
+    console.log(chat)
     // 만약 s3DataUrl 의 값이 null 이 아니라면 => chat 내용이 파일 업로드와 관련된 내용이라면
     // img 를 채팅에 보여주는 작업
     if(chat.s3DataUrl != null){
@@ -192,7 +208,7 @@ function onMessageReceived(payload) {
     }else{
         // 만약 s3DataUrl 의 값이 null 이라면
         // 이전에 넘어온 채팅 내용 보여주기기
-       var messageText = document.createTextNode(chat.message);
+        var messageText = document.createTextNode(chat.message);
         contentElement.appendChild(messageText);
     }
 
@@ -264,8 +280,9 @@ function uploadFile(){
             "fileName": file.name, // 원본 파일 이름
             "fileDir": data.fileDir // 업로드 된 위치
         };
-
+        console.log(chatMessage);
         // 해당 내용을 발신한다.
+
         stompClient.send("/pub/chat/sendMessage", {}, JSON.stringify(chatMessage));
     }).fail(function (error){
         alert(error);

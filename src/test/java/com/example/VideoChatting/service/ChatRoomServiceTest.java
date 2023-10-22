@@ -1,5 +1,6 @@
 package com.example.VideoChatting.service;
 
+import com.example.VideoChatting.entity.ChatMessage;
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.exception.ChatRoomNotFoundException;
 import com.example.VideoChatting.repository.ChatRoomRepository;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
@@ -29,29 +32,33 @@ class ChatRoomServiceTest {
     private ChatRoomService chatRoomService;
     @Mock
     private ChatRoomRepository chatRoomRepository;
-    private Map<String, ChatRoom> chatRoomMap;
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+    @Mock
+    private HashOperations<String, String, ChatRoom> opsHashChatRoom;
+    String CHAT_ROOMS = "CHAT_ROOM";
+    String ENTER_INFO = "ENTER_INFO"; // 채팅룸에 입장한 클라이언트의 sessionId와 채팅룸 id를 맵핑한 정보 저장
+
+
     @BeforeEach
     public void setup() {
-        chatRoomMap = new LinkedHashMap<>();
-        ReflectionTestUtils.setField(chatRoomService, "chatRoomMap", chatRoomMap);
+        ReflectionTestUtils.setField(chatRoomService, "redisTemplate", redisTemplate);
+        ReflectionTestUtils.setField(chatRoomService, "opsHashChatRoom", opsHashChatRoom);
     }
 
     @Test
     @DisplayName("방리스트 조회")
     void 방리스트조회_test() {
-
         //given
         List<ChatRoom> chatRooms = new ArrayList<>();
         String roomName = "방1";
         chatRooms.add(new ChatRoom().create(roomName));
         String roomName2 = "방12";
         chatRooms.add(new ChatRoom().create(roomName2));
-        chatRoomRepository.saveAll(chatRooms);
         //stub
-        when(chatRoomRepository.findAll()).thenReturn(chatRooms);
+        when(chatRoomService.findAllRooms()).thenReturn(chatRooms);
         //when
         List<ChatRoom> allRooms = chatRoomService.findAllRooms();
-
         //then
         assertThat(allRooms.size()).isEqualTo(2);
     }
@@ -72,7 +79,6 @@ class ChatRoomServiceTest {
              assertThat(roomById.getRoomName()).isEqualTo("방1");
              verify(chatRoomRepository, times(1)).findByRoomId(roomName);
     }
-
     @Test
     @DisplayName("방 생성후 채팅방 리스트 확인")
     void 방생성_테스트() {
@@ -82,13 +88,11 @@ class ChatRoomServiceTest {
         //when
         ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
         // Then
+        assertThat(createdChatRoom.getRoomName()).isEqualTo(roomName);
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
 
-        assertNotNull(createdChatRoom);
 
-        assertTrue(chatRoomMap.containsKey(createdChatRoom.getRoomId()));
-        assertEquals(createdChatRoom, chatRoomMap.get(createdChatRoom.getRoomId()));
-        assertThat(chatRoomMap.get(createdChatRoom.getRoomId()).getRoomName()).isEqualTo("방1");
+
     }
     @Test
     @DisplayName("똑같은 방 이름 생성시 예외 터뜨리는지 테스트")
@@ -156,6 +160,7 @@ class ChatRoomServiceTest {
         String roomName = "채팅방 유저 참가";
         String username = "이민우";
         ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
 
         //when
         String uuid = chatRoomService.addUser(createdChatRoom.getRoomId(), username);
@@ -172,6 +177,8 @@ class ChatRoomServiceTest {
         String username = "이민우";
         String username1 = "이민우";
         ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+
         //when
         chatRoomService.addUser(createdChatRoom.getRoomId(), username);
         chatRoomService.addUser(createdChatRoom.getRoomId(), username1);
@@ -190,11 +197,15 @@ class ChatRoomServiceTest {
         String roomName = "채팅방 유저 삭제";
         String username = "이민우";
         ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+        when(opsHashChatRoom.get(ENTER_INFO, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+
         String uuid = chatRoomService.addUser(createdChatRoom.getRoomId(), username);
         //when
         chatRoomService.delUser(createdChatRoom.getRoomId(), uuid);
         //then
         assertThat(createdChatRoom.getUserList().get(uuid)).isEqualTo(null);
+        assertThat(createdChatRoom.getUserList().size()).isEqualTo(0);
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
 
@@ -205,6 +216,9 @@ class ChatRoomServiceTest {
         String roomName = "채팅방 유저 조회";
         String username = "이민우";
         ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+        when(opsHashChatRoom.get(ENTER_INFO, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+
         String uuid = chatRoomService.addUser(createdChatRoom.getRoomId(), username);
         //when
         String getUserName = chatRoomService.getUserName(createdChatRoom.getRoomId(), uuid);
@@ -222,6 +236,7 @@ class ChatRoomServiceTest {
         String username1 = "이민";
         String username2 = "김민우";
         ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
 
         chatRoomService.addUser(createdChatRoom.getRoomId(), username);
         chatRoomService.addUser(createdChatRoom.getRoomId(), username1);
@@ -234,4 +249,33 @@ class ChatRoomServiceTest {
 
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
+    @Test
+    @DisplayName("채팅방 삭제")
+    void deleteChatRoom() throws Exception{
+        //given
+        String roomName = "채팅방 유저 삭제";
+        String username = "이민우";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        when(chatRoomService.findRoomById(createdChatRoom.getRoomId())).thenReturn(null);
+
+        //when
+        chatRoomService.deleteChatRoom(createdChatRoom.getRoomId());
+
+        //then
+        assertThat(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).isEqualTo(null);
+    }
+    @Test
+    @DisplayName("채팅 메시지 생성")
+    void createChatMessage() {
+        // given
+        ChatRoom chatRoom = new ChatRoom(); // ChatRoom 객체 생성
+        ChatMessage chatMessage = new ChatMessage(); // ChatMessage 객체 생성
+
+        // when
+        chatRoomService.createChatMessage(chatRoom, chatMessage);
+
+        // then
+        assertThat(chatRoom.getChatMessageList()).contains(chatMessage);
+    }
+
 }

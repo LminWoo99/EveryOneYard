@@ -57,7 +57,6 @@ class FileControllerTest {
         mockFileUploadDto.setOriginFileName("test.txt");
         mockFileUploadDto.setChatRoom("방123");
 
-
         ResultActions perform = mockMvc.perform(multipart("/s3/upload")
                 .file(file)
                 .param("roomId", "12345")
