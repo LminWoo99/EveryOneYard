@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.security.cert.TrustAnchor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,9 +53,9 @@ class ChatRoomServiceTest {
         //given
         List<ChatRoom> chatRooms = new ArrayList<>();
         String roomName = "방1";
-        chatRooms.add(new ChatRoom().create(roomName));
+        chatRooms.add(new ChatRoom().create(roomName, "1234", Boolean.TRUE, 50));
         String roomName2 = "방12";
-        chatRooms.add(new ChatRoom().create(roomName2));
+        chatRooms.add(new ChatRoom().create(roomName2, "1234", Boolean.TRUE, 50));
         //stub
         when(chatRoomService.findAllRooms()).thenReturn(chatRooms);
         //when
@@ -69,7 +70,7 @@ class ChatRoomServiceTest {
             //given
 
             String roomName = "방1";
-            ChatRoom chatRoom = new ChatRoom().create(roomName);
+            ChatRoom chatRoom = new ChatRoom().create(roomName, "1234", Boolean.TRUE, 50);
             chatRoomRepository.save(chatRoom);
             //stub
             when(chatRoomRepository.findByRoomId(roomName)).thenReturn(chatRoom);
@@ -86,7 +87,7 @@ class ChatRoomServiceTest {
 
         String roomName = "방1";
         //when
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         // Then
         assertThat(createdChatRoom.getRoomName()).isEqualTo(roomName);
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
@@ -100,11 +101,11 @@ class ChatRoomServiceTest {
         //given
         String roomName = "방1";
         //when
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(chatRoomRepository.existsByRoomName(roomName)).thenReturn(Boolean.TRUE);
         // Then
         assertThrows(ChatRoomNotFoundException.class, () -> {
-            chatRoomService.createChatRoom(roomName);
+            chatRoomService.createChatRoom(roomName,"1234", Boolean.TRUE, 50);
         });
         // Then
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
@@ -116,7 +117,7 @@ class ChatRoomServiceTest {
         //given
         String roomName = "방21";
 
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
         //when
         chatRoomService.plusUserCnt(createdChatRoom.getRoomId());
@@ -130,7 +131,7 @@ class ChatRoomServiceTest {
     void 채팅방_유저_감소_테스트() {
         String roomName = "방감소";
 
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
 
         chatRoomService.plusUserCnt(createdChatRoom.getRoomId());
@@ -144,7 +145,7 @@ class ChatRoomServiceTest {
     void 채팅방_유저_감소_예외테스트() {
         String roomName = "방감소";
 
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
 
         chatRoomService.minusUserCnt(createdChatRoom.getRoomId());
@@ -159,7 +160,7 @@ class ChatRoomServiceTest {
         //given
         String roomName = "채팅방 유저 참가";
         String username = "이민우";
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
 
         //when
@@ -176,7 +177,7 @@ class ChatRoomServiceTest {
         String roomName = "채팅방 중복체크";
         String username = "이민우";
         String username1 = "이민우";
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
 
         //when
@@ -196,7 +197,7 @@ class ChatRoomServiceTest {
         //given
         String roomName = "채팅방 유저 삭제";
         String username = "이민우";
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
         when(opsHashChatRoom.get(ENTER_INFO, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
 
@@ -215,7 +216,7 @@ class ChatRoomServiceTest {
         //given
         String roomName = "채팅방 유저 조회";
         String username = "이민우";
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
         when(opsHashChatRoom.get(ENTER_INFO, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
 
@@ -235,7 +236,7 @@ class ChatRoomServiceTest {
         String username = "이민우";
         String username1 = "이민";
         String username2 = "김민우";
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
 
         chatRoomService.addUser(createdChatRoom.getRoomId(), username);
@@ -255,7 +256,7 @@ class ChatRoomServiceTest {
         //given
         String roomName = "채팅방 유저 삭제";
         String username = "이민우";
-        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName);
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
         when(chatRoomService.findRoomById(createdChatRoom.getRoomId())).thenReturn(null);
 
         //when
@@ -263,6 +264,7 @@ class ChatRoomServiceTest {
 
         //then
         assertThat(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).isEqualTo(null);
+        verify(chatRoomRepository, times(2)).findByRoomId(createdChatRoom.getRoomId());
     }
     @Test
     @DisplayName("채팅 메시지 생성")
@@ -276,6 +278,67 @@ class ChatRoomServiceTest {
 
         // then
         assertThat(chatRoom.getChatMessageList()).contains(chatMessage);
+    }
+    @Test
+    @DisplayName("채팅방 최대 인원 체크 테스트")
+    void checkRoomUserCntTest() throws Exception{
+        //given
+        String roomName = "채팅방 유저 삭제";
+        String username = "이민우";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 50);
+        when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+        //when
+        boolean test = chatRoomService.checkRoomUserCnt(createdChatRoom.getRoomId());
+        //then
+        assertThat(test).isEqualTo(Boolean.TRUE);
+        verify(chatRoomRepository, times(1)).findByRoomId(createdChatRoom.getRoomId());
+    }
+    @Test
+    @DisplayName("채팅방 최대 인원 초과 체크 테스트")
+    void checkRoomUserCntUpTest() throws Exception{
+        //given
+        String roomName = "채팅방 유저 삭제";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 1);
+
+
+        when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+
+        chatRoomService.plusUserCnt(createdChatRoom.getRoomId());
+        chatRoomService.plusUserCnt(createdChatRoom.getRoomId());
+
+        //when
+        boolean test = chatRoomService.checkRoomUserCnt(createdChatRoom.getRoomId());
+
+        //then
+        assertThat(test).isEqualTo(Boolean.FALSE);
+        verify(chatRoomRepository, times(3)).findByRoomId(createdChatRoom.getRoomId());
+    }
+    @Test
+    @DisplayName("채팅방 비밀번호 체크 테스트")
+    void confirmPwdTest() throws Exception{
+        //given
+        String roomName = "채팅방 비밀번호 체크";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 1);
+
+        when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+        //when
+        boolean check = chatRoomService.confirmPwd(createdChatRoom.getRoomId(), "1234");
+        //then
+        assertThat(check).isEqualTo(Boolean.TRUE);
+
+    }
+    @Test
+    @DisplayName("채팅방 비밀번호 체크 실패 테스트")
+    void confirmPwdFailTest() throws Exception{
+        //given
+        String roomName = "채팅방 비밀번호 체크";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 1);
+
+        when(opsHashChatRoom.get(CHAT_ROOMS, createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+        //when
+        boolean check = chatRoomService.confirmPwd(createdChatRoom.getRoomId(), "12344");
+        //then
+        assertThat(check).isEqualTo(Boolean.FALSE);
     }
 
 }
