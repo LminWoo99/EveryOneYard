@@ -68,9 +68,23 @@ function onConnected() {
     )
 
     connectingElement.classList.add('hidden');
+    loadPreviousMessages();
 
 }
-
+function loadPreviousMessages() {
+    $.ajax({
+        type: "GET",
+        url: "/chat/room/" + roomId + "/message",
+        success: function (data) {
+            // 이전 메시지를 화면에 출력
+            for (var i = 0; i < data.length; i++) {
+                onMessageReceived({
+                    body: JSON.stringify(data[i])
+                });
+            }
+        }
+    });
+}
 // 유저 닉네임 중복 확인
 function isDuplicateName() {
 

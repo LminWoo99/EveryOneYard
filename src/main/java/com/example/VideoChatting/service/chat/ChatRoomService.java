@@ -52,9 +52,8 @@ public class ChatRoomService {
     public List<ChatRoom> findAllRooms() {
         List<ChatRoom> chatRooms = chatRoomRepository.findAll();
         Collections.reverse(chatRooms);
-        log.info(String.valueOf(chatRooms.size()));
-        return chatRooms;
-//      return  opsHashChatRoom.values(CHAT_ROOMS);
+
+        return  opsHashChatRoom.values(CHAT_ROOMS);
     }
 
     public ChatRoom findRoomById(String roomId) {

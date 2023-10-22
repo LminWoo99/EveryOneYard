@@ -22,7 +22,6 @@ import java.util.List;
 @RequestMapping("/chat")
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
-    private final HttpSession httpSession;
         @GetMapping("")
         @ApiOperation(value = "채팅방 리스트 조회 ", notes = "전체 채팅방 목록을 조회한다")
         public String chatRoomList(Model model, @AuthenticationPrincipal SessionUser sessionUser) {
@@ -32,7 +31,6 @@ public class ChatRoomController {
             if (sessionUser != null) {
                 model.addAttribute("user", sessionUser.getAttributes());
             }
-            log.info("유저 정보 =" + sessionUser.getAttributes());
             return "roomlist";
         }
         @GetMapping("/json")
