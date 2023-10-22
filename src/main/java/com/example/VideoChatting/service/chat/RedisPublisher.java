@@ -15,8 +15,6 @@ public class RedisPublisher {
 	private final RedisTemplate<String, Object> redisTemplate;
 
 	public void publish(ChannelTopic topic, ChatMessage message) {
-		log.info("토픽은: " + topic);
-		log.info("토픽은: " + message);
 		redisTemplate.convertAndSend(topic.getTopic(), message);
 	}
 }

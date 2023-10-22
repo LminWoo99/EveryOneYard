@@ -26,7 +26,7 @@ public class FileController {
     @ApiOperation(value = "채팅시 파일 업로드 ", notes = "MultipartFile 형태로 파일과 roomId 를 전달받고 s3에 업로드")
     public FileUploadDto uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("roomId") String roomId) {
         FileUploadDto formData = fileService.uploadFile(file, UUID.randomUUID().toString(), roomId);
-        log.info("url"+formData.getS3DataUrl());
+
         return formData;
     }
     // get 으로 요청이 오면 아래 download 메서드를 실행한다.

@@ -5,10 +5,12 @@ import com.example.VideoChatting.dto.ChatDto;
 import com.example.VideoChatting.entity.ChatMessage;
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.service.chat.ChatRoomService;
+import com.example.VideoChatting.service.chat.ChatService;
 import com.example.VideoChatting.service.chat.RedisPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -16,11 +18,13 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +32,7 @@ import java.util.ArrayList;
 public class ChatController {
     private final RedisPublisher redisPublisher;
     private final SimpMessageSendingOperations template;
+    private final ChatService chatService;
 
     private final ChatRoomService chatRoomService;
 
@@ -63,9 +68,16 @@ public class ChatController {
         chatRoomService.createChatMessage(chatRoom, message1);
         // Websocket에 발행된 메시지를 redis로 발행(publish)
         redisPublisher.publish(chatRoomService.getTopic(chat.getRoomId()), message1);
+        chatService.saveMessage(chat);
 //        template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
 
     }
+    // 대화 내역 조회
+    @GetMapping("/chat/room/{roomId}/message")
+    public ResponseEntity<List<ChatDto>> loadMessage(@PathVariable String roomId) {
+        return ResponseEntity.ok(chatService.loadMessage(roomId));
+    }
+
 
     // 유저 퇴장 시에는 EventListener 을 통해서 유저 퇴장을 확인
     @EventListener
@@ -121,3 +133,4 @@ public class ChatController {
         return userName;
     }
 }
+

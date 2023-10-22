@@ -1,5 +1,6 @@
 package com.example.VideoChatting.config;
 
+import com.example.VideoChatting.dto.ChatDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -65,4 +66,13 @@ public class RedisConfig {
 
         return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(cf).cacheDefaults(redisCacheConfiguration).build();
     }
+    @Bean
+    public RedisTemplate<String, ChatDto> redisTemplateForChatDto(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ChatDto> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(connectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatDto.class)); // ChatDto 클래스를 직렬화
+        return redisTemplate;
+    }
+
 }

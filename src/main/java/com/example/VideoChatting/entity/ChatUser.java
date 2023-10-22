@@ -47,6 +47,15 @@ public class ChatUser {
         this.nickname = nickname;
         return this;
     }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getRoleKey() {
         return this.role.getKey();
 }

@@ -25,8 +25,10 @@ public class SessionUser implements OAuth2User, Serializable {
     public Map<String, Object> getAttributes() {
         Map<String, Object> attributes = new HashMap<>();
         // 예제: ChatUser 객체에서 필요한 속성을 추가
-        attributes.put("nickname", chatUser.getNickname());
-        attributes.put("email", chatUser.getEmail());
+        if (chatUser !=null) {
+            attributes.put("nickname", chatUser.getNickname());
+            attributes.put("email", chatUser.getEmail());
+        }
         // 필요한 다른 속성들도 여기에 추가 가능
         return attributes;
     }
