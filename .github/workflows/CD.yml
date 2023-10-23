@@ -28,6 +28,11 @@ jobs:
           cd ./src/main/resources
           touch ./application.yml
           echo "${{ secrets.APPLICATION_PROD }}" > ./application.yml
+      - name: make application-prod.yaml
+        run: |
+          cd ./src/main/resources
+          touch ./application.yaml
+          echo "${{ secrets.APPLICATION_PRO }}" > ./application.yaml
 
 
       - name: Grant execute permission for gradlew
