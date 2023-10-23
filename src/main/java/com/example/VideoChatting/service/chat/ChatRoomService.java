@@ -34,7 +34,7 @@ public class ChatRoomService {
     private final S3FileService fileService;
     // Redis
     private static final String CHAT_ROOMS = "CHAT_ROOM";
-    public static final String ENTER_INFO = "ENTER_INFO"; // 채팅룸에 입장한 클라이언트의 sessionId와 채팅룸 id를 맵핑한 정보 저장
+    public static final String ENTER_INFO = "ENTER_INFO";
     private final RedisTemplate<String, Object> redisTemplate;
     private HashOperations<String, String, ChatRoom> opsHashChatRoom;
     // 채팅방의 대화 메시지를 발행하기 위한 redis topic 정보. 서버별로 채팅방에 매치되는 topic정보를 Map에 넣어 roomId로 찾을수 있도록 한다.
@@ -53,7 +53,8 @@ public class ChatRoomService {
         List<ChatRoom> chatRooms = chatRoomRepository.findAll();
         Collections.reverse(chatRooms);
 
-        return  opsHashChatRoom.values(CHAT_ROOMS);
+//        return opsHashChatRoom.values(CHAT_ROOMS);
+        return chatRooms;
     }
 
     public ChatRoom findRoomById(String roomId) {
@@ -62,11 +63,11 @@ public class ChatRoomService {
     /**
      * 채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다.
      */
-    public ChatRoom createChatRoom(String roomName) {
+    public ChatRoom createChatRoom(String roomName,String roomPwd, boolean secretCheck, int maxUserCnt) {
         if (chatRoomRepository.existsByRoomName(roomName)) {
             throw new ChatRoomNotFoundException("채팅방 이름이 존재합니다");
         } else {
-            ChatRoom chatRoom = new ChatRoom().create(roomName);
+            ChatRoom chatRoom = new ChatRoom().create(roomName, roomPwd, secretCheck, maxUserCnt);
             opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);
             log.info(chatRoom.getRoomName());
             chatRoomRepository.save(chatRoom);
@@ -89,15 +90,16 @@ public class ChatRoomService {
         topics.put(roomId, topic);
     }
     public ChannelTopic getTopic(String roomId) {
-        log.info("topic : " + roomId);
-        log.info("topic : " + topics.get(roomId));
-        log.info("topic : " + topics);
+
         return topics.get(roomId);
     }
     public void plusUserCnt(String roomId) {
+
         ChatRoom room = chatRoomRepository.findByRoomId(roomId);
+        log.info(String.valueOf(room.getUserCount()));
         if (room != null) {
             room.setUserCount(room.getUserCount() + 1);
+            log.info(String.valueOf(room.getUserCount()));
             chatRoomRepository.save(room);
         }
     }
@@ -154,17 +156,19 @@ public class ChatRoomService {
     }
     // 채팅방 최대 인원 체크
     public boolean checkRoomUserCnt(String roomId) {
-        ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS , roomId);
-        log.info("참여인원 확인 [{}, {}]", room.getUserCount(), room.getMaxUserCnt());
+        ChatRoom room = chatRoomRepository.findByRoomId(roomId);
 
-        if (room.getUserCount() + 1 > room.getUserCount()) {
+//        log.info(String.valueOf(room.getUserCount()));
+//        log.info("참여인원 확인 [{}, {}]", room.getUserCount(), room.getMaxUserCnt());
+
+        if (room.getUserCount() + 1 > room.getMaxUserCnt()) {
             return false;
         }
         return true;
     }
     //비밀번호 조회
     public boolean confirmPwd(String roomId, String roomPwd) {
-        return roomPwd.equals(opsHashChatRoom.get(ENTER_INFO, roomId).getRoomPwd());
+        return roomPwd.equals(opsHashChatRoom.get(CHAT_ROOMS, roomId).getRoomPwd());
     }
     @CacheEvict(value = "ChatRoom", key = "#roomId", cacheManager = "testCacheManager")
     public void deleteChatRoom(String roomId) {
@@ -173,7 +177,6 @@ public class ChatRoomService {
             ChatRoom byRoomId = chatRoomRepository.findByRoomId(roomId);
             chatRoomRepository.delete(byRoomId);
             fileService.deleteFileDir(roomId);
-            log.info("삭제 완료 roomId : {}", roomId);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

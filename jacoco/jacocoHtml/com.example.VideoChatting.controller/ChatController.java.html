@@ -2,10 +2,15 @@
 
 
 import com.example.VideoChatting.dto.ChatDto;
+import com.example.VideoChatting.entity.ChatMessage;
+import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.service.chat.ChatRoomService;
+import com.example.VideoChatting.service.chat.ChatService;
+import com.example.VideoChatting.service.chat.RedisPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -13,18 +18,21 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.ArrayList;
+import java.util.List;
 
-<span class="fc" id="L22">@Slf4j</span>
-<span class="fc" id="L23">@RequiredArgsConstructor</span>
+<span class="fc" id="L29">@Slf4j</span>
+<span class="fc" id="L30">@RequiredArgsConstructor</span>
 @Controller
 public class ChatController {
-
+    private final RedisPublisher redisPublisher;
     private final SimpMessageSendingOperations template;
+    private final ChatService chatService;
 
     private final ChatRoomService chatRoomService;
 
@@ -35,69 +43,82 @@ public class ChatController {
     public void enterUser(@Payload ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
 
         // 채팅방 유저+1
-<span class="fc" id="L38">        chatRoomService.plusUserCnt(chat.getRoomId());</span>
+<span class="fc" id="L46">        chatRoomService.plusUserCnt(chat.getRoomId());</span>
 
         // 채팅방에 유저 추가 및 UserUUID 반환
-<span class="fc" id="L41">        String userUUID = chatRoomService.addUser(chat.getRoomId(), chat.getSender());</span>
+<span class="fc" id="L49">        String userUUID = chatRoomService.addUser(chat.getRoomId(), chat.getSender());</span>
 
         // 반환 결과를 socket session 에 userUUID 로 저장
-<span class="fc" id="L44">        headerAccessor.getSessionAttributes().put(&quot;userUUID&quot;, userUUID);</span>
-<span class="fc" id="L45">        headerAccessor.getSessionAttributes().put(&quot;roomId&quot;, chat.getRoomId());</span>
+<span class="fc" id="L52">        headerAccessor.getSessionAttributes().put(&quot;userUUID&quot;, userUUID);</span>
+<span class="fc" id="L53">        headerAccessor.getSessionAttributes().put(&quot;roomId&quot;, chat.getRoomId());</span>
+<span class="fc" id="L54">        chatRoomService.enterChatRoom(chat.getRoomId());</span>
+<span class="fc" id="L55">        chat.setMessage(chat.getSender() + &quot; 님 입장!!&quot;);</span>
+<span class="fc" id="L56">        template.convertAndSend(&quot;/sub/chat/room/&quot; + chat.getRoomId(), chat);</span>
 
-<span class="fc" id="L47">        chat.setMessage(chat.getSender() + &quot; 님 입장!!&quot;);</span>
-<span class="fc" id="L48">        template.convertAndSend(&quot;/sub/chat/room/&quot; + chat.getRoomId(), chat);</span>
-
-<span class="fc" id="L50">    }</span>
+<span class="fc" id="L58">    }</span>
 
     // 해당 유저
     @MessageMapping(&quot;/chat/sendMessage&quot;)
     public void sendMessage(@Payload ChatDto chat) {
-<span class="nc" id="L55">        log.info(&quot;CHAT {}&quot;, chat);</span>
-<span class="nc" id="L56">        chat.setMessage(chat.getMessage());</span>
-<span class="nc" id="L57">        template.convertAndSend(&quot;/sub/chat/room/&quot; + chat.getRoomId(), chat);</span>
+<span class="fc" id="L63">        log.info(&quot;CHAT {}&quot;, chat);</span>
+<span class="fc" id="L64">        ChatRoom chatRoom=chatRoomService.findRoomById(chat.getRoomId());</span>
 
-<span class="nc" id="L59">    }</span>
+<span class="fc" id="L66">        ChatMessage message1=ChatMessage.createChatMessage(chatRoom, chat.getSender(), chat.getMessage(), chat.getType(), chat.getS3DataUrl());</span>
+
+<span class="fc" id="L68">        chatRoomService.createChatMessage(chatRoom, message1);</span>
+        // Websocket에 발행된 메시지를 redis로 발행(publish)
+<span class="fc" id="L70">        redisPublisher.publish(chatRoomService.getTopic(chat.getRoomId()), message1);</span>
+<span class="fc" id="L71">        chatService.saveMessage(chat);</span>
+//        template.convertAndSend(&quot;/sub/chat/room/&quot; + chat.getRoomId(), chat);
+
+<span class="fc" id="L74">    }</span>
+    // 대화 내역 조회
+    @GetMapping(&quot;/chat/room/{roomId}/message&quot;)
+    public ResponseEntity&lt;List&lt;ChatDto&gt;&gt; loadMessage(@PathVariable String roomId) {
+<span class="fc" id="L78">        return ResponseEntity.ok(chatService.loadMessage(roomId));</span>
+    }
+
 
     // 유저 퇴장 시에는 EventListener 을 통해서 유저 퇴장을 확인
     @EventListener
     public void webSocketDisconnectListener(SessionDisconnectEvent event) {
-<span class="nc" id="L64">        log.info(&quot;DisConnEvent {}&quot;, event);</span>
+<span class="nc" id="L85">        log.info(&quot;DisConnEvent {}&quot;, event);</span>
 
-<span class="nc" id="L66">        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());</span>
+<span class="nc" id="L87">        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());</span>
 
         // stomp 세션에 있던 uuid 와 roomId 를 확인해서 채팅방 유저 리스트와 room 에서 해당 유저를 삭제
-<span class="nc" id="L69">        String userUUID = (String) headerAccessor.getSessionAttributes().get(&quot;userUUID&quot;);</span>
-<span class="nc" id="L70">        String roomId = (String) headerAccessor.getSessionAttributes().get(&quot;roomId&quot;);</span>
+<span class="nc" id="L90">        String userUUID = (String) headerAccessor.getSessionAttributes().get(&quot;userUUID&quot;);</span>
+<span class="nc" id="L91">        String roomId = (String) headerAccessor.getSessionAttributes().get(&quot;roomId&quot;);</span>
 
-<span class="nc" id="L72">        log.info(&quot;headAccessor {}&quot;, headerAccessor);</span>
+<span class="nc" id="L93">        log.info(&quot;headAccessor {}&quot;, headerAccessor);</span>
 
         // 채팅방 유저 -1
-<span class="nc" id="L75">        chatRoomService.minusUserCnt(roomId);</span>
+<span class="nc" id="L96">        chatRoomService.minusUserCnt(roomId);</span>
 
         // 채팅방 유저 리스트에서 UUID 유저 닉네임 조회 및 리스트에서 유저 삭제
-<span class="nc" id="L78">        String username = chatRoomService.getUserName(roomId, userUUID);</span>
-<span class="nc" id="L79">        chatRoomService.delUser(roomId, userUUID);</span>
+<span class="nc" id="L99">        String username = chatRoomService.getUserName(roomId, userUUID);</span>
+<span class="nc" id="L100">        chatRoomService.delUser(roomId, userUUID);</span>
 
-<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (username != null) {</span>
-<span class="nc" id="L82">            log.info(&quot;User Disconnected : &quot; + username);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (username != null) {</span>
+<span class="nc" id="L103">            log.info(&quot;User Disconnected : &quot; + username);</span>
 
             // builder 어노테이션 활용
-<span class="nc" id="L85">            ChatDto chat = ChatDto.builder()</span>
-<span class="nc" id="L86">                    .type(ChatDto.MessageType.LEAVE)</span>
-<span class="nc" id="L87">                    .sender(username)</span>
-<span class="nc" id="L88">                    .message(username + &quot; 님 퇴장!!&quot;)</span>
-<span class="nc" id="L89">                    .build();</span>
+<span class="nc" id="L106">            ChatDto chat = ChatDto.builder()</span>
+<span class="nc" id="L107">                    .type(ChatDto.MessageType.LEAVE)</span>
+<span class="nc" id="L108">                    .sender(username)</span>
+<span class="nc" id="L109">                    .message(username + &quot; 님 퇴장!!&quot;)</span>
+<span class="nc" id="L110">                    .build();</span>
 
-<span class="nc" id="L91">            template.convertAndSend(&quot;/sub/chat/room/&quot; + roomId, chat);</span>
+<span class="nc" id="L112">            template.convertAndSend(&quot;/sub/chat/room/&quot; + roomId, chat);</span>
         }
-<span class="nc" id="L93">    }</span>
+<span class="nc" id="L114">    }</span>
 
     // 채팅에 참여한 유저 리스트 반환
     @GetMapping(&quot;/chat/userlist&quot;)
     @ResponseBody
     public ArrayList&lt;String&gt; userList(String roomId) {
 
-<span class="fc" id="L100">        return chatRoomService.getUserList(roomId);</span>
+<span class="fc" id="L121">        return chatRoomService.getUserList(roomId);</span>
     }
 
     // 채팅에 참여한 유저 닉네임 중복 확인
@@ -106,10 +127,11 @@ public class ChatController {
     public String isDuplicateName(@RequestParam(&quot;roomId&quot;) String roomId, @RequestParam(&quot;username&quot;) String username) {
 
         // 유저 이름 확인
-<span class="fc" id="L109">        String userName = chatRoomService.isDuplicateName(roomId, username);</span>
-<span class="fc" id="L110">        log.info(&quot;동작확인 {}&quot;, userName);</span>
+<span class="fc" id="L130">        String userName = chatRoomService.isDuplicateName(roomId, username);</span>
+<span class="fc" id="L131">        log.info(&quot;동작확인 {}&quot;, userName);</span>
 
-<span class="fc" id="L112">        return userName;</span>
+<span class="fc" id="L133">        return userName;</span>
     }
 }
+
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
