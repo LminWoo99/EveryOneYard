@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RedisSubscriber.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.chat</a> &gt; <span class="el_source">RedisSubscriber.java</span></div><h1>RedisSubscriber.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.service.chat;
+
+import com.example.VideoChatting.entity.ChatMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.stereotype.Service;
+
+<span class="fc" id="L13">@Slf4j</span>
+<span class="fc" id="L14">@RequiredArgsConstructor</span>
+@Service
+public class RedisSubscriber implements MessageListener {
+    private final ObjectMapper objectMapper;
+    private final RedisTemplate redisTemplate;
+    private final SimpMessageSendingOperations messagingTemplate;
+
+    /**
+     * Redis에서 메시지가 발행(publish)되면 대기하고 있던 onMessage가 해당 메시지를 받아 처리한다.
+     */
+    @Override
+    public void onMessage(Message message, byte[] pattern) {
+        try {
+            // redis에서 발행된 데이터를 받아 deserialize
+<span class="nc" id="L28">            String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());</span>
+            // ChatMessage 객채로 맵핑
+<span class="nc" id="L30">            ChatMessage roomMessage = objectMapper.readValue(publishMessage, ChatMessage.class);</span>
+            // Websocket 구독자에게 채팅 메시지 Send
+<span class="nc" id="L32">            messagingTemplate.convertAndSend(&quot;/sub/chat/room/&quot; + roomMessage.getChatRoom().getRoomId(), roomMessage);</span>
+<span class="nc" id="L33">        } catch (Exception e) {</span>
+<span class="nc" id="L34">            log.error(e.getMessage());</span>
+<span class="nc" id="L35">        }</span>
+<span class="nc" id="L36">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

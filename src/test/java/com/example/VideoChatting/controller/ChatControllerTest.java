@@ -1,7 +1,13 @@
 package com.example.VideoChatting.controller;
 
 import com.example.VideoChatting.dto.ChatDto;
+import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.service.chat.ChatRoomService;
+import com.example.VideoChatting.service.chat.ChatService;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
+import com.example.VideoChatting.service.chat.RedisPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,20 +19,27 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,12 +52,18 @@ class ChatControllerTest {
 
     @Mock
     private ChatRoomService chatRoomService;
-
+    @Mock
+    private ChatService chatService;
+    @Mock
+    private RedisTemplate<String, ChatDto> redisTemplate;
+    @Mock
+    private RedisPublisher redisPublisher;
     @InjectMocks
     private ChatController chatController;
     MockMvc mockMvc;
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(chatService, "redisTemplate", redisTemplate);
         mockMvc = MockMvcBuilders.standaloneSetup(chatController).build();
     }
     @Test
@@ -64,6 +83,58 @@ class ChatControllerTest {
         verify(chatRoomService).addUser(chat.getRoomId(), chat.getSender());
         verify(headerAccessor, times(2)).getSessionAttributes();
         verify(template).convertAndSend(anyString(), any(ChatDto.class));
+    }
+    @Test
+    @DisplayName("채팅 메세지 보내기 테스트")
+    void sendMessageTest() throws Exception{
+        //given
+        ChatDto chatDto = ChatDto.builder()
+                .type(ChatDto.MessageType.TALK)
+                .roomId("testRoomId")
+                .sender("testSender")
+                .message("Hello, World!")
+                .createdAt(new Date())
+                .s3DataUrl("https://example.com/some-file")
+                .fileName("example.txt")
+                .fileDir("/files")
+                .build();
+        ChatRoom chatRoom = new ChatRoom();
+        when(chatRoomService.findRoomById("testRoomId")).thenReturn(chatRoom);
+        //when
+        chatController.sendMessage(chatDto);
+
+        //then
+        verify(chatService, times(1)).saveMessage(chatDto);
+    }
+    @Test
+    @DisplayName("이전 채팅 메세지 조회")
+    void loadMessageTest() throws Exception {
+        //given
+        String roomId = "testRoomId";
+        List<ChatDto> expectedMessages = new ArrayList<>();
+        ChatDto chatDto1 = new ChatDto();
+        ChatDto chatDto2 = new ChatDto();
+
+        chatDto1.setSender("sender1");
+        chatDto2.setSender("sender2");
+
+        chatDto1.setMessage("메세지 테스트 1");
+        chatDto2.setMessage("메세지 테스트 2");
+
+        expectedMessages.add(chatDto1);
+        expectedMessages.add(chatDto2);
+
+        when(chatService.loadMessage(roomId)).thenReturn(expectedMessages);
+        //when
+        mockMvc.perform(get("/chat/room/" + roomId + "/message"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("[" +
+                        "{\"type\":null,\"roomId\":null,\"sender\":\"sender1\",\"message\":\"메세지 테스트 1\",\"createdAt\":null,\"s3DataUrl\":null,\"fileName\":null,\"fileDir\":null}," +
+                        "{\"type\":null,\"roomId\":null,\"sender\":\"sender2\",\"message\":\"메세지 테스트 2\",\"createdAt\":null,\"s3DataUrl\":null,\"fileName\":null,\"fileDir\":null}" +
+                        "]"));
+        //then
+        verify(chatService, times(1)).loadMessage(roomId);
     }
 
     @Test

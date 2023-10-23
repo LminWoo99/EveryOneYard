@@ -33,17 +33,18 @@ public class ChatRoomController {
             }
             return "roomlist";
         }
-        @GetMapping("/json")
-        @ApiOperation(value = "채팅방 리스트 조회 json 반환", notes = "전체 채팅방 목록을 조회한다")
-        @ResponseBody
-        public List<ChatRoom> chatRoomList() {
-            return chatRoomService.findAllRooms();
-
-        }
+//        @GetMapping("/json")
+//        @ApiOperation(value = "채팅방 리스트 조회 json 반환", notes = "전체 채팅방 목록을 조회한다")
+//        @ResponseBody
+//        public List<ChatRoom> chatRoomList() {
+//            return chatRoomService.findAllRooms();
+//
+//        }
     @PostMapping("/createRoom")
     @ApiOperation(value = "채팅방 생성 ", notes = "채팅방을 생성한다")
-    public String createRoom(@RequestParam String roomName, RedirectAttributes rttr) {
-        ChatRoom room = chatRoomService.createChatRoom(roomName);
+    public String createRoom(@RequestParam("roomName") String name, @RequestParam("roomPwd")String roomPwd, @RequestParam("secretCheck")String secretCheck,
+                             @RequestParam(value = "maxUserCnt", defaultValue = "100")String maxUserCnt,  RedirectAttributes rttr) {
+        ChatRoom room = chatRoomService.createChatRoom(name, roomPwd, Boolean.parseBoolean(secretCheck), Integer.parseInt(maxUserCnt));
         rttr.addFlashAttribute("roomName", room);
         return "redirect:/chat";
     }
@@ -53,6 +54,32 @@ public class ChatRoomController {
         log.info("roomId {}", roomId);
         model.addAttribute("room", chatRoomService.findRoomById(roomId));
         return "chatroom";
+    }
+    @PostMapping("/confirmPwd/{roomId}")
+    @ResponseBody
+    @ApiOperation(value = "채팅방 비밀번호 체크 ", notes = "파라미터로 넘어오는 ROOMID 기준으로 채팅방 비밀 번호 체크 ")
+    public boolean confirmPwd(@PathVariable String roomId, @RequestParam String roomPwd){
+
+        // 넘어온 roomId 와 roomPwd 를 이용해서 비밀번호 찾기
+        // 찾아서 입력받은 roomPwd 와 room pwd 와 비교해서 맞으면 true, 아니면  false
+        return chatRoomService.confirmPwd(roomId, roomPwd);
+    }
+    @GetMapping("/delRoom/{roomId}")
+    @ApiOperation(value = "채팅방 삭제 ", notes = "파라미터로 넘어오는 ROOMID 기준으로 채팅방 삭제 ")
+    public String deleteChatRoom(@PathVariable String roomId){
+
+        // roomId 기준으로 chatRoomMap 에서 삭제, 해당 채팅룸 안에 있는 사진 삭제
+        chatRoomService.deleteChatRoom(roomId);
+
+        return "redirect:/";
+    }
+
+    // 유저 카운트
+    @GetMapping("/chkUserCnt/{roomId}")
+    @ResponseBody
+    @ApiOperation(value = "채팅방 유저 카운트 ", notes = "사용자가 설정한 최대 인원 안 넘는지 체크  ")
+    public boolean checkUserCnt(@PathVariable String roomId){
+        return chatRoomService.checkRoomUserCnt(roomId);
     }
 
 }
