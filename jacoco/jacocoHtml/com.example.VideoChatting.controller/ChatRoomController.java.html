@@ -33,13 +33,13 @@ public class ChatRoomController {
             }
 <span class="fc" id="L34">            return &quot;roomlist&quot;;</span>
         }
-        @GetMapping(&quot;/json&quot;)
-        @ApiOperation(value = &quot;채팅방 리스트 조회 json 반환&quot;, notes = &quot;전체 채팅방 목록을 조회한다&quot;)
-        @ResponseBody
-        public List&lt;ChatRoom&gt; chatRoomList() {
-<span class="nc" id="L40">            return chatRoomService.findAllRooms();</span>
-
-        }
+//        @GetMapping(&quot;/json&quot;)
+//        @ApiOperation(value = &quot;채팅방 리스트 조회 json 반환&quot;, notes = &quot;전체 채팅방 목록을 조회한다&quot;)
+//        @ResponseBody
+//        public List&lt;ChatRoom&gt; chatRoomList() {
+//            return chatRoomService.findAllRooms();
+//
+//        }
     @PostMapping(&quot;/createRoom&quot;)
     @ApiOperation(value = &quot;채팅방 생성 &quot;, notes = &quot;채팅방을 생성한다&quot;)
     public String createRoom(@RequestParam(&quot;roomName&quot;) String name, @RequestParam(&quot;roomPwd&quot;)String roomPwd, @RequestParam(&quot;secretCheck&quot;)String secretCheck,

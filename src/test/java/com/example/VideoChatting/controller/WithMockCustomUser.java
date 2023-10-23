@@ -15,7 +15,7 @@ public @interface WithMockCustomUser {
 
     String email() default "user";
 
-    // ... 기타 속성
+
 
 
 }
