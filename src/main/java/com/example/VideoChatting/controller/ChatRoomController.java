@@ -1,6 +1,7 @@
 package com.example.VideoChatting.controller;
 
 import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.entity.ChatType;
 import com.example.VideoChatting.entity.ChatUser;
 import com.example.VideoChatting.entity.SessionUser;
 import com.example.VideoChatting.service.chat.ChatRoomService;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @Slf4j
@@ -52,8 +54,16 @@ public class ChatRoomController {
     @ApiOperation(value = "채팅방 입장 ", notes = "파라미터로 넘어오는 ROOMID 기준으로 채팅방을 찾음 ")
     public String roomDetail(Model model,  String roomId){
         log.info("roomId {}", roomId);
-        model.addAttribute("room", chatRoomService.findRoomById(roomId));
-        return "chatroom";
+        ChatRoom chatRoom = chatRoomService.findRoomById(roomId);
+        model.addAttribute("room", chatRoom);
+
+        if (chatRoom.getChatType().equals(ChatType.MSG)) {
+            return "chatroom";
+        }else{
+            log.info("화상채팅 유저 확인 :"+chatRoom.getUserRtcList());
+            model.addAttribute("uuid", UUID.randomUUID().toString());
+            return "rtcroom";
+        }
     }
     @PostMapping("/confirmPwd/{roomId}")
     @ResponseBody
