@@ -1,18 +1,13 @@
 package com.example.VideoChatting.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
+import lombok.*;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -39,6 +34,13 @@ public class ChatRoom implements Serializable {
     private List<ChatMessage> chatMessageList = new ArrayList<>();
 
     private HashMap<String, String> userList = new HashMap<String, String>();
+    private HashMap<String, WebSocketSession> userRtcList = new HashMap<String, WebSocketSession>();
+    @Enumerated(EnumType.STRING)
+    private ChatType chatType;
+
+    public void setChatType(ChatType chatType) {
+        this.chatType = chatType;
+    }
 
     public ChatRoom create(String roomName, String roomPwd, boolean secretCheck, int maxUserCnt){
         ChatRoom chatRoom = new ChatRoom();
@@ -50,11 +52,14 @@ public class ChatRoom implements Serializable {
         return chatRoom;
     }
 
-
+    public void setUserRtcList(HashMap<String, WebSocketSession> userRtcList) {
+        this.userRtcList = userRtcList;
+    }
 
     public void setUserCount(int userCount) {
         this.userCount = userCount;
     }
+
     public void addChatMessages(ChatMessage chatMessage) {
         this.chatMessageList.add(chatMessage);
     }

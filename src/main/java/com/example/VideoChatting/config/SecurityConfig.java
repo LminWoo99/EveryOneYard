@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authorizeRequests()
-                .antMatchers("/api/user", "/login/*", "/s3/*", "/chat/createRoom", "/chat/*", "/").permitAll() // /chat 경로는 허용
+                .antMatchers("/api/user", "/login/*", "/s3/*", "/chat/createRoom", "/chat/*", "/*").permitAll() // /chat 경로는 허용
                 .and()
                 .oauth2Login()
                 .userInfoEndpoint().userService(customOAuth2UserService)
