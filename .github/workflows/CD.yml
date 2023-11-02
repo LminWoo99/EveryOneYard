@@ -56,9 +56,9 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }} # pem 키
 
           script: |
+            docker rm $(docker ps --filter 'status=exited' -a -q)
             docker pull ${{ secrets.DOCKER_USERNAME }}/chat
             docker-compose up -d
-            docker stop $(docker ps -a -q)
+#            docker stop $(docker ps -a -q)
             docker run -d --log-driver=syslog -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/chat
-            docker rm $(docker ps --filter 'status=exited' -a -q)
             docker image prune -a -f
