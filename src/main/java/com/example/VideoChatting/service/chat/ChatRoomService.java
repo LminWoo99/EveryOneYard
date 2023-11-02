@@ -2,6 +2,7 @@ package com.example.VideoChatting.service.chat;
 
 import com.example.VideoChatting.entity.ChatMessage;
 import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.entity.ChatType;
 import com.example.VideoChatting.exception.ChatRoomNotFoundException;
 import com.example.VideoChatting.repository.ChatRoomRepository;
 import com.example.VideoChatting.service.file.FileService;
@@ -68,6 +69,7 @@ public class ChatRoomService {
             throw new ChatRoomNotFoundException("채팅방 이름이 존재합니다");
         } else {
             ChatRoom chatRoom = new ChatRoom().create(roomName, roomPwd, secretCheck, maxUserCnt);
+            chatRoom.setChatType(ChatType.MSG);
             opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);
             log.info(chatRoom.getRoomName());
             chatRoomRepository.save(chatRoom);
@@ -118,6 +120,7 @@ public class ChatRoomService {
         ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS, roomId);
         String userUUID = UUID.randomUUID().toString();
         room.getUserList().put(userUUID, username);
+        System.out.println("userUUID = " + userUUID);
         return userUUID;
     }
     //채팅방 유저 이름 중복 확인
