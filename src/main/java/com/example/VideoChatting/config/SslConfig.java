@@ -34,10 +34,6 @@ public class SslConfig {
         return tomcat;
     }
 
-    /*
-        http 를 https 로 리다이렉트한다.
-        즉 http://8080 으로 요청이 들어온 경우 리다이렉트를 통해서 https://8443 으로 변경해준다
-     */
     private Connector httpToHttpsRedirectConnector() {
         Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
         connector.setScheme("http");
