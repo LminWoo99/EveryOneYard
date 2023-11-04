@@ -1,6 +1,6 @@
 'use strict';
-// const addr = "localhost:8443"
-const addr = "52.78.190.79:443"
+const addr = "localhost:8443"
+// const addr = "52.78.190.79:443"
 // create and run Web Socket connection
 // 웹 소켓 연결 정보
 const socket = new WebSocket("wss://" + window.location.host + "/signal");
