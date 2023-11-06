@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SignalHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.chat</a> &gt; <span class="el_source">SignalHandler.java</span></div><h1>SignalHandler.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.service.chat;
+
+import com.example.VideoChatting.dto.ChatRoomMap;
+import com.example.VideoChatting.dto.WebSocketMessage;
+import com.example.VideoChatting.entity.ChatRoom;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.thymeleaf.util.StringUtils;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+
+
+@Component
+<span class="fc" id="L23">@RequiredArgsConstructor</span>
+<span class="fc" id="L24">@Slf4j</span>
+public class SignalHandler extends TextWebSocketHandler {
+
+    private final RtcChatService rtcChatService;
+    private final ChatRoomService chatRoomService;
+
+
+<span class="fc" id="L31">    private final ObjectMapper objectMapper = new ObjectMapper();</span>
+
+    // roomID to room Mapping
+<span class="fc" id="L34">    private Map&lt;String, ChatRoom&gt; rooms = ChatRoomMap.getInstance().getChatRooms();</span>
+
+    // message types, used in signalling:
+    // SDP Offer message
+    private static final String MSG_TYPE_OFFER = &quot;offer&quot;;
+    // SDP Answer message
+    private static final String MSG_TYPE_ANSWER = &quot;answer&quot;;
+    // New ICE Candidate message
+    private static final String MSG_TYPE_ICE = &quot;ice&quot;;
+    // join room data message
+    private static final String MSG_TYPE_JOIN = &quot;join&quot;;
+    // leave room data message
+    private static final String MSG_TYPE_LEAVE = &quot;leave&quot;;
+
+    // 연결 끊어졌을 때 이벤트처리
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+<span class="nc" id="L51">        log.info(&quot;[ws] Session has been closed with status [{} {}]&quot;, status, session);</span>
+<span class="nc" id="L52">    }</span>
+
+    // 소켓 연결되었을 때 이벤트 처리
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) {
+        /*
+         * 웹 소켓이 연결되었을 때 클라이언트 쪽으로 메시지를 발송한다
+         * 이때 원본 코드에서는 rooms.isEmpty() 가 false 를 전달한다. 이 의미는 현재 room 에 아무도 없다는 것을 의미하고 따라서 추가적인 ICE 요청을 하지 않도록 한다.
+         *
+         * 현재 채팅 코드에서는 chatRoom 안에 userList 안에 user가 저장되기 때문에 rooms 이 아닌 userList 에 몇명이 있는지 확인해야 했다.
+         * 따라서 js 쪽에서 ajax 요청을 통해 rooms 가 아닌 userList 에 몇명이 있는지 확인하고
+         * 2명 이상인 경우에만 JS에서 이와 관련된 변수를 true 가 되도록 변경하였다.
+         *
+         * 이렇게 true 상태가 되면 이후에 들어온 유저가 방안에 또 다른 유저가 있음을 확인하고,
+         * P2P 연결을 시작한다.
+         * */
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        sendMessage(session, new WebSocketMessage(&quot;Server&quot;, MSG_TYPE_JOIN, Boolean.toString(!rooms.isEmpty()), null, null));</span>
+<span class="nc" id="L69">    }</span>
+
+    // 소켓 메시지 처리
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
+        // a message has been received
+        try {
+            // 웹 소켓으로부터 전달받은 메시지
+            // 소켓쪽에서는 socket.send 로 메시지를 발송한다 =&gt; 참고로 JSON 형식으로 변환해서 전달해온다
+<span class="nc" id="L78">            WebSocketMessage message = objectMapper.readValue(textMessage.getPayload(), WebSocketMessage.class);</span>
+<span class="nc" id="L79">            log.debug(&quot;[ws] Message of {} type from {} received&quot;, message.getType(), message.getFrom());</span>
+            // 유저 uuid 와 roomID 를 저장
+<span class="nc" id="L81">            String userUUID = message.getFrom(); // 유저 uuid</span>
+<span class="nc" id="L82">            String roomId = message.getData(); // roomId</span>
+
+
+            // 메시지 타입에 따라서 서버에서 하는 역할이 달라진다
+<span class="nc bnc" id="L86" title="All 4 branches missed.">            switch (message.getType()) {</span>
+
+                // 클라이언트에게서 받은 메시지 타입에 따른 signal 프로세스
+                case MSG_TYPE_OFFER:
+                case MSG_TYPE_ANSWER:
+                case MSG_TYPE_ICE:
+<span class="nc" id="L92">                    Object candidate = message.getCandidate();</span>
+<span class="nc" id="L93">                    Object sdp = message.getSdp();</span>
+
+<span class="nc" id="L95">                    log.debug(&quot;[ws] Signal: {}&quot;,</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                            candidate != null</span>
+<span class="nc" id="L97">                                    ? candidate.toString().substring(0, 64)</span>
+<span class="nc" id="L98">                                    : sdp.toString().substring(0, 64));</span>
+
+                    /* 여기도 마찬가지 */
+<span class="nc" id="L101">                    ChatRoom room = rooms.get(roomId);</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                    if (room != null) {</span>
+<span class="nc" id="L104">                        Map&lt;String, WebSocketSession&gt; clients = rtcChatService.getClients(room);</span>
+<span class="nc" id="L105">                        log.info(&quot;signal checkL : &quot; + clients);</span>
+                        /*
+                         * Map.Entry 는 Map 인터페이스 내부에서 Key, Value 를 쌍으로 다루기 위해 정의된 내부 인터페이스
+                         * 보통 key 값들을 가져오는 entrySet() 과 함께 사용한다.
+                         * entrySet 을 통해서 key 값들을 불러온 후 Map.Entry 를 사용하면서 Key 에 해당하는 Value 를 쌍으로 가져온다
+                         *
+                         */
+<span class="nc bnc" id="L112" title="All 2 branches missed.">                        for (Map.Entry&lt;String, WebSocketSession&gt; client : clients.entrySet()) {</span>
+
+                            // send messages to all clients except current user
+<span class="nc bnc" id="L115" title="All 2 branches missed.">                            if (!client.getKey().equals(userUUID)) {</span>
+                                // select the same type to resend signal
+<span class="nc" id="L117">                                sendMessage(client.getValue(),</span>
+                                        new WebSocketMessage(
+                                                userUUID,
+<span class="nc" id="L120">                                                message.getType(),</span>
+                                                roomId,
+                                                candidate,
+                                                sdp));
+                            }
+<span class="nc" id="L125">                        }</span>
+<span class="nc" id="L126">                    }</span>
+                    break;
+
+                // identify user and their opponent
+                case MSG_TYPE_JOIN:
+                    // message.data contains connected room id
+<span class="nc" id="L132">                    log.info(&quot;[ws] {} has joined Room: #{}&quot;, userUUID, message.getData());</span>
+
+//                    room = rtcChatService.findRoomByRoomId(roomId)
+//                            .orElseThrow(() -&gt; new IOException(&quot;Invalid room number received!&quot;));
+<span class="nc" id="L136">                    room = ChatRoomMap.getInstance().getChatRooms().get(roomId);</span>
+<span class="nc" id="L137">                    log.info(&quot;시그널[]: &quot;+room.getRoomId());</span>
+                    // room 안에 있는 userList 에 유저 추가
+<span class="nc" id="L139">                    rtcChatService.addClient(room, userUUID, session);</span>
+
+                    // 채팅방 입장 후 유저 카운트+1
+<span class="nc" id="L142">                    chatRoomService.plusUserCnt(roomId);</span>
+
+                    /* 이 부분에서 session.getID 대신 roomID 를 사용하면 문제 생김*/
+<span class="nc" id="L145">                    rooms.put(session.getId(), room);</span>
+<span class="nc" id="L146">                    break;</span>
+
+                case MSG_TYPE_LEAVE:
+                    // message data contains connected room id
+<span class="nc" id="L150">                    log.info(&quot;[ws] {} is going to leave Room: #{}&quot;, userUUID, message.getData());</span>
+
+                    // roomID 기준 채팅방 찾아오기
+<span class="nc" id="L153">                    room = rooms.get(message.getData());</span>
+
+                    // room clients list 에서 해당 유저 삭제
+                    // 1. room 에서 client List 를 받아와서 keySet 을 이용해서 key 값만 가져온 후 stream 을 사용해서 반복문 실행
+<span class="nc" id="L157">                    Optional&lt;String&gt; client = rtcChatService.getClients(room).keySet().stream()</span>
+                            // 2. 이때 filter - 일종의 if문 -을 사용하는데 entry 에서 key 값만 가져와서 userUUID 와 비교한다
+<span class="nc" id="L159">                            .filter(clientListKeys -&gt; StringUtils.equals(clientListKeys, userUUID))</span>
+                            // 3. 하여튼 동일한 것만 가져온다
+<span class="nc" id="L161">                            .findAny();</span>
+
+                    // 만약 client 의 값이 존재한다면 - Optional 임으로 isPersent 사용 , null  아니라면 - removeClientByName 을 실행
+<span class="nc" id="L164">                    client.ifPresent(userID -&gt; rtcChatService.removeClientByName(room, userID));</span>
+
+                    // 채팅방에서 떠날 시 유저 카운트 -1
+<span class="nc" id="L167">                    chatRoomService.minusUserCnt(roomId);</span>
+
+<span class="nc" id="L169">                    log.debug(&quot;삭제 완료 [{}] &quot;, client);</span>
+<span class="nc" id="L170">                    break;</span>
+
+                // something should be wrong with the received message, since it's type is unrecognizable
+                default:
+<span class="nc" id="L174">                    log.debug(&quot;[ws] Type of the received message {} is undefined!&quot;, message.getType());</span>
+                    // handle this if needed
+            }
+
+<span class="nc" id="L178">        } catch (IOException e) {</span>
+<span class="nc" id="L179">            log.debug(&quot;An error occured: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L180">        }</span>
+<span class="nc" id="L181">    }</span>
+
+    private void sendMessage(WebSocketSession session, WebSocketMessage message) {
+        try {
+<span class="nc" id="L185">            String json = objectMapper.writeValueAsString(message);</span>
+<span class="nc" id="L186">            session.sendMessage(new TextMessage(json));</span>
+<span class="nc" id="L187">        } catch (IOException e) {</span>
+<span class="nc" id="L188">            log.debug(&quot;An error occured: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L189">        }</span>
+<span class="nc" id="L190">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

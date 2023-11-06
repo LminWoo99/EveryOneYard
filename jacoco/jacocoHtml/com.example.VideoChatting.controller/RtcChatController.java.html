@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RtcChatController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.controller</a> &gt; <span class="el_source">RtcChatController.java</span></div><h1>RtcChatController.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.controller;
+
+import com.example.VideoChatting.dto.WebSocketMessage;
+import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.service.chat.RtcChatService;
+import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+<span class="fc" id="L15">@RequiredArgsConstructor</span>
+<span class="fc" id="L16">@Slf4j</span>
+public class RtcChatController {
+    private final RtcChatService rtcChatService;
+
+    @PostMapping(&quot;/webrtc/usercount&quot;)
+    private ResponseEntity&lt;String&gt; webRTC(@ModelAttribute WebSocketMessage webSocketMessage) {
+<span class="fc" id="L22">        log.info(&quot;MESSAGE : {}&quot;, webSocketMessage.getData());</span>
+<span class="fc" id="L23">        return ResponseEntity.ok().body(Boolean.toString(rtcChatService.findUserCount(webSocketMessage)));</span>
+    }
+    @PostMapping(&quot;/chat/createRtcRoom&quot;)
+    @ApiOperation(value = &quot;채팅방 생성 &quot;, notes = &quot;채팅방을 생성한다&quot;)
+    public String createRoom(@RequestParam(&quot;roomName&quot;) String name, @RequestParam(&quot;roomPwd&quot;)String roomPwd, @RequestParam(&quot;secretCheck&quot;)String secretCheck,
+                             @RequestParam(value = &quot;maxUserCnt&quot;, defaultValue = &quot;100&quot;)String maxUserCnt, RedirectAttributes rttr) {
+<span class="fc" id="L29">        ChatRoom room = rtcChatService.createChatRoom(name, roomPwd, Boolean.parseBoolean(secretCheck), Integer.parseInt(maxUserCnt));</span>
+<span class="fc" id="L30">        rttr.addFlashAttribute(&quot;roomName&quot;, room);</span>
+<span class="fc" id="L31">        return &quot;redirect:/chat&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -77,7 +77,8 @@ jacocoTestReport {
 					"com/example/VideoChatting/entity/*",
 					"**/config/*",
 					"**/exception/*",
-					"**/oAuth/*"
+					"**/oAuth/*",
+					"**/SignalHandler.class"
 			])
 		}))
 	}
