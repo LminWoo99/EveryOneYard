@@ -2,6 +2,7 @@
 
 import com.example.VideoChatting.entity.ChatMessage;
 import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.entity.ChatType;
 import com.example.VideoChatting.exception.ChatRoomNotFoundException;
 import com.example.VideoChatting.repository.ChatRoomRepository;
 import com.example.VideoChatting.service.file.FileService;
@@ -22,9 +23,9 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service
-<span class="fc" id="L25">@Slf4j</span>
+<span class="fc" id="L26">@Slf4j</span>
 @Transactional
-<span class="fc" id="L27">@RequiredArgsConstructor</span>
+<span class="fc" id="L28">@RequiredArgsConstructor</span>
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     // 채팅방(topic)에 발행되는 메시지를 처리할 Listner
@@ -42,145 +43,147 @@ public class ChatRoomService {
     private HashOperations&lt;String, String, String&gt; hashOpsEnterInfo;
     @PostConstruct
     private void init() {
-<span class="fc" id="L45">        opsHashChatRoom = redisTemplate.opsForHash();</span>
-<span class="fc" id="L46">        hashOpsEnterInfo=redisTemplate.opsForHash();</span>
-<span class="fc" id="L47">        topics = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L48">    }</span>
+<span class="fc" id="L46">        opsHashChatRoom = redisTemplate.opsForHash();</span>
+<span class="fc" id="L47">        hashOpsEnterInfo=redisTemplate.opsForHash();</span>
+<span class="fc" id="L48">        topics = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L49">    }</span>
     //채팅방
     //방 아이디로 검색
 //    @Cacheable(value = &quot;ChatRoom&quot;, cacheManager = &quot;testCacheManager&quot;)
     public List&lt;ChatRoom&gt; findAllRooms() {
-<span class="fc" id="L53">        List&lt;ChatRoom&gt; chatRooms = chatRoomRepository.findAll();</span>
-<span class="fc" id="L54">        Collections.reverse(chatRooms);</span>
+<span class="fc" id="L54">        List&lt;ChatRoom&gt; chatRooms = chatRoomRepository.findAll();</span>
+<span class="fc" id="L55">        Collections.reverse(chatRooms);</span>
 
 //        return opsHashChatRoom.values(CHAT_ROOMS);
-<span class="fc" id="L57">        return chatRooms;</span>
+<span class="fc" id="L58">        return chatRooms;</span>
     }
 
     public ChatRoom findRoomById(String roomId) {
-<span class="fc" id="L61">        return chatRoomRepository.findByRoomId(roomId);</span>
+<span class="fc" id="L62">        return chatRoomRepository.findByRoomId(roomId);</span>
     }
     /**
      * 채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다.
      */
     public ChatRoom createChatRoom(String roomName,String roomPwd, boolean secretCheck, int maxUserCnt) {
-<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (chatRoomRepository.existsByRoomName(roomName)) {</span>
-<span class="fc" id="L68">            throw new ChatRoomNotFoundException(&quot;채팅방 이름이 존재합니다&quot;);</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (chatRoomRepository.existsByRoomName(roomName)) {</span>
+<span class="fc" id="L69">            throw new ChatRoomNotFoundException(&quot;채팅방 이름이 존재합니다&quot;);</span>
         } else {
-<span class="fc" id="L70">            ChatRoom chatRoom = new ChatRoom().create(roomName, roomPwd, secretCheck, maxUserCnt);</span>
-<span class="fc" id="L71">            opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);</span>
-<span class="fc" id="L72">            log.info(chatRoom.getRoomName());</span>
-<span class="fc" id="L73">            chatRoomRepository.save(chatRoom);</span>
-<span class="fc" id="L74">            return chatRoom;</span>
+<span class="fc" id="L71">            ChatRoom chatRoom = new ChatRoom().create(roomName, roomPwd, secretCheck, maxUserCnt);</span>
+<span class="fc" id="L72">            chatRoom.setChatType(ChatType.MSG);</span>
+<span class="fc" id="L73">            opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);</span>
+<span class="fc" id="L74">            log.info(chatRoom.getRoomName());</span>
+<span class="fc" id="L75">            chatRoomRepository.save(chatRoom);</span>
+<span class="fc" id="L76">            return chatRoom;</span>
         }
 
     }
 
     public void createChatMessage(ChatRoom chatRoom, ChatMessage chatMessage) {
-<span class="fc" id="L80">        chatRoom.addChatMessages(chatMessage);</span>
-<span class="fc" id="L81">    }</span>
+<span class="fc" id="L82">        chatRoom.addChatMessages(chatMessage);</span>
+<span class="fc" id="L83">    }</span>
     /**
      * 채팅방 입장 : redis에 topic을 만들고 pub/sub 통신을 하기 위해 리스너를 설정한다.
      */
     public void enterChatRoom(String roomId) {
-<span class="nc" id="L86">        ChannelTopic topic = topics.get(roomId);</span>
-<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (topic == null)</span>
-<span class="nc" id="L88">            topic = new ChannelTopic(roomId);</span>
-<span class="nc" id="L89">        redisMessageListener.addMessageListener(redisSubscriber, topic);</span>
-<span class="nc" id="L90">        topics.put(roomId, topic);</span>
-<span class="nc" id="L91">    }</span>
+<span class="nc" id="L88">        ChannelTopic topic = topics.get(roomId);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (topic == null)</span>
+<span class="nc" id="L90">            topic = new ChannelTopic(roomId);</span>
+<span class="nc" id="L91">        redisMessageListener.addMessageListener(redisSubscriber, topic);</span>
+<span class="nc" id="L92">        topics.put(roomId, topic);</span>
+<span class="nc" id="L93">    }</span>
     public ChannelTopic getTopic(String roomId) {
 
-<span class="nc" id="L94">        return topics.get(roomId);</span>
+<span class="nc" id="L96">        return topics.get(roomId);</span>
     }
     public void plusUserCnt(String roomId) {
 
-<span class="fc" id="L98">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
-<span class="fc" id="L99">        log.info(String.valueOf(room.getUserCount()));</span>
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if (room != null) {</span>
-<span class="fc" id="L101">            room.setUserCount(room.getUserCount() + 1);</span>
-<span class="fc" id="L102">            log.info(String.valueOf(room.getUserCount()));</span>
-<span class="fc" id="L103">            chatRoomRepository.save(room);</span>
+<span class="fc" id="L100">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
+<span class="fc" id="L101">        log.info(String.valueOf(room.getUserCount()));</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if (room != null) {</span>
+<span class="fc" id="L103">            room.setUserCount(room.getUserCount() + 1);</span>
+<span class="fc" id="L104">            log.info(String.valueOf(room.getUserCount()));</span>
+<span class="fc" id="L105">            chatRoomRepository.save(room);</span>
         }
-<span class="fc" id="L105">    }</span>
+<span class="fc" id="L107">    }</span>
 
     public void minusUserCnt(String roomId) {
-<span class="fc" id="L108">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
-<span class="pc bpc" id="L109" title="1 of 4 branches missed.">        if (room != null &amp;&amp; room.getUserCount()!=0) {</span>
-<span class="fc" id="L110">            room.setUserCount(room.getUserCount() - 1);</span>
-<span class="fc" id="L111">            chatRoomRepository.save(room);</span>
-<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        } else if (room.getUserCount()==0) {</span>
-<span class="fc" id="L113">            room.setUserCount(0);</span>
-<span class="fc" id="L114">            chatRoomRepository.save(room);</span>
+<span class="fc" id="L110">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
+<span class="pc bpc" id="L111" title="1 of 4 branches missed.">        if (room != null &amp;&amp; room.getUserCount()!=0) {</span>
+<span class="fc" id="L112">            room.setUserCount(room.getUserCount() - 1);</span>
+<span class="fc" id="L113">            chatRoomRepository.save(room);</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        } else if (room.getUserCount()==0) {</span>
+<span class="fc" id="L115">            room.setUserCount(0);</span>
+<span class="fc" id="L116">            chatRoomRepository.save(room);</span>
         }
-<span class="fc" id="L116">    }</span>
+<span class="fc" id="L118">    }</span>
     public String addUser(String roomId, String username) {
-<span class="fc" id="L118">        ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS, roomId);</span>
-<span class="fc" id="L119">        String userUUID = UUID.randomUUID().toString();</span>
-<span class="fc" id="L120">        room.getUserList().put(userUUID, username);</span>
-<span class="fc" id="L121">        return userUUID;</span>
+<span class="fc" id="L120">        ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS, roomId);</span>
+<span class="fc" id="L121">        String userUUID = UUID.randomUUID().toString();</span>
+<span class="fc" id="L122">        room.getUserList().put(userUUID, username);</span>
+<span class="fc" id="L123">        System.out.println(&quot;userUUID = &quot; + userUUID);</span>
+<span class="fc" id="L124">        return userUUID;</span>
     }
     //채팅방 유저 이름 중복 확인
     public String isDuplicateName(String roomId, String username) {
-<span class="fc" id="L125">        ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS,roomId);</span>
-<span class="fc" id="L126">        String temp = username;</span>
+<span class="fc" id="L128">        ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS,roomId);</span>
+<span class="fc" id="L129">        String temp = username;</span>
         // 만약 userName 이 중복이라면 랜덤한 숫자를 붙임
         // 이때 랜덤한 숫자를 붙였을 때 getUserlist 안에 있는 네임이라면 다시 랜덤한 숫자 붙이기!
-<span class="fc bfc" id="L129" title="All 2 branches covered.">        while(room.getUserList().containsValue(temp)){</span>
-<span class="fc" id="L130">            int ranNum = (int) (Math.random()*100)+1;</span>
-<span class="fc" id="L131">            temp = username+ranNum;</span>
-<span class="fc" id="L132">        }</span>
-<span class="fc" id="L133">        return temp;</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        while(room.getUserList().containsValue(temp)){</span>
+<span class="fc" id="L133">            int ranNum = (int) (Math.random()*100)+1;</span>
+<span class="fc" id="L134">            temp = username+ranNum;</span>
+<span class="fc" id="L135">        }</span>
+<span class="fc" id="L136">        return temp;</span>
     }
     // 채팅방 유저 리스트 삭제
     public void delUser(String roomId, String userUUID){
-<span class="fc" id="L137">        ChatRoom room = opsHashChatRoom.get(ENTER_INFO, roomId);</span>
-<span class="fc" id="L138">        room.getUserList().remove(userUUID);</span>
-<span class="fc" id="L139">    }</span>
+<span class="fc" id="L140">        ChatRoom room = opsHashChatRoom.get(ENTER_INFO, roomId);</span>
+<span class="fc" id="L141">        room.getUserList().remove(userUUID);</span>
+<span class="fc" id="L142">    }</span>
     // 채팅방 userName 조회
     public String getUserName(String roomId, String userUUID){
-<span class="fc" id="L142">        ChatRoom room = opsHashChatRoom.get(ENTER_INFO, roomId);</span>
-<span class="fc" id="L143">        return room.getUserList().get(userUUID);</span>
+<span class="fc" id="L145">        ChatRoom room = opsHashChatRoom.get(ENTER_INFO, roomId);</span>
+<span class="fc" id="L146">        return room.getUserList().get(userUUID);</span>
     }
 
     // 채팅방 전체 userlist 조회
     public ArrayList&lt;String&gt; getUserList(String roomId){
-<span class="fc" id="L148">        ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L151">        ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();</span>
 
-<span class="fc" id="L150">        ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS, roomId);</span>
+<span class="fc" id="L153">        ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS, roomId);</span>
 
         // hashmap 을 for 문을 돌린 후
         // value 값만 뽑아내서 list 에 저장 후 reutrn
-<span class="fc" id="L154">        room.getUserList().forEach((key, value) -&gt; list.add(value));</span>
-<span class="fc" id="L155">        return list;</span>
+<span class="fc" id="L157">        room.getUserList().forEach((key, value) -&gt; list.add(value));</span>
+<span class="fc" id="L158">        return list;</span>
     }
     // 채팅방 최대 인원 체크
     public boolean checkRoomUserCnt(String roomId) {
-<span class="fc" id="L159">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
+<span class="fc" id="L162">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
 
 //        log.info(String.valueOf(room.getUserCount()));
 //        log.info(&quot;참여인원 확인 [{}, {}]&quot;, room.getUserCount(), room.getMaxUserCnt());
 
-<span class="fc bfc" id="L164" title="All 2 branches covered.">        if (room.getUserCount() + 1 &gt; room.getMaxUserCnt()) {</span>
-<span class="fc" id="L165">            return false;</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if (room.getUserCount() + 1 &gt; room.getMaxUserCnt()) {</span>
+<span class="fc" id="L168">            return false;</span>
         }
-<span class="fc" id="L167">        return true;</span>
+<span class="fc" id="L170">        return true;</span>
     }
     //비밀번호 조회
     public boolean confirmPwd(String roomId, String roomPwd) {
-<span class="fc" id="L171">        return roomPwd.equals(opsHashChatRoom.get(CHAT_ROOMS, roomId).getRoomPwd());</span>
+<span class="fc" id="L174">        return roomPwd.equals(opsHashChatRoom.get(CHAT_ROOMS, roomId).getRoomPwd());</span>
     }
     @CacheEvict(value = &quot;ChatRoom&quot;, key = &quot;#roomId&quot;, cacheManager = &quot;testCacheManager&quot;)
     public void deleteChatRoom(String roomId) {
         try {
-<span class="fc" id="L176">            opsHashChatRoom.delete(roomId);</span>
-<span class="fc" id="L177">            ChatRoom byRoomId = chatRoomRepository.findByRoomId(roomId);</span>
-<span class="fc" id="L178">            chatRoomRepository.delete(byRoomId);</span>
-<span class="nc" id="L179">            fileService.deleteFileDir(roomId);</span>
-<span class="fc" id="L180">        } catch (Exception e) {</span>
-<span class="fc" id="L181">            log.error(e.getMessage());</span>
-<span class="nc" id="L182">        }</span>
-<span class="fc" id="L183">    }</span>
+<span class="fc" id="L179">            opsHashChatRoom.delete(roomId);</span>
+<span class="fc" id="L180">            ChatRoom byRoomId = chatRoomRepository.findByRoomId(roomId);</span>
+<span class="fc" id="L181">            chatRoomRepository.delete(byRoomId);</span>
+<span class="nc" id="L182">            fileService.deleteFileDir(roomId);</span>
+<span class="fc" id="L183">        } catch (Exception e) {</span>
+<span class="fc" id="L184">            log.error(e.getMessage());</span>
+<span class="nc" id="L185">        }</span>
+<span class="fc" id="L186">    }</span>
 
 
 }

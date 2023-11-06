@@ -15,7 +15,7 @@ public class RedisPublisher {
 	private final RedisTemplate&lt;String, Object&gt; redisTemplate;
 
 	public void publish(ChannelTopic topic, ChatMessage message) {
-<span class="nc" id="L18">		redisTemplate.convertAndSend(topic.getTopic(), message);</span>
-<span class="nc" id="L19">	}</span>
+<span class="fc" id="L18">		redisTemplate.convertAndSend(topic.getTopic(), message);</span>
+<span class="fc" id="L19">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -15,6 +15,7 @@ public class VideoChattingApplication {
 	public HiddenHttpMethodFilter hiddenHttpMethodFilter(){
 		return new HiddenHttpMethodFilter();
 	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(VideoChattingApplication.class, args);
 	}

@@ -1,12 +1,15 @@
 package com.example.VideoChatting.controller;
 import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.entity.ChatType;
 import com.example.VideoChatting.entity.ChatUser;
 import com.example.VideoChatting.entity.SessionUser;
 import com.example.VideoChatting.repository.ChatRoomRepository;
 import com.example.VideoChatting.repository.ChatUserRepository;
 import com.example.VideoChatting.service.chat.ChatRoomService;
+import com.example.VideoChatting.service.chat.RtcChatService;
 import com.example.VideoChatting.service.oAuth.CustomOAuth2UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +37,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,11 +46,8 @@ class ChatRoomControllerTest {
     private ChatRoomController chatRoomController;
     @Mock
     private ChatRoomService chatRoomService;
-    String CHAT_ROOMS = "CHAT_ROOM";
     @Mock
-    Model model;
-    @Mock
-    SessionUser mockSessionUser;
+    private RtcChatService rtcChatService;
     private MockMvc mockMvc;
     @Mock
     private HashOperations<String, String, ChatRoom> opsHashChatRoom;
@@ -109,13 +110,15 @@ class ChatRoomControllerTest {
     }
 
     @Test
-    @DisplayName("채팅방 입장 컨트롤러 테스트")
+    @DisplayName("일반 채팅방 입장 컨트롤러 테스트")
     void roomDetail() throws Exception {
         //given
         String roomName = "채팅방 입장";
         String roomId="방1";
         ChatRoom chatRoom = new ChatRoom().create(roomName, "1234", Boolean.TRUE, 50);
+
         chatRoomService.createChatRoom(roomId, "1234", Boolean.TRUE, 50);
+        chatRoom.setChatType(ChatType.MSG);
 
         when(chatRoomService.findRoomById(roomId)).thenReturn(chatRoom);
 
@@ -125,8 +128,34 @@ class ChatRoomControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
 
         //then
-        perform.andExpect(status().isOk());
+        perform.andExpect(status().isOk())
+                .andExpect(view().name("chatroom"));
 
+    }
+    @Test
+    @DisplayName("화상 채팅방 입장 컨트롤러 테스트")
+    void rtcRoomDetail() throws Exception {
+        //given
+        String roomName = "화상 채팅방 테스트";
+        String roomId = "화상 채팅방1";
+        ChatRoom chatRoom = new ChatRoom().create(roomName, "1234", Boolean.TRUE, 50);
+
+        ChatRoom chatRoom1 = rtcChatService.createChatRoom(roomId, "1234", Boolean.TRUE, 50);
+        chatRoom.setChatType(ChatType.RTC);
+
+        when(chatRoomService.findRoomById(roomId)).thenReturn(chatRoom);
+
+        //when
+        ResultActions perform = mockMvc.perform(get("/chat/room")
+                .param("roomId", roomId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(view().name("rtcroom"))
+                .andExpect(model().attributeExists("room"));
     }
     @Test
     @DisplayName("채팅방 비밀번호 체크 컨트롤러 테스트")

@@ -32,8 +32,8 @@
 [ RESTYLE TAG ]*/
 
 * {
-	margin: 0px; 
-	padding: 0px; 
+	margin: 0px;
+	padding: 0px;
 	box-sizing: border-box;
 }
 
@@ -158,7 +158,7 @@ iframe {
 }
 
 .container-login100 {
-  width: 100%;  
+  width: 100%;
   min-height: 100vh;
   display: -webkit-box;
   display: -webkit-flex;
@@ -170,11 +170,12 @@ iframe {
   align-items: center;
   padding: 15px;
 
+
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
   position: relative;
-  z-index: 1;  
+  z-index: 1;
 }
 
 .container-login100::before {
@@ -188,18 +189,18 @@ iframe {
   left: 0;
   background-color: rgba(255,255,255,0.9);
 }
-
 .wrap-login100 {
-  width: 500px;
-  border-radius: 10px;
+  width: 600px;
+  height: 600px;
+  border-radius: 20px;
   overflow: hidden;
   padding: 55px 55px 37px 55px;
 
-  background: #9152f8;
-  background: -webkit-linear-gradient(top, #7579ff, #b224ef);
-  background: -o-linear-gradient(top, #7579ff, #b224ef);
-  background: -moz-linear-gradient(top, #7579ff, #b224ef);
-  background: linear-gradient(top, #7579ff, #b224ef);
+  background: #6a82fb;  /* 밝은 파랑 */
+  background: -webkit-linear-gradient(top, #6a82fb, #4568dc); /* 크롬, 사파리 등 */
+  background: -o-linear-gradient(top, #6a82fb, #4568dc); /* 오페라 */
+  background: -moz-linear-gradient(top, #6a82fb, #4568dc); /* 파이어폭스 */
+  background: linear-gradient(to bottom, #6a82fb, #4568dc); /* 표준 구문, 방향 지정 수정 */
 }
 
 
@@ -211,7 +212,7 @@ iframe {
 }
 
 .login100-form-logo {
-  font-size: 60px; 
+  font-size: 60px;
   color: #333333;
 
   display: -webkit-box;
@@ -227,9 +228,13 @@ iframe {
   background-color: #fff;
   margin: 0 auto;
 }
+@font-face {
+  font-family: 'HomeBackgroundFont';
+  src: url('../../fonts/NanumGothicBold.otf') format('opentype');
+}
 
 .login100-form-title {
-  font-family: Poppins-Medium;
+  font-family: HomeBackgroundFont;
   font-size: 30px;
   color: #fff;
   line-height: 1.2;
@@ -246,7 +251,6 @@ iframe {
 .wrap-input100 {
   width: 100%;
   position: relative;
-  border-bottom: 2px solid rgba(255,255,255,0.24);
   margin-bottom: 30px;
 }
 
@@ -263,7 +267,7 @@ iframe {
   padding: 0 5px 0 38px;
 }
 
-/*---------------------------------------------*/ 
+/*---------------------------------------------*/
 .focus-input100 {
   position: absolute;
   display: block;
@@ -483,6 +487,7 @@ iframe {
 
 .validate-input {
   position: relative;
+  text-align: center;
 }
 
 .alert-validate::before {
