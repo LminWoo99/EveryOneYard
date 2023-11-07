@@ -34,7 +34,7 @@
 
 <!-- Begin page content -->
 <main role="main" class="container-fluid">
-    <h1>ChatForYOU with WebRTC</h1>
+    <h1>모두의 마당</h1>
     <input type="hidden" id="id" name="id" th:value="${room.roomId}"/>
     <input type="hidden" id="uuid" name="uuid" th:value="${uuid}">
     <div class="col-lg-12 mb-3">
@@ -47,33 +47,40 @@
                     <div class="btn-group mr-2" role="group">
                         <div class="mr-2" data-toggle="buttons">
                             <label class="btn btn-outline-success" id="video_off">
-                                <input type="radio" name="options" style="display:none" autocomplete="off">Video On
+                                <input type="radio" name="options" style="display:none" autocomplete="off">화면 켜기
                             </label>
                             <label class="btn btn-outline-warning active" id="video_on">
-                                <input type="radio" name="options" style="display:none" autocomplete="off" checked>Video Off
+                                <input type="radio" name="options" style="display:none" autocomplete="off" checked>화면 끄기
                             </label>
                         </div>
                         <div class="mr-2" data-toggle="buttons">
                             <label class="btn btn-outline-success" id="audio_off">
-                                <input type="radio" name="options" style="display:none" autocomplete="off">Audio On
+                                <input type="radio" name="options" style="display:none" autocomplete="off">마이크 켜기
                             </label>
                             <label class="btn btn-outline-warning active" id="audio_on">
-                                <input type="radio" name="options" style="display:none" autocomplete="off" checked>Audio Off
+                                <input type="radio" name="options" style="display:none" autocomplete="off" checked>마이크 끄기
                             </label>
                         </div>
                         <div class="mr-2" data-toggle="buttons">
                             <label class="btn btn-outline-success" id="view_on">
-                                <input type="radio" name="options" style="display:none" autocomplete="off">view On
+                                <input type="radio" name="options" style="display:none" autocomplete="off">화면 공유
                             </label>
                             <label class="btn btn-outline-warning active" id="view_off">
-                                <input type="radio" name="options" style="display:none" autocomplete="off">view Off
+                                <input type="radio" name="options" style="display:none" autocomplete="off">화면 공유 중지
                             </label>
                         </div>
-                    </div>
+                        <label class="btn btn-outline-success" id="flip_video">
+                            <input type="radio" name="options" style="display:none" autocomplete="off">
+                            <span class="btn-text">좌우 반전</span>
+                        </label>
+                        <label class="btn btn-outline-warning active" id="local_video2">
+                            <input type="radio" name="options" style="display:none" autocomplete="off">
+                            <span class="btn-text">좌우 반전 끄기</span>
+                        </label>
 
                     <a href="/chat">
                         <button type="button" class="btn btn-outline-danger" id="exit" name="exit">
-                            Exit Room
+                            방 나가기
                         </button>
                     </a>
                 </div>
@@ -81,19 +88,80 @@
         </div>
 
         <div class="row justify-content-around mb-3">
-            <div class="col-lg-6 mb-3">
+            <div class="col-lg-6 mb-3 video-container">
                 <video id="local_video" autoplay playsinline></video>
+                <div id="local_nickname" class="nickname-label">Loading...</div>
             </div>
-            <div class="col-lg-6 mb-3">
+            <div class="col-lg-6 mb-3 video-container">
                 <video id="remote_video" autoplay playsinline></video>
+
+                <div id="remote_nickname" class="nickname-label">Remote User</div>
             </div>
-            <div class="col-lg-6 mb-3">
-                <video id="share-video" autoplay=""></video>
-            </div>
+            <!-- 다른 비디오 요소들도 동일하게 처리할 수 있습니다. -->
         </div>
     </div>
 </main>
 
 <script src="/js/rtc/webrtc_client.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 로컬 스토리지에서 'nickname' 가져오기
+        var nickname = localStorage.getItem('nickname') || 'Anonymous'; // 닉네임이 없으면 'Anonymous'로 설정
+        document.getElementById('local_nickname').textContent = nickname; // 로컬 비디오 닉네임 설정
+
+
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... 기존 코드 ...
+
+        // 좌우 반전 버튼 이벤트 리스너
+        var flipButton = document.getElementById('flip_video');
+        var localVideo = document.getElementById('local_video2');
+
+        // 비디오 스트림의 좌우 반전 상태를 추적하는 변수
+        var flipped = false;
+
+        flipButton.addEventListener('click', function() {
+            // flipped 상태를 토글
+            flipped = !flipped;
+
+            // 비디오 요소에 적용된 스타일을 업데이트
+            if(flipped) {
+                localVideo.style.transform = 'scaleX(-1)';
+            } else {
+                localVideo.style.transform = '';
+            }
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        var flipButton = document.getElementById('flip_video'); // '좌우 반전' 버튼
+        var unflipButton = document.getElementById('local_video2'); // '좌우 반전 끄기' 버튼
+        var localVideo = document.getElementById('local_video');
+        var flipped = false; // 비디오 스트림의 좌우 반전 상태를 추적하는 변수
+
+        // '좌우 반전' 버튼 클릭 이벤트
+        flipButton.addEventListener('click', function() {
+            // 비디오 요소에 좌우 반전 적용
+            localVideo.style.transform = 'scaleX(-1)';
+            flipped = true;
+            // 버튼 상태 변경
+            flipButton.classList.add('active');
+            unflipButton.classList.remove('active');
+        });
+
+        // '좌우 반전 끄기' 버튼 클릭 이벤트
+        unflipButton.addEventListener('click', function() {
+            // 비디오 요소의 좌우 반전 해제
+            localVideo.style.transform = '';
+            flipped = false;
+            // 버튼 상태 변경
+            flipButton.classList.remove('active');
+            unflipButton.classList.add('active');
+        });
+    });
+
+</script>
 </body>
 </html>
