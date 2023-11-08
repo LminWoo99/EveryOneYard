@@ -1,8 +1,108 @@
-video {
-    max-width: 100%;
+/* Custom styles for WebRTC Chat Room */
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #36393f; /* Discord's dark background color */
+    color: #ffffff; /* Discord's text color */
 }
 
-textarea {
+h1 {
+    color: #7289da; /* Discord's brand color */
+    padding-top: 20px;
+}
+
+.btn {
+    border-radius: 4px;
+    color: #ffffff; /* White text for buttons */
+    border: 1px solid #7289da; /* Discord brand color for borders */
+}
+
+.btn-outline-success {
+    color: #43b581; /* Success green */
+    border-color: #43b581; /* Success green */
+}
+
+.btn-outline-warning {
+    color: #faa61a; /* Warning orange */
+    border-color: #faa61a; /* Warning orange */
+}
+
+.btn-outline-danger {
+    margin-top: 1px;
+    margin-left: 6px;
+    color: #f04747; /* Danger red */
+    border-color: #f04747; /* Danger red */
+}
+
+.btn.active, .btn:active {
+    background-color: #4f545c; /* Active button background */
+    color: #ffffff; /* White text for active state */
+}
+
+.btn:hover {
+    background-color: #495057; /* Button hover state background */
+}
+
+/* Video elements */
+video {
     width: 100%;
-    height: 100%;
+    border-radius: 10px;
+    background-color: #23272a; /* Discord's secondary dark background */
+}
+
+/* Chat Room container adjustments */
+.container-fluid {
+    max-width: 90%;
+    padding: 0;
+}
+
+/* Buttons row adjustments */
+#buttons .btn-group {
+    padding: 10px 0;
+}
+
+/* Video containers adjustments */
+.col-lg-6.mb-3 {
+    padding: 10px;
+}
+
+/* Override Bootstrap's default padding for columns */
+[class*="col-"] {
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+/* Additional responsive adjustments might be necessary */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+.video-container {
+    position: relative;
+    display: inline-block; /* 인라인 블록으로 설정하여 비디오를 나란히 배열 */
+    margin-bottom: 1rem;
+}
+
+.video-container video {
+    width: 100%;
+    display: block;
+}
+
+.nickname-label {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 4px 10px;
+    border-radius: 0 0 0 10px; /* 오른쪽 상단 모서리에 둥근 테두리 */
+    width: calc(100% - 20px); /* 패딩 공간 제거 */
+    box-sizing: border-box;
+    text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.9em;
 }

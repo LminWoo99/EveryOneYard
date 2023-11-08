@@ -52,7 +52,54 @@
             font-size: 26px;
             margin-top: 10px; /* 부제목과 박스 사이의 간격 조절 */
         }
+        @media screen and (max-width: 768px) {
+            .title-container {
+                margin-right: 30px; /* 좁은 화면에서는 오른쪽 간격을 줄입니다 */
+                margin-bottom: 50px; /* 좁은 화면에서는 아래쪽 간격을 줄입니다 */
+                align-items: center; /* 타이틀을 중앙에 위치시킵니다 */
+                text-align: center; /* 텍스트를 중앙 정렬합니다 */
+            }
 
+            h2.title {
+                font-size: 48px; /* 타이틀 글자 크기를 줄입니다 */
+                margin-bottom: 20px; /* 타이틀과 부제목 사이 간격을 줄입니다 */
+            }
+
+            p.subtitle {
+                font-size: 18px; /* 부제목 글자 크기를 줄입니다 */
+            }
+
+            .wrap-login100 {
+                padding: 10px; /* 로그인 박스의 패딩을 조정합니다 */
+            }
+
+            .login100-form-btn {
+                padding: 10px 20px; /* 버튼의 패딩을 조정합니다 */
+            }
+        }
+
+        /* 작은 스마트폰을 위한 반응형 스타일 */
+        @media screen and (max-width: 480px) {
+            .title-container {
+                margin-right: 15px; /* 더 좁은 화면에서는 오른쪽 간격을 더 줄입니다 */
+                margin-bottom: 30px; /* 더 좁은 화면에서는 아래쪽 간격을 더 줄입니다 */
+            }
+
+            h2.title {
+                font-size: 36px; /* 타이틀 글자 크기를 더 줄입니다 */
+            }
+
+            p.subtitle {
+                font-size: 16px; /* 부제목 글자 크기를 더 줄입니다 */
+            }
+
+            /* 이미지와 소셜 로그인 버튼의 크기를 조정합니다 */
+            .wrap-input100 img {
+                width: 100%; /* 이미지가 부모 요소의 100% 크기를 차지하도록 합니다 */
+                height: auto; /* 이미지의 높이를 자동으로 조절합니다 */
+                max-width: 280px; /* 최대 너비를 280px로 제한합니다 */
+            }
+        }
     </style>
 </head>
 <body>
@@ -83,11 +130,7 @@
                         <img src="/images/login/btnG_official.png" width="280" height="50" alt="" />
                     </a>
                 </div>
-                <div class="container-login100-form-btn">
-                    <button class="login100-form-btn">
-                        Login
-                    </button>
-                </div>
+
             </form>
         </div>
     </div>
