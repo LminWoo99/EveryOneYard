@@ -64,9 +64,6 @@ public class RtcChatService {
         Map<String, WebSocketSession> userRtcList = room.getUserRtcList();
         log.info("세션 정보"+ session);
         userRtcList.put(name, session);
-        log.info("비어있나? : "+userRtcList.isEmpty());
-        log.info("rtc 유저 리스트 : "+ userRtcList.size());
-        log.info("rtc 유저 리스트wow : "+ userRtcList.get(name).getId());
         return userRtcList;
     }
 
