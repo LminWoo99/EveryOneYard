@@ -7,6 +7,7 @@ import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.service.chat.ChatRoomService;
 import com.example.VideoChatting.service.chat.ChatService;
 import com.example.VideoChatting.service.chat.RedisPublisher;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,6 +83,7 @@ public class ChatController {
     }
     // 대화 내역 조회
     @GetMapping("/chat/room/{roomId}/message")
+    @Operation
     public ResponseEntity<List<ChatDto>> loadMessage(@PathVariable String roomId) {
         return ResponseEntity.ok(chatService.loadMessage(roomId));
     }
