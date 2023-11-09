@@ -1,15 +1,8 @@
 package com.example.VideoChatting.controller;
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.entity.ChatType;
-import com.example.VideoChatting.entity.ChatUser;
-import com.example.VideoChatting.entity.SessionUser;
-import com.example.VideoChatting.repository.ChatRoomRepository;
-import com.example.VideoChatting.repository.ChatUserRepository;
 import com.example.VideoChatting.service.chat.ChatRoomService;
-import com.example.VideoChatting.service.chat.RtcChatService;
-import com.example.VideoChatting.service.oAuth.CustomOAuth2UserService;
-import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
+import com.example.VideoChatting.service.rtc.RtcChatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,17 +10,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.ui.Model;
 
 
 import java.util.*;

@@ -83,6 +83,12 @@
                             방 나가기
                         </button>
                     </a>
+                        <!-- 필터 버튼 추가 -->
+                        <div id="filter_buttons" class="row">
+                            <button id="grayscale_filter" class="btn btn-secondary">흑백 필터</button>
+                            <button id="blur_filter" class="btn btn-secondary">블러 필터</button>
+                            <button id="brightness_filter" class="btn btn-secondary">밝기 조절</button>
+                        </div>
                 </div>
             </div>
         </div>
@@ -161,6 +167,31 @@
             unflipButton.classList.add('active');
         });
     });
+    document.addEventListener('DOMContentLoaded', function() {
+        var localVideo = document.getElementById('local_video');
+        var grayscaleButton = document.getElementById('grayscale_filter'); // 이 버튼의 ID를 지정해야 합니다.
+        var blurButton = document.getElementById('blur_filter'); // 이 버튼의 ID를 지정해야 합니다.
+        var brightnessButton = document.getElementById('brightness_filter'); // 이 버튼의 ID를 지정해야 합니다.
+
+        // 흑백 필터 적용 버튼 이벤트
+        grayscaleButton.addEventListener('click', function() {
+            localVideo.classList.add('grayscale');
+            localVideo.classList.remove('blur', 'brightness'); // 다른 필터 클래스가 있을 경우 제거
+        });
+
+        // 블러 필터 적용 버튼 이벤트
+        blurButton.addEventListener('click', function() {
+            localVideo.classList.add('blur');
+            localVideo.classList.remove('grayscale', 'brightness'); // 다른 필터 클래스가 있을 경우 제거
+        });
+
+        // 밝기 조절 필터 적용 버튼 이벤트
+        brightnessButton.addEventListener('click', function() {
+            localVideo.classList.add('brightness');
+            localVideo.classList.remove('grayscale', 'blur'); // 다른 필터 클래스가 있을 경우 제거
+        });
+    });
+
 
 </script>
 </body>
