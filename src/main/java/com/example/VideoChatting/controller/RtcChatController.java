@@ -2,7 +2,7 @@ package com.example.VideoChatting.controller;
 
 import com.example.VideoChatting.dto.WebSocketMessage;
 import com.example.VideoChatting.entity.ChatRoom;
-import com.example.VideoChatting.service.chat.RtcChatService;
+import com.example.VideoChatting.service.rtc.RtcChatService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

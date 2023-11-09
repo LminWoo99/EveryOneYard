@@ -1,7 +1,8 @@
 package com.example.VideoChatting.config;
 
-import com.example.VideoChatting.service.chat.SignalHandler;
+import com.example.VideoChatting.service.rtc.KurentoHandler;
 import lombok.RequiredArgsConstructor;
+import org.kurento.client.KurentoClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -15,13 +16,23 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 @RequiredArgsConstructor
 public class WebRtcConfig implements WebSocketConfigurer {
     /* TODO WebRTC 관련 */
-    private final SignalHandler signalHandler;
+
+
+    @Bean
+    public KurentoHandler kurentoHandler(){
+        return new KurentoHandler();
+        }
+        @Bean
+        public KurentoClient kurentoClient() {
+                return KurentoClient.create();
+        }
+
 
     // signal 로 요청이 왔을 때 아래의 WebSockerHandler 가 동작하도록 registry 에 설정
     // 요청은 클라이언트 접속, close, 메시지 발송 등에 대해 특정 메서드를 호출한다
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(signalHandler, "/signal")
+        registry.addHandler(kurentoHandler(), "/signal")
                 .setAllowedOrigins("*");
     }
 

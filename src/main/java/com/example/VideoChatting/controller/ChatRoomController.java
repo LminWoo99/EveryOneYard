@@ -61,8 +61,12 @@ public class ChatRoomController {
             return "chatroom";
         }else{
             log.info("화상채팅 유저 확인 :"+chatRoom.getUserRtcList());
-            model.addAttribute("uuid", UUID.randomUUID().toString());
-            return "rtcroom";
+//            model.addAttribute("uuid", UUID.randomUUID().toString());
+            String uuid = UUID.randomUUID().toString().split("-")[0];
+            model.addAttribute("uuid", uuid);
+            model.addAttribute("roomId", chatRoom.getRoomId());
+            model.addAttribute("roomName", chatRoom.getRoomName());
+            return "kurentoroom";
         }
     }
     @PostMapping("/confirmPwd/{roomId}")

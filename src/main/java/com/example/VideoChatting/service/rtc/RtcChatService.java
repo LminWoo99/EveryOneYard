@@ -1,12 +1,15 @@
 
-package com.example.VideoChatting.service.chat;
+package com.example.VideoChatting.service.rtc;
 import com.example.VideoChatting.dto.ChatRoomMap;
+import com.example.VideoChatting.dto.KurentoRoomDto;
 import com.example.VideoChatting.dto.WebSocketMessage;
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.entity.ChatType;
 import com.example.VideoChatting.repository.ChatRoomRepository;
+import com.example.VideoChatting.service.chat.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.kurento.client.KurentoClient;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -15,6 +18,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,25 +34,34 @@ public class RtcChatService {
     // 채팅방의 대화 메시지를 발행하기 위한 redis topic 정보. 서버별로 채팅방에 매치되는 topic정보를 Map에 넣어 roomId로 찾을수 있도록 한다.
     private Map<String, ChannelTopic> topics;
     private Map<String, ChatRoom> chatRoomMap;
+    private final KurentoClient kurento;
+
     @PostConstruct
     private void init() {
         chatRoomMap = new LinkedHashMap<>();
         opsHashChatRoom = redisTemplate.opsForHash();
         topics = new HashMap<>();
     }
-    public ChatRoom createChatRoom(String roomName, String roomPwd, boolean secretCheck, int maxUserCnt) {
+    public KurentoRoomDto createChatRoom(String roomName, String roomPwd, boolean secretCheck, int maxUserCnt) {
         // roomName 와 roomPwd 로 chatRoom 빌드 후 return
-        ChatRoom room = new ChatRoom().create( roomName, roomPwd, secretCheck
-                , maxUserCnt
-        );
+//        ChatRoom room = new ChatRoom().create( roomName, roomPwd, secretCheck
+//                , maxUserCnt
+//        );
+        KurentoRoomDto room = new KurentoRoomDto();
+        String roomId = UUID.randomUUID().toString();
+        room.setRoomInfo(roomId, roomName, roomPwd, secretCheck, 0, maxUserCnt, ChatType.RTC, kurento);
+        room.createPipline();
         // msg 타입이면 ChatType.MSG
-        room.setChatType(ChatType.RTC);
+        room.setUserKurentoList(new ConcurrentHashMap<String, WebSocketSession>());
         // map 에 채팅룸 아이디와 만들어진 채팅룸을 저장
-        opsHashChatRoom.put(CHAT_ROOMS, room.getRoomId(), room);
+        ChatRoom chatRoom = new ChatRoom().createRtc(roomId, roomName, roomPwd, secretCheck, maxUserCnt);
+        chatRoom.setChatType(ChatType.RTC);
+
+        opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);
         ChatRoomMap.getInstance().getChatRooms().put(room.getRoomId(), room);
 
 
-        chatRoomRepository.save(room);
+        chatRoomRepository.save(chatRoom);
         return room;
     }
 

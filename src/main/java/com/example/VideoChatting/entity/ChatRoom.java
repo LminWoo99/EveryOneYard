@@ -1,5 +1,6 @@
 package com.example.VideoChatting.entity;
 
+import com.example.VideoChatting.service.rtc.KurentoUserSession;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.web.socket.WebSocketSession;
@@ -7,6 +8,8 @@ import org.springframework.web.socket.WebSocketSession;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Entity
 @Getter
@@ -33,7 +36,9 @@ public class ChatRoom implements Serializable {
     @JsonIgnore
     private List<ChatMessage> chatMessageList = new ArrayList<>();
 
-    private HashMap<String, String> userList = new HashMap<String, String>();
+    public HashMap<String, String> userList = new HashMap<String, String>();
+    @Transient
+    public ConcurrentMap<String, ?> userKurentoList = new ConcurrentHashMap<>();
     private HashMap<String, WebSocketSession> userRtcList = new HashMap<String, WebSocketSession>();
     @Enumerated(EnumType.STRING)
     private ChatType chatType;
@@ -50,10 +55,18 @@ public class ChatRoom implements Serializable {
         chatRoom.roomPwd = roomPwd;
         chatRoom.secretCheck = secretCheck;
         return chatRoom;
+    }    public ChatRoom createRtc(String roomId, String roomName, String roomPwd, boolean secretCheck, int maxUserCnt){
+        ChatRoom chatRoom = new ChatRoom();
+        chatRoom.roomId = roomId;
+        chatRoom.roomName = roomName;
+        chatRoom.maxUserCnt = maxUserCnt;
+        chatRoom.roomPwd = roomPwd;
+        chatRoom.secretCheck = secretCheck;
+        return chatRoom;
     }
 
-    public void setUserRtcList(HashMap<String, WebSocketSession> userRtcList) {
-        this.userRtcList = userRtcList;
+    public void setUserKurentoList(ConcurrentMap<String, ?> userKurentoList) {
+        this.userKurentoList = userKurentoList;
     }
 
     public void setUserCount(int userCount) {
