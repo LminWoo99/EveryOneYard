@@ -23,7 +23,6 @@ public class KurentoUserService {
 
   /**
    * @Desc userSession 을 파라미터로 받은 후 해당 객체에서 userName 과 sessionId 를 key 로해서 userSession 저장
-   * @Param userSession
    * */
   public void register(KurentoUserSession user) {
     usersByName.put(user.getName(), user);
