@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.entity</a> &gt; <span class="el_source">ChatMessage.java</span></div><h1>ChatMessage.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.entity;
+
+import com.example.VideoChatting.dto.ChatDto.MessageType;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import javax.persistence.*;
+import java.util.Date;
+
+@Getter
+<span class="pc" id="L11">@Builder</span>
+<span class="fc" id="L12">@AllArgsConstructor</span>
+@Entity
+<span class="fc" id="L14">@NoArgsConstructor</span>
+public class ChatMessage {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="nc" id="L18">    private Long id;</span>
+
+<span class="nc" id="L20">    private MessageType type;</span>
+<span class="nc" id="L21">    private String sender;</span>
+<span class="nc" id="L22">    private String message;</span>
+<span class="nc" id="L23">    private String s3DataUrl;</span>
+<span class="nc" id="L24">    private String roomId;</span>
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;CHATROOM_ID&quot;)
+<span class="nc" id="L27">    private ChatRoom chatRoom;</span>
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    @CreationTimestamp
+<span class="nc" id="L31">    private Date createdAt;</span>
+<span class="nc" id="L32">    private String fileName; // 파일이름</span>
+
+<span class="nc" id="L34">    private String fileDir; // s3 파일 경로</span>
+
+<span class="fc" id="L36">    public ChatMessage(String sender, String message, String s3DataUrl, ChatRoom chatRoom, String roomId, String fileName, String fileDir) {</span>
+<span class="fc" id="L37">        this.sender = sender;</span>
+<span class="fc" id="L38">        this.message = message;</span>
+<span class="fc" id="L39">        this.s3DataUrl = s3DataUrl;</span>
+<span class="fc" id="L40">        this.chatRoom = chatRoom;</span>
+<span class="fc" id="L41">        this.roomId = roomId;</span>
+<span class="fc" id="L42">        this.fileName = fileName;</span>
+<span class="fc" id="L43">        this.fileDir = fileDir;</span>
+<span class="fc" id="L44">    }</span>
+
+    public static ChatMessage createChatMessage(ChatRoom chatRoom, String sender, String message, MessageType type,
+                                                String s3DataUrl, String fileName,String fileDir) {
+<span class="fc" id="L48">        ChatMessage chatMessage= ChatMessage.builder()</span>
+<span class="fc" id="L49">                .chatRoom(chatRoom)</span>
+<span class="fc" id="L50">                .sender(sender)</span>
+<span class="fc" id="L51">                .message(message)</span>
+<span class="fc" id="L52">                .type(type)</span>
+<span class="fc" id="L53">                .s3DataUrl(s3DataUrl)</span>
+<span class="fc" id="L54">                .fileName(fileName)</span>
+<span class="fc" id="L55">                .fileDir(fileDir)</span>
+<span class="fc" id="L56">                .build();</span>
+<span class="fc" id="L57">        return chatMessage;</span>
+    }
+
+
+    public void setMessage(String message){
+<span class="nc" id="L62">        this.message=message;</span>
+<span class="nc" id="L63">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

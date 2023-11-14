@@ -2,9 +2,9 @@ name: CD
 
 on:
   push:
-    branches: [ "master"]
+    branches: [ "feature/kurento"]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "feature/kurento" ]
 
 permissions:
   contents: read
