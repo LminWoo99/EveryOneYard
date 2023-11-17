@@ -12,10 +12,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentMap;
 
-/**
- * @modifyBy SeJon Jang (wkdtpwhs@gmail.com)
- * @Desc KuirentoRoom 을 관리하기 위한 클래스
- */
 @Service
 @RequiredArgsConstructor
 public class KurentoService {

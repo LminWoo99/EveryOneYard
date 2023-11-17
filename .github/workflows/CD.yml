@@ -51,7 +51,7 @@ jobs:
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }} # EC2 인스턴스 퍼블릭 DNS
+          host: ${{ secrets.HOST }}
           username: ec2-user
           key: ${{ secrets.PRIVATE_KEY }} # pem 키
 
