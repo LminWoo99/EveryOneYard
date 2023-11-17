@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Chat For You Login</title>
+    <title>모두의 마당</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--===============================================================================================-->
@@ -36,7 +36,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            margin-right: 150px; /* 문구와 박스 사이의 간격 조절 */
+            margin-right: 150px;
             margin-bottom: 130px;
         }
         body{
@@ -50,14 +50,15 @@
 
         p.subtitle {
             font-size: 26px;
-            margin-top: 10px; /* 부제목과 박스 사이의 간격 조절 */
+            margin-top: 10px;
+            color: #1b1e21;
         }
         @media screen and (max-width: 768px) {
             .title-container {
-                margin-right: 30px; /* 좁은 화면에서는 오른쪽 간격을 줄입니다 */
-                margin-bottom: 50px; /* 좁은 화면에서는 아래쪽 간격을 줄입니다 */
-                align-items: center; /* 타이틀을 중앙에 위치시킵니다 */
-                text-align: center; /* 텍스트를 중앙 정렬합니다 */
+                margin-right: 30px;
+                margin-bottom: 50px;
+                align-items: center;
+                text-align: center;
             }
 
             h2.title {
@@ -67,6 +68,7 @@
 
             p.subtitle {
                 font-size: 18px; /* 부제목 글자 크기를 줄입니다 */
+
             }
 
             .wrap-login100 {
@@ -93,9 +95,9 @@
                 font-size: 16px; /* 부제목 글자 크기를 더 줄입니다 */
             }
 
-            /* 이미지와 소셜 로그인 버튼의 크기를 조정합니다 */
+
             .wrap-input100 img {
-                width: 100%; /* 이미지가 부모 요소의 100% 크기를 차지하도록 합니다 */
+                width: 100%;
                 height: auto; /* 이미지의 높이를 자동으로 조절합니다 */
                 max-width: 280px; /* 최대 너비를 280px로 제한합니다 */
             }
@@ -104,10 +106,10 @@
 </head>
 <body>
 <div class="limiter">
-    <div class="container-login100" style="background-image: url('/images/login/home_background.png');">
+    <div class="container-login100" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/login/home_background.png');">
         <div class="title-container">
-        <h2 class="title">모두의 마당</h2>
-        <p class="subtitle">모두가 주인인 마당, 여기서 회의 시작해요</p>
+            <h2 class="title">모두의 마당</h2>
+            <p class="subtitle">모두가 주인인 마당, 여기서 회의 시작해요</p>
         </div>
         <div class="wrap-login100">
 

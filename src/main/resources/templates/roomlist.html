@@ -46,7 +46,7 @@
                 if($rtcType.is(':checked')){
                     let number = 2;
 
-                    $("#maxUserCnt").val(2);
+                    $("#maxUserCnt").val(number);
                     // $("#maxUserCnt").attr('value', 2)
                     $("#maxUserCnt").attr('disabled', true);
                 }
@@ -150,7 +150,7 @@
                     alert("채팅은 최소 2명 이상!!");
                     return false;
                 }else if ($("#maxUserCnt").val() > 4) {
-                    alert("4명 이상은 서버가 아파요ㅠ.ㅠ");
+                    alert("3명 이상은 서버가 아파요ㅠ.ㅠ");
                     return false;
                 }
             }else if($msgType.is(':checked')){
@@ -181,6 +181,48 @@
             }
 
             return true;
+        }
+        // 채팅방 정보 수정 함수
+        function updateRoomName(roomId) {
+            var newRoomName = $('#newRoomName').val();
+
+            // 채팅방 이름 변경 요청
+            if(newRoomName) {
+                $.ajax({
+                    type: 'PUT',
+                    url: '/chat/updateRoomName/' + roomId,
+                    contentType: 'application/json',
+                    data: JSON.stringify({ roomName: newRoomName }),
+                    success: function(response) {
+                        console.log("Room name updated");
+                        location.reload();
+                    },
+                    error: function(error) {
+                        console.log("Error updating room name: " + error);
+                    }
+                });
+            }
+        }
+
+        function updateRoomPassword(roomId) {
+            var newRoomPwd = $('#newRoomPwd').val();
+
+
+            if(newRoomPwd) {
+                $.ajax({
+                    type: 'PUT',
+                    url: '/chat/updateRoomPwd/' + roomId,
+                    contentType: 'application/json',
+                    data: JSON.stringify({ roomPwd: newRoomPwd }),
+                    success: function(response) {
+                        console.log("Room password updated");
+                        location.reload();
+                    },
+                    error: function(error) {
+                        console.log("Error updating room password: " + error);
+                    }
+                });
+            }
         }
 
         // 채팅방 입장 시 비밀번호 확인
@@ -218,9 +260,7 @@
         function chkRoomUserCnt(roomId){
             let chk;
 
-            // 비동기 처리 설정 false 로 변경 => ajax 통신이 완료된 후 return 문 실행
-            // 기본설정 async = true 인 경우에는 ajax 통신 후 결과가 나올 때까지 기다리지 않고 먼저 return 문이 실행되서
-            // 제대로된 값 - 원하는 값 - 이 return 되지 않아서 문제가 발생한다.
+
             $.ajax({
                 type : "GET",
                 url : "/chat/chkUserCnt/"+roomId,
@@ -236,30 +276,125 @@
             })
             return chk;
         }
+        function updateRoomUserCnt(roomId) {
+            var newUserCnt = $('#newRoomUserCnt').val();
+
+            // 채팅방 인원 변경 요청
+            if(newUserCnt) {
+                $.ajax({
+                    type: 'PUT',
+                    url: '/chat/updateRoomUserCnt/' + roomId,
+                    contentType: 'application/json',
+                    data: JSON.stringify({ userCnt: newUserCnt }),
+                    success: function(response) {
+                        console.log("Room user count updated");
+                        location.reload();
+                    },
+                    error: function(error) {
+                        console.log("Error updating room user count: " + error);
+                    }
+                });
+            }
+        }
         var user = /*[[${user}]]*/ null;
         if (user !== null) {
             localStorage.setItem('nickname', user.nickname);
+        }$(function() {
+            let $maxUserCnt = $("#maxUserCnt");
+            let $msgType = $("#msgType");
+            let $rtcType = $("#rtcType");
+            let $userCntChangeSection = $("#userCntChangeSection");
+
+            // 초기 상태 설정
+            if($msgType.is(':checked')) {
+                $userCntChangeSection.show();
+            } else {
+                $userCntChangeSection.hide();
+            }
+
+            // 화상 채팅 시 1:1 임으로 2명 고정
+            $rtcType.change(function() {
+                if ($rtcType.is(':checked')) {
+                    $maxUserCnt.val(2).attr('disabled', true);
+                    $userCntChangeSection.hide();
+                }
+            });
+
+            // 문자 채팅 선택 시
+            $msgType.change(function() {
+                if ($msgType.is(':checked')) {
+                    $maxUserCnt.attr('disabled', false);
+                    $userCntChangeSection.show();
+                }
+            });
+        });
+        function toggleRoomSecret(roomId) {
+            // 먼저 GET 요청으로 현재 잠금 상태를 가져옵니다.
+            $.ajax({
+                type: 'GET',
+                url: '/chat/find',
+                data: { roomId: roomId },
+                success: function(chatRoom) {
+                    // 가져온 상태를 반전시킵니다.
+                    var newSecretStatus = !chatRoom.secretCheck;
+
+                    // 반전된 상태를 서버에 PUT 요청으로 전송합니다.
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/chat/updateRoomSecret/' + roomId,
+                        contentType: 'application/json',
+                        data: JSON.stringify({ secretCheck: newSecretStatus }),
+                        success: function() {
+                            console.log("채팅방 잠금 상태가 변경되었습니다.");
+                            // 성공적으로 변경되면 UI를 업데이트합니다.
+                            updateLockButton(newSecretStatus);
+                            location.reload();
+                        },
+                        error: function(error) {
+                            console.log("채팅방 잠금 상태 변경 중 오류가 발생했습니다: " + error);
+                        }
+                    });
+                },
+                error: function(error) {
+                    console.log("채팅방 정보 조회 중 오류가 발생했습니다: " + error);
+                }
+            });
         }
 
+        function updateLockButton(isLocked) {
+            var $lockButton = $('#lockButton');
+            var $lockStatusText = $('#lockStatusText');
+
+
+            if (isLocked) {
+                $lockButton.text('잠금 해제');
+                $lockStatusText.text('채팅방이 잠겨 있습니다.');
+                $lockButton.addClass('locked').removeClass('unlocked');
+            } else {
+                $lockButton.text('잠금');
+                $lockStatusText.text('채팅방이 열려 있습니다.');
+                $lockButton.addClass('unlocked').removeClass('locked');
+            }
+        }
     </script>
     <style>
         body {
-            background-color: #36393f; /* Background color similar to Discord */
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; /* Use a font similar to Discord */
+            background-color: #36393f;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
 
         .container {
-            background-color: #2f3136; /* Container background color */
+            /*background-color: #2f3136;*/
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            color: #fff; /* Text color in the container */
+            color: #fff;
         }
 
         h2 {
             font-size: 24px;
             margin-bottom: 20px;
-            color: #fff; /* Header text color */
+            color: #fff;
         }
 
         .room-list {
@@ -268,17 +403,22 @@
         }
 
         .room-list-item {
-            border: 2px solid #4f545c; /* Border color for room items - changed to be thicker */
-            border-radius: 4px;
+            border: none;
+            border-radius: 30px;
             margin-bottom: 10px;
             padding: 15px;
-            background-color: #36393f; /* Background color for room items */
+            background-color: #2c2f33;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .room-list-item:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
         .room-list-item a {
             text-decoration: none;
             font-weight: bold;
-            color: #fff; /* Text color for room links */
+            color: #fff;
             font-size: 18px;
         }
 
@@ -294,12 +434,12 @@
 
         .room-list-item .room-description {
             font-size: 14px;
-            color: #b9bbbe; /* Color for room descriptions */
+            color: #b9bbbe;
             margin-top: 10px;
         }
 
         .room-list-item .enter-button {
-            background-color: #7289da; /* Button background color similar to Discord */
+            background-color: #7289da;
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -307,18 +447,25 @@
             font-weight: bold;
             cursor: pointer;
         }
+        #userCntChangeSection {
+            display: none; /* 기본적으로 섹션을 숨김 */
+        }
+
+        /* 여기에 다른 CSS 스타일을 추가합니다. */
+
 
         .room-list-item .enter-button:hover {
-            background-color: #5a68a0; /* Hover background color for buttons */
+            background-color: #5a68a0;
         }
 
         .create-room-button {
             margin-top: 20px;
             text-align: center;
+
         }
 
         .create-room-button button {
-            background-color: #43b581; /* Create room button background color similar to Discord */
+            background-color: #43b581;
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -328,17 +475,35 @@
         }
 
         .create-room-button button:hover {
-            background-color: #349e5e; /* Hover background color for create room button */
+            background-color: #349e5e; /
         }
         .msg-description {
-            color: #43b581; /* 채팅 타입이 MSG인 경우의 텍스트 색상 */
-            font-weight: bold; /* 폰트 굵기 변경 (선택 사항) */
+            color: #43b581;
+            font-weight: bold;
         }
 
         .rtc-description {
-            color: #7289da; /* 채팅 타입이 RTC인 경우의 텍스트 색상 */
-            font-style: italic; /* 폰트 스타일 변경 (선택 사항) */
+            color: #7289da;
+            font-style: italic;
         }
+        .modal-body .mb-3 {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-body .mb-3 label {
+            display: block;
+            margin-bottom: .5rem;
+        }
+
+        .modal-body .mb-3 input {
+            margin-bottom: .5rem;
+        }
+
+        .modal-body .mb-3 button {
+            width: 100%;
+            margin-top: .5rem;
+        }
+
     </style>
 </head>
 <body>
@@ -357,10 +522,12 @@
     <!-- 채팅방 리스트를 목록으로 표시 -->
     <ul class="room-list">
         <li th:each="room : ${list}" class="room-list-item">
-            <a th:if="${room.secretCheck}" href="#enterRoomModal" data-bs-toggle="modal"
-               data-bs-target="#enterRoomModal" th:data-id="${room.roomId}">
-                <span>🔒</span>[[${room.roomName}]]
-            </a>
+            <div class="room-list-item-header">
+                <a th:if="${room.secretCheck}" href="#enterRoomModal" data-bs-toggle="modal"
+                   data-bs-target="#enterRoomModal" th:data-id="${room.roomId}">
+                    <span class="room-lock-icon"><i class="fa fa-lock"></i></span>
+                    <span class="room-name">[[${room.roomName}]]</span>
+                </a>
             <a th:if="${!room.secretCheck}" th:href="@{/chat/room(roomId=${room.roomId})}"
                th:roomId="${room.roomId}" onclick="return chkRoomUserCnt(this.getAttribute('roomId'));">[[${room.roomName}]]</a>
             <div class="badge bg-primary rounded-pill">
@@ -425,7 +592,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="chatType" id="rtcType" value="rtcChat">
                             <label class="form-check-label" for="rtcType">
-                                화상 채팅(최대 4명)
+                                화상 채팅(1:1)
                             </label>
                         </div>
                     </div>
@@ -529,30 +696,29 @@
                 <h5 class="modal-title">채팅방 설정</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <!-- 채팅방 설정 모달 내부 -->
+            <!-- 채팅방 설정 모달 내부 -->
             <div class="modal-body">
+                <!-- 채팅방 이름 변경 입력 필드 -->
                 <div class="mb-3">
-                    <label for="chPwd" class="col-form-label">비밀번호 변경</label>
-                    <div class="input-group">
-                        <input type="password" name="confirmPwd" id="chPwd" class="form-control" data-toggle="password">
-                        <div class="input-group-append">
-                            <span class="input-group-text"><i class="fa fa-eye"></i></span>
-                        </div>
-                    </div>
+                    <label for="newRoomName" class="col-form-label">채팅방 이름 변경</label>
+                    <input type="text" class="form-control" id="newRoomName">
+                    <!-- 이름 변경 버튼 -->
+                    <button type="button" class="btn btn-primary mt-2" onclick="updateRoomName(roomId)">이름 변경</button>
                 </div>
+
+                <!-- 채팅방 비밀번호 변경 입력 필드 -->
                 <div class="mb-3">
-                    <label for="chRoomName" class="col-form-label">채팅방 이름 변경</label>
-                    <input type="text" class="form-control" id="chRoomName" name="chRoomName">
+                    <label for="newRoomPwd" class="col-form-label">채팅방 비밀번호 변경</label>
+                    <input type="password" class="form-control" id="newRoomPwd">
+                    <!-- 비밀번호 변경 버튼 -->
+                    <button type="button" class="btn btn-primary mt-2" onclick="updateRoomPassword(roomId)">비밀번호 변경</button>
                 </div>
+
+
+            </div>
                 <div class="mb-3">
-                    <label for="chRoomUserCnt" class="col-form-label">채팅방 인원 변경</label>
-                    <input type="text" class="form-control" id="chRoomUserCnt" name="chUserCnt">
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="chSecret">
-                    <input type="hidden" name="secretCheck" id="chSecretChk" value="">
-                    <label class="form-check-label" for="secret">
-                        채팅방 잠금
-                    </label>
+                    <button type="button" class="btn btn-primary" onclick="toggleRoomSecret(roomId)">잠금 상태 변경</button>
                 </div>
                 <div class="mb-3">
                     <button type="button" class="btn btn-primary" onclick="delRoom()">방 삭제</button>

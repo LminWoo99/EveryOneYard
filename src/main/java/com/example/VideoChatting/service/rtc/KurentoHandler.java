@@ -25,7 +25,6 @@ public class KurentoHandler extends TextWebSocketHandler {
 
     // 데이터를 json 으로 넘겨 받고, 넘기기 때문에 관련 라이브러리로 GSON 을 사용함
     // gson은 json구조를 띄는 직렬화된 데이터를 JAVA의 객체로 역직렬화, 직렬화 해주는 자바 라이브러리 입니다.
-    // 즉, JSON Object -> JAVA Object 또는 그 반대의 행위를 돕는 라이브러리 입니다.
     private static final Gson gson = new GsonBuilder().create();
 
     // 유저 등록? 을 위한 객체 생성
