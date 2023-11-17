@@ -20,7 +20,6 @@ public class SpringConfig implements WebSocketMessageBrokerConfigurer {
                 .addInterceptors(new HttpSessionHandshakeInterceptor())
                 .withSockJS(); // SocketJS 를 연결한다는 설정
     }
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // 메시지를 구독하는 요청 url => 즉 메시지 받을 때

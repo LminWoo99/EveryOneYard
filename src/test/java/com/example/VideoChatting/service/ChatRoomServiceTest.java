@@ -340,5 +340,59 @@ class ChatRoomServiceTest {
         //then
         assertThat(check).isEqualTo(Boolean.FALSE);
     }
+    @Test
+    @DisplayName("채팅방 이름 수정 단위 테스트")
+    void updateRoomNameTest() throws Exception{
+        //given
+        String roomName = "채팅방 이름  수정";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 1);
+        String updateRoomName = "수정된 채팅방 이름";
+
+        when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+        doNothing().when(chatRoomRepository).updateRoomName(anyString(), anyString());
+        //when
+        chatRoomService.updateRoomName(createdChatRoom.getRoomId(), updateRoomName);
+
+        //then
+
+        verify(chatRoomRepository, times(1)).updateRoomName(createdChatRoom.getRoomId(), updateRoomName);
+
+    }
+    @Test
+    @DisplayName("채팅방 패스워드 수정 단위 테스트")
+    void updateRoomPasswordTest() throws Exception{
+        //given
+        String roomName = "채팅방 pw  수정";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 1);
+        String updateRoomPw = "수정된 채팅방 pw";
+
+        when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+        doNothing().when(chatRoomRepository).updateRoomPwd(anyString(), anyString());
+        //when
+        chatRoomService.updateRoomPassWord(createdChatRoom.getRoomId(), updateRoomPw);
+
+        //then
+
+        verify(chatRoomRepository, times(1)).updateRoomPwd(createdChatRoom.getRoomId(), updateRoomPw);
+
+    } @Test
+    @DisplayName("채팅방 잠금 상태 수정 단위 테스트")
+    void updateRoomSecretCheckTest() throws Exception{
+        //given
+        String roomName = "채팅방 상태 수정";
+        ChatRoom createdChatRoom = chatRoomService.createChatRoom(roomName, "1234", Boolean.TRUE, 1);
+        String updateSecretCheck = "true";
+
+        when(chatRoomRepository.findByRoomId(createdChatRoom.getRoomId())).thenReturn(createdChatRoom);
+        doNothing().when(chatRoomRepository).updateRoomSecretCheck(anyString(), anyBoolean());
+        //when
+        chatRoomService.updateRoomSecretCheck(createdChatRoom.getRoomId(), updateSecretCheck);
+
+        //then
+
+        verify(chatRoomRepository, times(1)).updateRoomSecretCheck(createdChatRoom.getRoomId(), Boolean.valueOf(updateSecretCheck));
+
+    }
+
 
 }
