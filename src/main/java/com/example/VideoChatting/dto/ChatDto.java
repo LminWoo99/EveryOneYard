@@ -41,6 +41,8 @@ public class ChatDto implements Serializable {
         this.roomId = chatMessage.getChatRoom().getRoomId();
         this.message = chatMessage.getMessage();
         this.s3DataUrl= chatMessage.getS3DataUrl();
+        this.fileName= chatMessage.getFileName();
+        this.fileDir = chatMessage.getFileDir();
     }
 
 }

@@ -27,7 +27,7 @@ public class SwaggerConfig {
     public ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("SpringBoot Rest API Documentation")
-                .description("화상채팅 서비스 -copyright@Lee")
+                .description("화상채팅서비스 -copyright@LeeMinWoo")
                 .version("0.1")
                 .build();
     }

@@ -23,8 +23,7 @@ import java.util.*;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -219,5 +218,63 @@ class ChatRoomControllerTest {
                 .andExpect(jsonPath("$").value(true));
 
         verify(chatRoomService, times(1)).checkRoomUserCnt(roomId);
+    }
+    @Test
+    @DisplayName("이름 수정 컨트롤러 테스트")
+    void updateRoomNameTest() throws Exception{
+        //given
+        String roomName="room1";
+        String roomPwd = "1234";
+        ChatRoom createdChatRoom = new ChatRoom().create(roomName, roomPwd, Boolean.TRUE, 50);
+        String updateRoomName = "room2";
+
+        String roomId = createdChatRoom.getRoomId();
+        //when
+        ResultActions perform = mockMvc.perform(put("/chat/updateRoomName/" + roomId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"roomName\":\"" + updateRoomName + "\"}"));
+        //then
+        perform.andExpect(status().isOk());
+        verify(chatRoomService, times(1)).updateRoomName(roomId, updateRoomName);
+    }
+    @Test
+    @DisplayName("패스워드 수정 컨트롤러 테스트")
+    void updateRoomPwdTest() throws Exception{
+        //given
+        String roomName="room1";
+        String roomPwd = "1234";
+
+        ChatRoom createdChatRoom = new ChatRoom().create(roomName, roomPwd, Boolean.TRUE, 50);
+        String updateRoomPwd = "1234";
+        String roomId = createdChatRoom.getRoomId();
+
+        //when
+        mockMvc.perform(put("/chat/updateRoomPwd/" + roomId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"roomPwd\":\"" + updateRoomPwd + "\"}"))
+                .andExpect(status().isOk());
+
+        //then
+        verify(chatRoomService, times(1)).updateRoomPassWord(roomId, updateRoomPwd);
+    }
+    @Test
+    @DisplayName("잠금 상태 수정 컨트롤러 테스트")
+    void updateRoomSecretCheckTest() throws Exception{
+        //given
+        String roomName="room1";
+        String roomPwd = "1234";
+        String secretCheck = "true";
+
+        ChatRoom createdChatRoom = new ChatRoom().create(roomName, roomPwd, Boolean.valueOf(secretCheck), 50);
+        String updateSecretCheck = "false";
+        String roomId = createdChatRoom.getRoomId();
+
+        //when
+        mockMvc.perform(put("/chat/updateRoomSecret/" + roomId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"secretCheck\":\"" + updateSecretCheck + "\"}"))
+                .andExpect(status().isOk());
+        //then
+        verify(chatRoomService, times(1)).updateRoomSecretCheck(roomId, updateSecretCheck);
     }
 }

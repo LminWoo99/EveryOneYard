@@ -2,6 +2,9 @@ package com.example.VideoChatting.repository;
 
 import com.example.VideoChatting.entity.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -9,4 +12,14 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     ChatRoom findByRoomId(String roomId);
 
     boolean existsByRoomName(String roomName);
+
+    @Modifying
+    @Query("update ChatRoom t set t.roomName = :roomName where t.roomId = :roomId")
+    void updateRoomName(@Param("roomId") String roomId, @Param("roomName") String roomName);
+    @Modifying
+    @Query("update ChatRoom t set t.roomPwd = :roomPwd where t.roomId = :roomId")
+    void updateRoomPwd(@Param("roomId") String roomId, @Param("roomPwd") String roomPwd);
+    @Modifying
+    @Query("update ChatRoom t set t.secretCheck = :secretCheck where t.roomId = :roomId")
+    void updateRoomSecretCheck(@Param("roomId")String roomId, @Param("secretCheck")Boolean secretCheck);
 }

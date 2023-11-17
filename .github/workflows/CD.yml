@@ -57,7 +57,7 @@ jobs:
 
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/chat
-            docker stop $(docker ps -a -q)
-            docker rm $(docker ps --filter 'status=exited' -a -q)
+            docker stop $(docker ps -a -q | grep -v $(docker-compose ps -q kurento)) # Kurento 서비스를 제외한 다른 모든 컨테이너 중지
+            docker rm $(docker ps --filter 'status=exited' -a -q) # 종료된(exited) 상태의 모든 컨테이너 삭제
             docker-compose up -d
             docker image prune -a -f

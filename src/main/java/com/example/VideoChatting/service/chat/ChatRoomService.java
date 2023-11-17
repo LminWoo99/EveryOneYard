@@ -186,4 +186,21 @@ public class ChatRoomService {
     }
 
 
+    public void updateRoomName(String roomId, String roomName) {
+        chatRoomRepository.updateRoomName(roomId, roomName);
+        opsHashChatRoom.delete(CHAT_ROOMS, roomId);
+        opsHashChatRoom.put(CHAT_ROOMS, roomId, chatRoomRepository.findByRoomId(roomId));
+
+    }
+    public void updateRoomPassWord(String roomId, String roomPwd) {
+        chatRoomRepository.updateRoomPwd(roomId, roomPwd);
+        opsHashChatRoom.delete(CHAT_ROOMS, roomId);
+        opsHashChatRoom.put(CHAT_ROOMS, roomId, chatRoomRepository.findByRoomId(roomId));
+    }
+
+    public void updateRoomSecretCheck(String roomId, String secretCheck) {
+        chatRoomRepository.updateRoomSecretCheck(roomId, Boolean.valueOf(secretCheck));
+        opsHashChatRoom.delete(CHAT_ROOMS, roomId);
+        opsHashChatRoom.put(CHAT_ROOMS, roomId, chatRoomRepository.findByRoomId(roomId));
+    }
 }
