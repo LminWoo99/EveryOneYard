@@ -299,7 +299,7 @@ window.onbeforeunload = function () {
 
 function leaveRoom() {
 
-    location.replace("/");
+    location.replace("/chat");
 
 }
 

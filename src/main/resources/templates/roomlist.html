@@ -528,14 +528,14 @@
                     <span class="room-lock-icon"><i class="fa fa-lock"></i></span>
                     <span class="room-name">[[${room.roomName}]]</span>
                 </a>
-                <a th:if="${!room.secretCheck}" th:href="@{/chat/room(roomId=${room.roomId})}"
-                   th:roomId="${room.roomId}" onclick="return chkRoomUserCnt(this.getAttribute('roomId'));">[[${room.roomName}]]</a>
-                <div class="badge bg-primary rounded-pill">
-                    [[${room.userCount}]]/[[${room.maxUserCnt}]]
-                </div>
-                <p th:class="room-description" th:data-id="${room.chatType}">
-                </p>
-                <button class="btn btn-primary btn-sm" id="configRoom" data-bs-toggle="modal" data-bs-target="#confirmPwdModal" th:data-id="${room.roomId}">채팅방 설정</button>
+            <a th:if="${!room.secretCheck}" th:href="@{/chat/room(roomId=${room.roomId})}"
+               th:roomId="${room.roomId}" onclick="return chkRoomUserCnt(this.getAttribute('roomId'));">[[${room.roomName}]]</a>
+            <div class="badge bg-primary rounded-pill">
+                [[${room.userCount}]]/[[${room.maxUserCnt}]]
+            </div>
+            <p th:class="room-description" th:data-id="${room.chatType}">
+            </p>
+            <button class="btn btn-primary btn-sm" id="configRoom" data-bs-toggle="modal" data-bs-target="#confirmPwdModal" th:data-id="${room.roomId}">채팅방 설정</button>
         </li>
     </ul>
     </script>
@@ -717,18 +717,18 @@
 
 
             </div>
-            <div class="mb-3">
-                <button type="button" class="btn btn-primary" onclick="toggleRoomSecret(roomId)">잠금 상태 변경</button>
+                <div class="mb-3">
+                    <button type="button" class="btn btn-primary" onclick="toggleRoomSecret(roomId)">잠금 상태 변경</button>
+                </div>
+                <div class="mb-3">
+                    <button type="button" class="btn btn-primary" onclick="delRoom()">방 삭제</button>
+                </div>
             </div>
-            <div class="mb-3">
-                <button type="button" class="btn btn-primary" onclick="delRoom()">방 삭제</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
     </div>
-</div>
 </div>
 </body>
 </html>
