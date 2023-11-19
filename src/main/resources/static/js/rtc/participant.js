@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 SejonJang (wkdtpwhs@gmail.com)
+ *
+ * Licensed under the  GNU General Public License v3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 const PARTICIPANT_MAIN_CLASS = 'participant main';
 const PARTICIPANT_CLASS = 'participant';
@@ -12,7 +28,7 @@ const PARTICIPANT_CLASS = 'participant';
  */
 
 function Participant(name) {
-	//console.log("참여자명 : "+name)
+	console.log("참여자명 : "+name)
 
 	this.name = name;
 	let rtcPeer = null;
@@ -93,7 +109,7 @@ function Participant(name) {
 
 
 	this.onIceCandidate = function (candidate, wp) {
-		//console.log("Local candidate" + JSON.stringify(candidate));
+		console.log("Local candidate" + JSON.stringify(candidate));
 
 		let message = {
 			id: 'onIceCandidate',
@@ -173,7 +189,7 @@ $(".localVideoToggle").on("click", function(){
 	let videoBtn = $('.localVideoToggle');
 	let isVideo = videoBtn.data("flag");
 	let videoTrack = participants[name].rtcPeer.getLocalStream().getTracks().filter(track => track.kind === 'video')[0];
-
+	console.log(videoTrack);
 	if (isVideo) { // 비디오가 사용중이라면 비디오 off
 		videoTrack.enabled = false;
 		videoBtn.val("Video On");
