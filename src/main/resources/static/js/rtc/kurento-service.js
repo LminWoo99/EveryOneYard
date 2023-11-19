@@ -1,4 +1,5 @@
 
+
 // //console.log("location.host : "+location.host)
 let locationHost = location.host
 let participants = {};
@@ -12,6 +13,7 @@ let turnUrl = null;
 let turnUser = null;
 let turnPwd = null;
 
+
 // websocket 연결 확인 후 register() 실행
 var ws = new WebSocket('wss://' + locationHost + '/signal');
 ws.onopen = () => {
@@ -21,6 +23,7 @@ ws.onopen = () => {
 }
 
 var initTurnServer = function(){
+    console.log(locationHost);
     fetch("https://"+locationHost+"/turnconfig", {
         method: 'POST',
         headers: {
@@ -29,13 +32,15 @@ var initTurnServer = function(){
     })
         .then(response => response.json()) // JSON 데이터로 변환
         .then(data => {
-            turnUrl = data.url;
-            turnUser = data.username;
-            turnPwd = data.credential;
-        })
+                turnUrl = data.url;
+                turnUser = data.username;
+                turnPwd = data.credential;
+            }
+        )
         .catch(error => {
             console.error('Error:', error);
         });
+    console.log(turnUrl);
 }
 
 var initDataChannel = function () {
@@ -58,7 +63,6 @@ let constraints = {
 
 navigator.mediaDevices.getUserMedia(constraints)
     .then(stream => {
-        // Add your logic after successfully getting the media here.
         constraints.video = {
             width: 1280,
             height: 720,
@@ -78,6 +82,7 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         return origGetUserMedia(cs).catch(function (error) {
             // 비디오 요청이 실패한 경우
             if (cs.video) {
+                console.log(cs.video);
                 console.warn("Video error occurred, using dummy video instead.", error);
 
                 // 오디오 스트림만 요청합니다.
@@ -108,6 +113,7 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 
         // 캔버스의 내용을 기반으로 더미 비디오 스트림을 생성합니다.
         const dummyStream = canvas.captureStream(60);
+        console.log(dummyStream);
         // 더미 비디오 트랙을 반환합니다.
         return dummyStream.getVideoTracks()[0];
     }
@@ -115,8 +121,7 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 
 ws.onmessage = function (message) {
     var parsedMessage = JSON.parse(message.data);
-    console.log('Received message: ' + message.data);
-    console.log('Received message: ' + parsedMessage.id);
+    console.info('Received message: ' + message.data);
 
     switch (parsedMessage.id) {
         case 'existingParticipants':
@@ -137,6 +142,16 @@ ws.onmessage = function (message) {
                     console.error("Error adding candidate: " + error);
                     return;
                 }
+            });
+            break;
+        case 'ConnectionFail': // 연결 실패 메시지 처리
+
+            // 모달을 표시
+            $('#connectionFailModal').modal('show');
+
+            // 모달의 확인 버튼에 클릭 이벤트 핸들러를 연결
+            $('#reconnectButton').click(function() {
+                leaveRoom('error');
             });
             break;
         default:
@@ -193,7 +208,7 @@ function onExistingParticipants(msg) {
 
     function handleSuccess(stream) {
         var hasVideo = constraints.video && stream.getVideoTracks().length > 0
-
+        console.log(hasVideo);
         var options = {
             localVideo: hasVideo ? video : null,
             localAudio: audio,
@@ -240,7 +255,7 @@ function receiveVideo(sender) {
     participants[sender] = participant;
     var video = participant.getVideoElement();
     var audio = participant.getAudioElement();
-
+    console.log(video);
     var options = {
         remoteVideo: video,
         remoteAudio : audio,
@@ -280,26 +295,35 @@ function receiveVideo(sender) {
 
 // 웹 종료 시 실행
 window.onbeforeunload = function () {
-    sendDataChannelMessage("님이 떠나셨습니다ㅠㅠ");
-    var delayInMilliseconds = 100;  // 0.1초 지연
-    var start = new Date().getTime();
-    while (new Date().getTime() < start + delayInMilliseconds);
-
-    sendMessageToServer({
-        id: 'leaveRoom'
-    });
-
-    for (var key in participants) {
-        participants[key].dispose();
-    }
-
-    ws.close();
-
+    leaveRoom();
 };
 
-function leaveRoom() {
+function leaveRoom(type) {
+    console.log(type);
+    if(type !== 'error'){ // type 이 error 이 아닐 경우에만 퇴장 메시지 전송
+        sendDataChannelMessage("님이 떠나셨습니다");
+    }
 
-    location.replace("/chat");
+    let leftUserfunc = function(){
+        // 서버로 연결 종료 메시지 전달
+        sendMessageToServer({
+            id: 'leaveRoom'
+        });
+
+        // 진행 중인 모든 연결을 종료
+        for (let key in participants) {
+            if (participants.hasOwnProperty(key)) {
+                participants[key].dispose();
+            }
+        }
+
+        // WebSocket 연결을 종료합니다.
+        ws.close();
+
+        location.replace("/chat");
+    }
+
+    setInterval(leftUserfunc, 10); // 퇴장 메시지 전송을 위해 timeout 설정
 
 }
 

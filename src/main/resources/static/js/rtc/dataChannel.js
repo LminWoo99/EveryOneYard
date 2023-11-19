@@ -1,6 +1,3 @@
-/**
- * DataChannel 을 다루기 위한 js
- */
 let chanId = 0;
 
 const dataChannel = {

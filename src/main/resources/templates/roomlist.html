@@ -19,46 +19,46 @@
     <script th:inline="javascript">
 
         let roomId;
-
-        $(function(){
-            let $maxUserCnt = $("#maxUserCnt");
-            let $msgType = $("#msgType");
-            let $rtcType = $("#rtcType");
-
-            // 모달창 열릴 때 이벤트 처리 => roomId 가져오기
-            $("#enterRoomModal").on("show.bs.modal", function (event) {
-                roomId = $(event.relatedTarget).data('id');
-                // console.log("roomId: " + roomId);
-
-            });
-
-            $("#confirmPwdModal").on("show.bs.modal", function (e) {
-                roomId = $(e.relatedTarget).data('id');
-                // console.log("roomId: " + roomId);
-
-            });
-
-            // 채팅방 설정 시 비밀번호 확인
-            confirmPWD();
-
-            // 화상 채팅 시 1:1 임으로 2명 고정
-            $rtcType.change(function() {
-                if($rtcType.is(':checked')){
-                    let number = 2;
-
-                    $("#maxUserCnt").val(number);
-                    // $("#maxUserCnt").attr('value', 2)
-                    $("#maxUserCnt").attr('disabled', true);
-                }
-            })
-
-            // 문자 채팅 누를 시 disabled 풀림
-            $msgType.change(function(){
-                if($msgType.is(':checked')){
-                    $maxUserCnt.attr('disabled', false);
-                }
-            })
-        })
+        //
+        // $(function(){
+        //     let $maxUserCnt = $("#maxUserCnt");
+        //     let $msgType = $("#msgType");
+        //     let $rtcType = $("#rtcType");
+        //
+        //     // 모달창 열릴 때 이벤트 처리 => roomId 가져오기
+        //     $("#enterRoomModal").on("show.bs.modal", function (event) {
+        //         roomId = $(event.relatedTarget).data('id');
+        //         // console.log("roomId: " + roomId);
+        //
+        //     });
+        //
+        //     $("#confirmPwdModal").on("show.bs.modal", function (e) {
+        //         roomId = $(e.relatedTarget).data('id');
+        //         // console.log("roomId: " + roomId);
+        //
+        //     });
+        //
+        //     // 채팅방 설정 시 비밀번호 확인
+        //     confirmPWD();
+        //
+        //     // 화상 채팅 시 1:1 임으로 2명 고정
+        //     $rtcType.change(function() {
+        //         if($rtcType.is(':checked')){
+        //             let number = 2;
+        //
+        //             $("#maxUserCnt").val(number);
+        //             // $("#maxUserCnt").attr('value', 2)
+        //             $("#maxUserCnt").attr('disabled', true);
+        //         }
+        //     })
+        //
+        //     // 문자 채팅 누를 시 disabled 풀림
+        //     $msgType.change(function(){
+        //         if($msgType.is(':checked')){
+        //             $maxUserCnt.attr('disabled', false);
+        //         }
+        //     })
+        // })
 
 
 
@@ -147,10 +147,10 @@
 
             if($rtcType.is(':checked')){
                 if($("#maxUserCnt").val() <= 1){
-                    alert("채팅은 최소 2명 이상!!");
+                    alert("채팅은 최소 2명 이상입니다");
                     return false;
                 }else if ($("#maxUserCnt").val() > 4) {
-                    alert("3명 이상은 서버가 아파요ㅠ.ㅠ");
+                    alert("5명 이상은 화상채팅이 불가합니다.");
                     return false;
                 }
             }else if($msgType.is(':checked')){
@@ -299,35 +299,36 @@
         var user = /*[[${user}]]*/ null;
         if (user !== null) {
             localStorage.setItem('nickname', user.nickname);
-        }$(function() {
-            let $maxUserCnt = $("#maxUserCnt");
-            let $msgType = $("#msgType");
-            let $rtcType = $("#rtcType");
-            let $userCntChangeSection = $("#userCntChangeSection");
-
-            // 초기 상태 설정
-            if($msgType.is(':checked')) {
-                $userCntChangeSection.show();
-            } else {
-                $userCntChangeSection.hide();
-            }
-
-            // 화상 채팅 시 1:1 임으로 2명 고정
-            $rtcType.change(function() {
-                if ($rtcType.is(':checked')) {
-                    $maxUserCnt.val(2).attr('disabled', true);
-                    $userCntChangeSection.hide();
-                }
-            });
-
-            // 문자 채팅 선택 시
-            $msgType.change(function() {
-                if ($msgType.is(':checked')) {
-                    $maxUserCnt.attr('disabled', false);
-                    $userCntChangeSection.show();
-                }
-            });
-        });
+        }
+        // $(function() {
+        //     let $maxUserCnt = $("#maxUserCnt");
+        //     let $msgType = $("#msgType");
+        //     let $rtcType = $("#rtcType");
+        //     let $userCntChangeSection = $("#userCntChangeSection");
+        //
+        //     // 초기 상태 설정
+        //     if($msgType.is(':checked')) {
+        //         $userCntChangeSection.show();
+        //     } else {
+        //         $userCntChangeSection.hide();
+        //     }
+        //
+        //     // 화상 채팅 시 1:1 임으로 2명 고정
+        //     $rtcType.change(function() {
+        //         if ($rtcType.is(':checked')) {
+        //             $maxUserCnt.val(2).attr('disabled', true);
+        //             $userCntChangeSection.hide();
+        //         }
+        //     });
+        //
+        //     // 문자 채팅 선택 시
+        //     $msgType.change(function() {
+        //         if ($msgType.is(':checked')) {
+        //             $maxUserCnt.attr('disabled', false);
+        //             $userCntChangeSection.show();
+        //         }
+        //     });
+        // });
         function toggleRoomSecret(roomId) {
             // 먼저 GET 요청으로 현재 잠금 상태를 가져옵니다.
             $.ajax({
@@ -536,7 +537,8 @@
             <p th:class="room-description" th:data-id="${room.chatType}">
             </p>
             <button class="btn btn-primary btn-sm" id="configRoom" data-bs-toggle="modal" data-bs-target="#confirmPwdModal" th:data-id="${room.roomId}">채팅방 설정</button>
-        </li>
+            </div>
+        </li>>
     </ul>
     </script>
     <script th:inline="javascript">
@@ -592,7 +594,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="chatType" id="rtcType" value="rtcChat">
                             <label class="form-check-label" for="rtcType">
-                                화상 채팅(1:1)
+                                화상 채팅(최대 4명)
                             </label>
                         </div>
                     </div>
