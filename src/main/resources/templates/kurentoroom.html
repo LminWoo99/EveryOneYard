@@ -17,8 +17,27 @@
     <link rel="styleSheet" href="/css/rtc/floating_chat.css" type="text/css" media="screen">
 </head>
 <script>
+    let isFlipped = true; // 초기 상태: 좌우 반전 켜기
+
+    function toggleFlip() {
+        const videoElement = document.querySelector('#participants video');
+        if (videoElement) {
+            if (isFlipped) {
+                videoElement.style.transform = 'scaleX(-1)';
+                document.getElementById('flipBtn').value = 'flip Off'; // 버튼 상태: 버튼 상태 끄기
+            } else {
+                videoElement.style.transform = 'scaleX(1)';
+                document.getElementById('flipBtn').value = 'flip'; // 버튼 상태: 좌우 반전 켜기
+            }
+            isFlipped = !isFlipped; // 버튼 상태 변경
+        }
+    }
 </script>
 <style>
+    body {
+        background-color: #2C2F33;
+        color: #FFFFFF;
+    }
 </style>
 <body>
 <div id="container">
@@ -37,6 +56,7 @@
                                data-flag="true">
                         <input type="button" class="btn btn-outline-success localAudioToggle" id="audioBtn" value="audio Off"
                                data-flag="true">
+                        <input type="button" class="btn btn-outline-success flipVideoToggle" id="flipBtn" value="flip" data-flag="false" onclick="toggleFlip()">
                     </div>
                 </div>
             </div>
@@ -60,7 +80,7 @@
         <div class="chat">
             <div class="header">
             <span class="title">
-                Tell Me Your Story
+                대화를 시작하세요
             </span>
                 <button>
                     <i class="fa fa-times" aria-hidden="true"></i>
