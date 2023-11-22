@@ -13,6 +13,7 @@ const dataChannel = {
         this.user = user;
     },
     isNullOrUndefined : function(value) {
+        console.log(value);
         return value === null || value === undefined;
     },
     getChannelName : function() {
@@ -21,7 +22,7 @@ const dataChannel = {
     handleDataChannelOpen: function(event)  {
         if (this.isNullOrUndefined(event)) return;
         // console.log("dataChannel.OnOpen", event);
-        this.sendMessage("등장!!")
+        this.sendMessage("참가하였습니다")
     },
     handleDataChannelMessageReceived: function(event) {
         if (this.isNullOrUndefined(event)) return;
