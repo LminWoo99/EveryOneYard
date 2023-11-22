@@ -13,7 +13,6 @@ const dataChannel = {
         this.user = user;
     },
     isNullOrUndefined : function(value) {
-        console.log(value);
         return value === null || value === undefined;
     },
     getChannelName : function() {
