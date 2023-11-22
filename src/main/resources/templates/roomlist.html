@@ -19,46 +19,29 @@
     <script th:inline="javascript">
 
         let roomId;
-        //
-        // $(function(){
-        //     let $maxUserCnt = $("#maxUserCnt");
-        //     let $msgType = $("#msgType");
-        //     let $rtcType = $("#rtcType");
-        //
-        //     // 모달창 열릴 때 이벤트 처리 => roomId 가져오기
-        //     $("#enterRoomModal").on("show.bs.modal", function (event) {
-        //         roomId = $(event.relatedTarget).data('id');
-        //         // console.log("roomId: " + roomId);
-        //
-        //     });
-        //
-        //     $("#confirmPwdModal").on("show.bs.modal", function (e) {
-        //         roomId = $(e.relatedTarget).data('id');
-        //         // console.log("roomId: " + roomId);
-        //
-        //     });
-        //
-        //     // 채팅방 설정 시 비밀번호 확인
-        //     confirmPWD();
-        //
-        //     // 화상 채팅 시 1:1 임으로 2명 고정
-        //     $rtcType.change(function() {
-        //         if($rtcType.is(':checked')){
-        //             let number = 2;
-        //
-        //             $("#maxUserCnt").val(number);
-        //             // $("#maxUserCnt").attr('value', 2)
-        //             $("#maxUserCnt").attr('disabled', true);
-        //         }
-        //     })
-        //
-        //     // 문자 채팅 누를 시 disabled 풀림
-        //     $msgType.change(function(){
-        //         if($msgType.is(':checked')){
-        //             $maxUserCnt.attr('disabled', false);
-        //         }
-        //     })
-        // })
+
+        $(function(){
+            let $maxUserCnt = $("#maxUserCnt");
+            let $msgType = $("#msgType");
+            let $rtcType = $("#rtcType");
+
+            // 모달창 열릴 때 이벤트 처리 => roomId 가져오기
+            $("#enterRoomModal").on("show.bs.modal", function (event) {
+                roomId = $(event.relatedTarget).data('id');
+                // console.log("roomId: " + roomId);
+
+            });
+
+            $("#confirmPwdModal").on("show.bs.modal", function (e) {
+                roomId = $(e.relatedTarget).data('id');
+                // console.log("roomId: " + roomId);
+
+            });
+
+            // 채팅방 설정 시 비밀번호 확인
+            confirmPWD();
+
+        })
 
 
 
@@ -228,7 +211,7 @@
         // 채팅방 입장 시 비밀번호 확인
         function enterRoom(){
             let $enterPwd = $("#enterPwd").val();
-
+            console.log(roomId);
             $.ajax({
                 type : "post",
                 url : "/chat/confirmPwd/"+roomId,
@@ -276,69 +259,50 @@
             })
             return chk;
         }
-        function updateRoomUserCnt(roomId) {
-            var newUserCnt = $('#newRoomUserCnt').val();
 
-            // 채팅방 인원 변경 요청
-            if(newUserCnt) {
-                $.ajax({
-                    type: 'PUT',
-                    url: '/chat/updateRoomUserCnt/' + roomId,
-                    contentType: 'application/json',
-                    data: JSON.stringify({ userCnt: newUserCnt }),
-                    success: function(response) {
-                        console.log("Room user count updated");
-                        location.reload();
-                    },
-                    error: function(error) {
-                        console.log("Error updating room user count: " + error);
-                    }
-                });
-            }
-        }
         var user = /*[[${user}]]*/ null;
         if (user !== null) {
             localStorage.setItem('nickname', user.nickname);
         }
-        // $(function() {
-        //     let $maxUserCnt = $("#maxUserCnt");
-        //     let $msgType = $("#msgType");
-        //     let $rtcType = $("#rtcType");
-        //     let $userCntChangeSection = $("#userCntChangeSection");
-        //
-        //     // 초기 상태 설정
-        //     if($msgType.is(':checked')) {
-        //         $userCntChangeSection.show();
-        //     } else {
-        //         $userCntChangeSection.hide();
-        //     }
-        //
-        //     // 화상 채팅 시 1:1 임으로 2명 고정
-        //     $rtcType.change(function() {
-        //         if ($rtcType.is(':checked')) {
-        //             $maxUserCnt.val(2).attr('disabled', true);
-        //             $userCntChangeSection.hide();
-        //         }
-        //     });
-        //
-        //     // 문자 채팅 선택 시
-        //     $msgType.change(function() {
-        //         if ($msgType.is(':checked')) {
-        //             $maxUserCnt.attr('disabled', false);
-        //             $userCntChangeSection.show();
-        //         }
-        //     });
-        // });
+        $(function() {
+            let $maxUserCnt = $("#maxUserCnt");
+            let $msgType = $("#msgType");
+            let $rtcType = $("#rtcType");
+            let $userCntChangeSection = $("#userCntChangeSection");
+
+            // 초기 상태 설정
+            if($msgType.is(':checked')) {
+                $userCntChangeSection.show();
+            } else {
+                $userCntChangeSection.hide();
+            }
+
+            $rtcType.change(function() {
+                if ($rtcType.is(':checked')) {
+
+                    $userCntChangeSection.hide();
+                }
+            });
+
+            // 문자 채팅 선택 시
+            $msgType.change(function() {
+                if ($msgType.is(':checked')) {
+                    $maxUserCnt.attr('disabled', false);
+                    $userCntChangeSection.show();
+                }
+            });
+        });
         function toggleRoomSecret(roomId) {
             // 먼저 GET 요청으로 현재 잠금 상태를 가져옵니다.
             $.ajax({
                 type: 'GET',
-                url: '/chat/find',
+                url: '/chat/findSecretCheck',
                 data: { roomId: roomId },
+
                 success: function(chatRoom) {
                     // 가져온 상태를 반전시킵니다.
                     var newSecretStatus = !chatRoom.secretCheck;
-
+                    console.log(newSecretStatus);
                     // 반전된 상태를 서버에 PUT 요청으로 전송합니다.
                     $.ajax({
                         type: 'PUT',
@@ -347,7 +311,6 @@
                         data: JSON.stringify({ secretCheck: newSecretStatus }),
                         success: function() {
                             console.log("채팅방 잠금 상태가 변경되었습니다.");
-                            // 성공적으로 변경되면 UI를 업데이트합니다.
                             updateLockButton(newSecretStatus);
                             location.reload();
                         },
