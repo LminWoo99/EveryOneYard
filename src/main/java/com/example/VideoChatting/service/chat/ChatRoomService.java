@@ -176,8 +176,8 @@ public class ChatRoomService {
     @CacheEvict(value = "ChatRoom", key = "#roomId", cacheManager = "testCacheManager")
     public void deleteChatRoom(String roomId) {
         try {
-            opsHashChatRoom.delete(roomId);
             ChatRoom byRoomId = chatRoomRepository.findByRoomId(roomId);
+            opsHashChatRoom.delete(roomId, byRoomId);
             chatRoomRepository.delete(byRoomId);
             fileService.deleteFileDir(roomId);
         } catch (Exception e) {
@@ -199,6 +199,7 @@ public class ChatRoomService {
     }
 
     public void updateRoomSecretCheck(String roomId, String secretCheck) {
+        log.info(secretCheck);
         chatRoomRepository.updateRoomSecretCheck(roomId, Boolean.valueOf(secretCheck));
         opsHashChatRoom.delete(CHAT_ROOMS, roomId);
         opsHashChatRoom.put(CHAT_ROOMS, roomId, chatRoomRepository.findByRoomId(roomId));

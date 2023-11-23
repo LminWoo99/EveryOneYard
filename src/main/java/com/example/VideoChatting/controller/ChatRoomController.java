@@ -2,7 +2,6 @@ package com.example.VideoChatting.controller;
 
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.entity.ChatType;
-import com.example.VideoChatting.entity.ChatUser;
 import com.example.VideoChatting.entity.SessionUser;
 import com.example.VideoChatting.service.chat.ChatRoomService;
 import io.swagger.annotations.ApiOperation;
@@ -15,8 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpSession;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,6 +36,15 @@ public class ChatRoomController {
         return "roomlist";
     }
 
+    @GetMapping("/findSecretCheck")
+    @ApiOperation(value = "채팅방 잠금 상태 조회 ", notes = "전체 채팅방 목록을 조회한다")
+    @ResponseBody
+    public ResponseEntity<ChatRoom> chatRoomSecretCheck(@RequestParam String roomId) {
+        ChatRoom chatRoom = chatRoomService.findRoomById(roomId);
+        return ResponseEntity.ok(chatRoom);
+
+    }
+
     @PostMapping("/createRoom")
     @ApiOperation(value = "채팅방 생성 ", notes = "채팅방을 생성한다")
     public String createRoom(@RequestParam("roomName") String name, @RequestParam("roomPwd")String roomPwd, @RequestParam("secretCheck")String secretCheck,
@@ -59,7 +65,6 @@ public class ChatRoomController {
             return "chatroom";
         } else {
             log.info("화상채팅 유저 확인 :" + chatRoom.getUserRtcList());
-//            model.addAttribute("uuid", UUID.randomUUID().toString());
             String uuid = UUID.randomUUID().toString().split("-")[0];
             model.addAttribute("uuid", uuid);
             model.addAttribute("roomId", chatRoom.getRoomId());
@@ -116,6 +121,7 @@ public class ChatRoomController {
     @ApiOperation(value = "채팅방 잠금 상태 변경", notes = "파라미터로 넘어오는 ROOMID 기준으로 채팅방 잠금/오픈 상태 변경")
     public ResponseEntity<?> updateRoomSecretCheck(@PathVariable String roomId, @RequestBody Map<String, String> body) {
         String secretCheck = body.get("secretCheck");
+        log.info("잠금 상태 ::::" + secretCheck);
         chatRoomService.updateRoomSecretCheck(roomId, secretCheck);
         return ResponseEntity.ok().build();
     }

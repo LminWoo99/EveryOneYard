@@ -6,7 +6,6 @@ import org.kurento.client.*;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -14,7 +13,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 
 @RequiredArgsConstructor
 public class KurentoUserSession implements Closeable {
@@ -51,33 +49,28 @@ public class KurentoUserSession implements Closeable {
     this.session = session;
     this.roomName = roomName;
 
-    // 외부로 송신하는 미디어?
-    this.outgoingMedia = new WebRtcEndpoint.Builder(pipeline).build();
+    this.outgoingMedia = new WebRtcEndpoint.Builder(pipeline)
+            .useDataChannels()
+            .build();
 
-    // iceCandidateFounder 이벤트 리스너 등록
-    // 이벤트가 발생했을 때 다른 유저들에게 새로운 iceCnadidate 후보를 알림
+
     this.outgoingMedia.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 
 
       @Override
       public void onEvent(IceCandidateFoundEvent event) {
-        // JsonObject 생성
         JsonObject response = new JsonObject();
-        // id : iceCnadidate, id 는 ice후보자 선정
+
         response.addProperty("id", "iceCandidate");
-        // name : 유저명
+
         response.addProperty("name", name);
 
-        // add 랑 addProperty 랑 차이점?
         // candidate 를 key 로 하고, IceCandidateFoundEvent 객체를 JsonUtils 를 이용해
         // json 형태로 변환시킨다 => toJsonObject 는 넘겨받은 Object 객체를 JsonObject 로 변환
         response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
 
         try {
           /** synchronized 안에는 동기화 필요한 부분 지정*/
-          // 먼저 동기화는 프로세스(스레드)가 수행되는 시점을 조절하여 서로가 알고 있는 정보가 일치하는 것
-          // 여기서는 쉽게 말해 onEvent 를 통해서 넘어오는 모든 session 객체에게 앞에서 생성한 response json 을
-          // 넘겨주게되고 이를 통해서 iceCandidate 상태를 '일치' 시킨다? ==> 여긴 잘 모르겟어요...
           synchronized (session) {
             session.sendMessage(new TextMessage(response.toString()));
           }
@@ -161,8 +154,6 @@ public class KurentoUserSession implements Closeable {
    * @return WebRtcEndPoint
    * */
   private WebRtcEndpoint getEndpointForUser(final KurentoUserSession sender) {
-    // 만약 sender 명이 현재 user명과 일치한다면, 즉 sdpOffer 제안을 보내는 쪽과 받는 쪽이 동일하다면?
-    // loopback 임을 찍고, 그대로 outgoinMedia 를 return
     if (sender.getName().equals(name)) {
       log.debug("PARTICIPANT {}: configuring loopback", this.name);
       return outgoingMedia;
@@ -174,14 +165,14 @@ public class KurentoUserSession implements Closeable {
     // sender 의 이름으로 나의 incomingMedia 에서 sender 의 webrtcEndpoint 객체를 가져옴
     WebRtcEndpoint incoming = incomingMedia.get(sender.getName());
 
-    // 만약 가져온 incoming 이 null 이라면
-    // 즉 현재 내가 갖고 있는 incomingMedia 에 sender 의 webrtcEndPoint 객체가 없다면
     if (incoming == null) {
       // 새로운 endpoint 가 만들어졌음을 확인
       log.debug("PARTICIPANT {}: creating new endpoint for {}", this.name, sender.getName());
 
       // 새로 incoming , 즉 webRtcEndpoint 를 만들고
-      incoming = new WebRtcEndpoint.Builder(pipeline).build();
+      incoming = new WebRtcEndpoint.Builder(pipeline)
+              .useDataChannels()
+              .build();
 
       // incoming 객체의 addIceCandidateFoundListener 메서드 실행
       incoming.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
@@ -198,9 +189,6 @@ public class KurentoUserSession implements Closeable {
           // {candidate : { event.getCandidate 를 json 으로 만든 형태 }
           response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
           try {
-            // 새로 webRtcEndpoint 가 만들어 졌기 때문에 모든 UserSession 이 이것을 동일하게 공유해야 할 필요가 있다.
-            // 즉 모든 UserSession 의 정보를 일치시키기 위해 동기화 - synchronized - 실행
-            // 이를 통해서 모든 user 의 incomingMedia 가 동일하게 일치 - 동기화 - 됨
             synchronized (session) {
               session.sendMessage(new TextMessage(response.toString()));
             }
@@ -210,14 +198,10 @@ public class KurentoUserSession implements Closeable {
         }
       });
 
-      // incomingMedia 에 유저명과 새로 생성된 incoming - webrtcEndPoint 객체 - 을 넣어준다
       incomingMedia.put(sender.getName(), incoming);
     }
 
     log.debug("PARTICIPANT {}: obtained endpoint for {}", this.name, sender.getName());
-
-    /** 여기가 이해가 안갔었음 */
-    // sender 기존에 갖고 있던 webRtcEndPoint 와 새로 생성된 incoming 을 연결한다
     sender.getOutgoingWebRtcPeer().connect(incoming);
 
     return incoming;
@@ -289,6 +273,7 @@ public class KurentoUserSession implements Closeable {
   public void sendMessage(JsonObject message) throws IOException {
     log.debug("USER {}: Sending message {}", name, message);
     synchronized (session) {
+      // TODO 예외 발생 시 접속 재시도하도록 유도
       session.sendMessage(new TextMessage(message.toString()));
     }
   }
@@ -304,11 +289,6 @@ public class KurentoUserSession implements Closeable {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
 
@@ -324,11 +304,6 @@ public class KurentoUserSession implements Closeable {
     return eq;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     int result = 1;
