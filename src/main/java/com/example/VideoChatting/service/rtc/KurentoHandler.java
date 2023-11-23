@@ -1,6 +1,7 @@
 package com.example.VideoChatting.service.rtc;
 
 import com.example.VideoChatting.dto.KurentoRoomDto;
+import com.example.VideoChatting.service.chat.ChatRoomService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -34,6 +35,8 @@ public class KurentoHandler extends TextWebSocketHandler {
    // room 매니저
     @Autowired
     private KurentoService roomManager;
+    @Autowired
+    private ChatRoomService chatRoomService;
 
     // 이전에 사용하던 그 메서드
     @Override
@@ -107,7 +110,7 @@ public class KurentoHandler extends TextWebSocketHandler {
         log.info("handler 룸 네임"+room);
         // 유저명과 session 을 room 에 넘겨서 room 에 유저 저장
         final KurentoUserSession user = room.join(name, session);
-
+        chatRoomService.plusUserCnt(room.getRoomId());
         // 단순히 room 에 저장하는 것 외에도 user 를 저장하기 위한 메서드?
         registry.register(user);
     }
@@ -120,7 +123,7 @@ public class KurentoHandler extends TextWebSocketHandler {
         room.leave(user);
 
         // room 에서 userCount -1
-        room.setUserCount(room.getUserCount()-1);
+        chatRoomService.minusUserCnt(room.getRoomId());
 
     }
 
