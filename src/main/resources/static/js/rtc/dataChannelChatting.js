@@ -22,7 +22,6 @@ const dataChannelChatting = {
 
         self.userTextInput.on('keydown', function(event) {
             if (event.shiftKey && event.which === 13) {
-                // shift + enter 사용 시 한줄 띄우기
             } else if (event.which === 13) {
                 event.preventDefault(); // 기본 동작(한줄 띄우기)을 방지
                 dataChannel.showNewMessage(self.parseMessage(self.userTextInput), "self");

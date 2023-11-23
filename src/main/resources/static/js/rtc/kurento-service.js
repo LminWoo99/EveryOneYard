@@ -164,7 +164,7 @@ function register() {
     name = $("#uuid").val();
     roomId = $("#roomId").val();
     roomName = $("#roomName").val();
-
+    console.log(roomId);
     document.getElementById('room-header').innerText = 'ROOM ' + roomName;
     document.getElementById('room').style.display = 'block';
 
@@ -176,6 +176,8 @@ function register() {
     }
     sendMessageToServer(message);
 }
+
+
 
 function onNewParticipant(request) {
     receiveVideo(request.name);
@@ -223,6 +225,7 @@ function onExistingParticipants(msg) {
                 onmessage : dataChannel.handleDataChannelMessageReceived,
                 onerror : dataChannel.handleDataChannelError
             },
+
             configuration: {
                 iceServers: [
                     {
