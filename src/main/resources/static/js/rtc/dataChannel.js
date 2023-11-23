@@ -1,7 +1,7 @@
 let chanId = 0;
-
 const dataChannel = {
     user : null,
+
     init: function() {
         // 핸들러들을 바인딩하여 'this'가 항상 dataChannel 객체를 참조하도록 보장하기 위함
         this.handleDataChannelOpen = this.handleDataChannelOpen.bind(this);
@@ -21,12 +21,12 @@ const dataChannel = {
     },
     handleDataChannelOpen: function(event)  {
         if (this.isNullOrUndefined(event)) return;
-        // console.log("dataChannel.OnOpen", event);
+        console.log("dataChannel.OnOpen", event);
         this.sendMessage("참가하였습니다")
     },
     handleDataChannelMessageReceived: function(event) {
         if (this.isNullOrUndefined(event)) return;
-        // console.log("dataChannel.OnMessage:", event);
+        console.log("dataChannel.OnMessage:", event);
         this.showNewMessage(event.data, "other")
     },
     handleDataChannelError: function(error) {
@@ -35,7 +35,7 @@ const dataChannel = {
     },
     handleDataChannelClose: function(leaveEvent, event) {
         if (this.isNullOrUndefined(event)) return;
-        // console.log("dataChannel.OnClose", event);
+        console.log("dataChannel.OnClose", event);
     },
     sendMessage: function(message) {
         if (this.isNullOrUndefined(message)) return;
