@@ -2,95 +2,127 @@
 
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.entity.ChatType;
-import com.example.VideoChatting.entity.ChatUser;
 import com.example.VideoChatting.entity.SessionUser;
 import com.example.VideoChatting.service.chat.ChatRoomService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpSession;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
-<span class="fc" id="L22">@Slf4j</span>
-<span class="fc" id="L23">@RequiredArgsConstructor</span>
+<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L22">@RequiredArgsConstructor</span>
 @RequestMapping(&quot;/chat&quot;)
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
-        @GetMapping(&quot;&quot;)
-        @ApiOperation(value = &quot;채팅방 리스트 조회 &quot;, notes = &quot;전체 채팅방 목록을 조회한다&quot;)
-        public String chatRoomList(Model model, @AuthenticationPrincipal SessionUser sessionUser) {
-<span class="fc" id="L30">            model.addAttribute(&quot;list&quot;,chatRoomService.findAllRooms());</span>
-<span class="fc" id="L31">            log.info(&quot;채팅방 설정 =&quot; + chatRoomService.findAllRooms());</span>
-            // 세션에 저장된 로그인 정보를 모델에 추가
-<span class="pc bpc" id="L33" title="1 of 2 branches missed.">            if (sessionUser != null) {</span>
-<span class="fc" id="L34">                model.addAttribute(&quot;user&quot;, sessionUser.getAttributes());</span>
-            }
-<span class="fc" id="L36">            return &quot;roomlist&quot;;</span>
+
+    @GetMapping(&quot;&quot;)
+    @ApiOperation(value = &quot;채팅방 리스트 조회 &quot;, notes = &quot;전체 채팅방 목록을 조회한다&quot;)
+    public String chatRoomList(Model model, @AuthenticationPrincipal SessionUser sessionUser) {
+<span class="fc" id="L30">        model.addAttribute(&quot;list&quot;, chatRoomService.findAllRooms());</span>
+<span class="fc" id="L31">        log.info(&quot;채팅방 설정 =&quot; + chatRoomService.findAllRooms());</span>
+        // 세션에 저장된 로그인 정보를 모델에 추가
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if (sessionUser != null) {</span>
+<span class="fc" id="L34">            model.addAttribute(&quot;user&quot;, sessionUser.getAttributes());</span>
         }
-//        @GetMapping(&quot;/json&quot;)
-//        @ApiOperation(value = &quot;채팅방 리스트 조회 json 반환&quot;, notes = &quot;전체 채팅방 목록을 조회한다&quot;)
-//        @ResponseBody
-//        public List&lt;ChatRoom&gt; chatRoomList() {
-//            return chatRoomService.findAllRooms();
-//
-//        }
+<span class="fc" id="L36">        return &quot;roomlist&quot;;</span>
+    }
+
+    @GetMapping(&quot;/findSecretCheck&quot;)
+    @ApiOperation(value = &quot;채팅방 잠금 상태 조회 &quot;, notes = &quot;전체 채팅방 목록을 조회한다&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;ChatRoom&gt; chatRoomSecretCheck(@RequestParam String roomId) {
+<span class="fc" id="L43">        ChatRoom chatRoom = chatRoomService.findRoomById(roomId);</span>
+<span class="fc" id="L44">        return ResponseEntity.ok(chatRoom);</span>
+
+    }
+
     @PostMapping(&quot;/createRoom&quot;)
     @ApiOperation(value = &quot;채팅방 생성 &quot;, notes = &quot;채팅방을 생성한다&quot;)
     public String createRoom(@RequestParam(&quot;roomName&quot;) String name, @RequestParam(&quot;roomPwd&quot;)String roomPwd, @RequestParam(&quot;secretCheck&quot;)String secretCheck,
-                             @RequestParam(value = &quot;maxUserCnt&quot;, defaultValue = &quot;100&quot;)String maxUserCnt,  RedirectAttributes rttr) {
-<span class="fc" id="L49">        ChatRoom room = chatRoomService.createChatRoom(name, roomPwd, Boolean.parseBoolean(secretCheck), Integer.parseInt(maxUserCnt));</span>
-<span class="fc" id="L50">        rttr.addFlashAttribute(&quot;roomName&quot;, room);</span>
-<span class="fc" id="L51">        return &quot;redirect:/chat&quot;;</span>
+                             @RequestParam(value = &quot;maxUserCnt&quot;)String maxUserCnt,  RedirectAttributes rttr) {
+<span class="fc" id="L52">        ChatRoom room = chatRoomService.createChatRoom(name, roomPwd, Boolean.parseBoolean(secretCheck), Integer.parseInt(maxUserCnt));</span>
+<span class="fc" id="L53">        rttr.addFlashAttribute(&quot;roomName&quot;, room);</span>
+<span class="fc" id="L54">        return &quot;redirect:/chat&quot;;</span>
     }
+
     @GetMapping(&quot;/room&quot;)
     @ApiOperation(value = &quot;채팅방 입장 &quot;, notes = &quot;파라미터로 넘어오는 ROOMID 기준으로 채팅방을 찾음 &quot;)
-    public String roomDetail(Model model,  String roomId){
-<span class="fc" id="L56">        log.info(&quot;roomId {}&quot;, roomId);</span>
-<span class="fc" id="L57">        ChatRoom chatRoom = chatRoomService.findRoomById(roomId);</span>
-<span class="fc" id="L58">        model.addAttribute(&quot;room&quot;, chatRoom);</span>
+    public String roomDetail(Model model, String roomId) {
+<span class="fc" id="L60">        log.info(&quot;roomId {}&quot;, roomId);</span>
+<span class="fc" id="L61">        ChatRoom chatRoom = chatRoomService.findRoomById(roomId);</span>
+<span class="fc" id="L62">        model.addAttribute(&quot;room&quot;, chatRoom);</span>
 
-<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (chatRoom.getChatType().equals(ChatType.MSG)) {</span>
-<span class="fc" id="L61">            return &quot;chatroom&quot;;</span>
-        }else{
-<span class="fc" id="L63">            log.info(&quot;화상채팅 유저 확인 :&quot;+chatRoom.getUserRtcList());</span>
-<span class="fc" id="L64">            model.addAttribute(&quot;uuid&quot;, UUID.randomUUID().toString());</span>
-<span class="fc" id="L65">            return &quot;rtcroom&quot;;</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (chatRoom.getChatType().equals(ChatType.MSG)) {</span>
+<span class="fc" id="L65">            return &quot;chatroom&quot;;</span>
+        } else {
+<span class="fc" id="L67">            String uuid = UUID.randomUUID().toString().split(&quot;-&quot;)[0];</span>
+<span class="fc" id="L68">            model.addAttribute(&quot;uuid&quot;, uuid);</span>
+<span class="fc" id="L69">            model.addAttribute(&quot;roomId&quot;, chatRoom.getRoomId());</span>
+<span class="fc" id="L70">            model.addAttribute(&quot;roomName&quot;, chatRoom.getRoomName());</span>
+<span class="fc" id="L71">            return &quot;kurentoroom&quot;;</span>
         }
     }
+
     @PostMapping(&quot;/confirmPwd/{roomId}&quot;)
     @ResponseBody
     @ApiOperation(value = &quot;채팅방 비밀번호 체크 &quot;, notes = &quot;파라미터로 넘어오는 ROOMID 기준으로 채팅방 비밀 번호 체크 &quot;)
-    public boolean confirmPwd(@PathVariable String roomId, @RequestParam String roomPwd){
+    public boolean confirmPwd(@PathVariable String roomId, @RequestParam String roomPwd) {
 
         // 넘어온 roomId 와 roomPwd 를 이용해서 비밀번호 찾기
         // 찾아서 입력받은 roomPwd 와 room pwd 와 비교해서 맞으면 true, 아니면  false
-<span class="fc" id="L75">        return chatRoomService.confirmPwd(roomId, roomPwd);</span>
+<span class="fc" id="L82">        return chatRoomService.confirmPwd(roomId, roomPwd);</span>
     }
+
     @GetMapping(&quot;/delRoom/{roomId}&quot;)
     @ApiOperation(value = &quot;채팅방 삭제 &quot;, notes = &quot;파라미터로 넘어오는 ROOMID 기준으로 채팅방 삭제 &quot;)
-    public String deleteChatRoom(@PathVariable String roomId){
+    public String deleteChatRoom(@PathVariable String roomId) {
 
         // roomId 기준으로 chatRoomMap 에서 삭제, 해당 채팅룸 안에 있는 사진 삭제
-<span class="fc" id="L82">        chatRoomService.deleteChatRoom(roomId);</span>
+<span class="fc" id="L90">        chatRoomService.deleteChatRoom(roomId);</span>
 
-<span class="fc" id="L84">        return &quot;redirect:/&quot;;</span>
+
+<span class="fc" id="L93">        return &quot;redirect:/chat&quot;;</span>
     }
 
     // 유저 카운트
     @GetMapping(&quot;/chkUserCnt/{roomId}&quot;)
     @ResponseBody
     @ApiOperation(value = &quot;채팅방 유저 카운트 &quot;, notes = &quot;사용자가 설정한 최대 인원 안 넘는지 체크  &quot;)
-    public boolean checkUserCnt(@PathVariable String roomId){
-<span class="fc" id="L92">        return chatRoomService.checkRoomUserCnt(roomId);</span>
+    public boolean checkUserCnt(@PathVariable String roomId) {
+<span class="fc" id="L101">        return chatRoomService.checkRoomUserCnt(roomId);</span>
     }
 
+    @PutMapping(&quot;/updateRoomName/{roomId}&quot;)
+    @ApiOperation(value = &quot;채팅방 이름 변경&quot;, notes = &quot;파라미터로 넘어오는 ROOMID 기준으로 채팅방 이름 변경&quot;)
+    public ResponseEntity&lt;?&gt; updateRoomName(@PathVariable String roomId, @RequestBody Map&lt;String, String&gt; body) {
+<span class="fc" id="L107">        String roomName = body.get(&quot;roomName&quot;);</span>
+<span class="fc" id="L108">        chatRoomService.updateRoomName(roomId, roomName);</span>
+<span class="fc" id="L109">        return ResponseEntity.ok().build(); // JSON 형태의 응답을 보내거나, 상태 코드만 보냅니다.</span>
+    }
+
+    @PutMapping(&quot;/updateRoomPwd/{roomId}&quot;)
+    @ApiOperation(value = &quot;채팅방 비번 변경&quot;, notes = &quot;파라미터로 넘어오는 ROOMID 기준으로 채팅방 비번 변경&quot;)
+    public ResponseEntity&lt;?&gt; updateRoomPwd(@PathVariable String roomId, @RequestBody Map&lt;String, String&gt; body) {
+<span class="fc" id="L115">        String roomPwd = body.get(&quot;roomPwd&quot;);</span>
+<span class="fc" id="L116">        chatRoomService.updateRoomPassWord(roomId, roomPwd);</span>
+<span class="fc" id="L117">        return ResponseEntity.ok().build();</span>
+    }
+    @PutMapping(&quot;/updateRoomSecret/{roomId}&quot;)
+    @ApiOperation(value = &quot;채팅방 잠금 상태 변경&quot;, notes = &quot;파라미터로 넘어오는 ROOMID 기준으로 채팅방 잠금/오픈 상태 변경&quot;)
+    public ResponseEntity&lt;?&gt; updateRoomSecretCheck(@PathVariable String roomId, @RequestBody Map&lt;String, String&gt; body) {
+<span class="fc" id="L122">        String secretCheck = body.get(&quot;secretCheck&quot;);</span>
+<span class="fc" id="L123">        log.info(&quot;잠금 상태 ::::&quot; + secretCheck);</span>
+<span class="fc" id="L124">        chatRoomService.updateRoomSecretCheck(roomId, secretCheck);</span>
+<span class="fc" id="L125">        return ResponseEntity.ok().build();</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

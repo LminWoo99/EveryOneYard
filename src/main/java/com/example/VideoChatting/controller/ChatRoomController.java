@@ -64,7 +64,6 @@ public class ChatRoomController {
         if (chatRoom.getChatType().equals(ChatType.MSG)) {
             return "chatroom";
         } else {
-            log.info("화상채팅 유저 확인 :" + chatRoom.getUserRtcList());
             String uuid = UUID.randomUUID().toString().split("-")[0];
             model.addAttribute("uuid", uuid);
             model.addAttribute("roomId", chatRoom.getRoomId());

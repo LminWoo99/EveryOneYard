@@ -146,45 +146,64 @@ public class ChatRoomService {
 <span class="fc" id="L146">        return room.getUserList().get(userUUID);</span>
     }
 
+
     // 채팅방 전체 userlist 조회
     public ArrayList&lt;String&gt; getUserList(String roomId){
-<span class="fc" id="L151">        ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L152">        ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();</span>
 
-<span class="fc" id="L153">        ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS, roomId);</span>
+<span class="fc" id="L154">        ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS, roomId);</span>
 
         // hashmap 을 for 문을 돌린 후
         // value 값만 뽑아내서 list 에 저장 후 reutrn
-<span class="fc" id="L157">        room.getUserList().forEach((key, value) -&gt; list.add(value));</span>
-<span class="fc" id="L158">        return list;</span>
+<span class="fc" id="L158">        room.getUserList().forEach((key, value) -&gt; list.add(value));</span>
+<span class="fc" id="L159">        return list;</span>
     }
     // 채팅방 최대 인원 체크
     public boolean checkRoomUserCnt(String roomId) {
-<span class="fc" id="L162">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
+<span class="fc" id="L163">        ChatRoom room = chatRoomRepository.findByRoomId(roomId);</span>
 
 //        log.info(String.valueOf(room.getUserCount()));
 //        log.info(&quot;참여인원 확인 [{}, {}]&quot;, room.getUserCount(), room.getMaxUserCnt());
 
-<span class="fc bfc" id="L167" title="All 2 branches covered.">        if (room.getUserCount() + 1 &gt; room.getMaxUserCnt()) {</span>
-<span class="fc" id="L168">            return false;</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        if (room.getUserCount() + 1 &gt; room.getMaxUserCnt()) {</span>
+<span class="fc" id="L169">            return false;</span>
         }
-<span class="fc" id="L170">        return true;</span>
+<span class="fc" id="L171">        return true;</span>
     }
     //비밀번호 조회
     public boolean confirmPwd(String roomId, String roomPwd) {
-<span class="fc" id="L174">        return roomPwd.equals(opsHashChatRoom.get(CHAT_ROOMS, roomId).getRoomPwd());</span>
+<span class="fc" id="L175">        return roomPwd.equals(opsHashChatRoom.get(CHAT_ROOMS, roomId).getRoomPwd());</span>
     }
     @CacheEvict(value = &quot;ChatRoom&quot;, key = &quot;#roomId&quot;, cacheManager = &quot;testCacheManager&quot;)
     public void deleteChatRoom(String roomId) {
         try {
-<span class="fc" id="L179">            opsHashChatRoom.delete(roomId);</span>
 <span class="fc" id="L180">            ChatRoom byRoomId = chatRoomRepository.findByRoomId(roomId);</span>
-<span class="fc" id="L181">            chatRoomRepository.delete(byRoomId);</span>
-<span class="nc" id="L182">            fileService.deleteFileDir(roomId);</span>
-<span class="fc" id="L183">        } catch (Exception e) {</span>
-<span class="fc" id="L184">            log.error(e.getMessage());</span>
-<span class="nc" id="L185">        }</span>
-<span class="fc" id="L186">    }</span>
+<span class="fc" id="L181">            opsHashChatRoom.delete(roomId, byRoomId);</span>
+<span class="fc" id="L182">            chatRoomRepository.delete(byRoomId);</span>
+<span class="nc" id="L183">            fileService.deleteFileDir(roomId);</span>
+<span class="fc" id="L184">        } catch (Exception e) {</span>
+<span class="fc" id="L185">            log.error(e.getMessage());</span>
+<span class="nc" id="L186">        }</span>
+<span class="fc" id="L187">    }</span>
 
 
+    public void updateRoomName(String roomId, String roomName) {
+<span class="fc" id="L191">        chatRoomRepository.updateRoomName(roomId, roomName);</span>
+<span class="fc" id="L192">        opsHashChatRoom.delete(CHAT_ROOMS, roomId);</span>
+<span class="fc" id="L193">        opsHashChatRoom.put(CHAT_ROOMS, roomId, chatRoomRepository.findByRoomId(roomId));</span>
+
+<span class="fc" id="L195">    }</span>
+    public void updateRoomPassWord(String roomId, String roomPwd) {
+<span class="fc" id="L197">        chatRoomRepository.updateRoomPwd(roomId, roomPwd);</span>
+<span class="fc" id="L198">        opsHashChatRoom.delete(CHAT_ROOMS, roomId);</span>
+<span class="fc" id="L199">        opsHashChatRoom.put(CHAT_ROOMS, roomId, chatRoomRepository.findByRoomId(roomId));</span>
+<span class="fc" id="L200">    }</span>
+
+    public void updateRoomSecretCheck(String roomId, String secretCheck) {
+<span class="fc" id="L203">        log.info(secretCheck);</span>
+<span class="fc" id="L204">        chatRoomRepository.updateRoomSecretCheck(roomId, Boolean.valueOf(secretCheck));</span>
+<span class="fc" id="L205">        opsHashChatRoom.delete(CHAT_ROOMS, roomId);</span>
+<span class="fc" id="L206">        opsHashChatRoom.put(CHAT_ROOMS, roomId, chatRoomRepository.findByRoomId(roomId));</span>
+<span class="fc" id="L207">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

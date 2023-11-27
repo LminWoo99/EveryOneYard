@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KurentoHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.rtc</a> &gt; <span class="el_source">KurentoHandler.java</span></div><h1>KurentoHandler.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.service.rtc;
+
+import com.example.VideoChatting.dto.KurentoRoomDto;
+import com.example.VideoChatting.service.chat.ChatRoomService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import lombok.RequiredArgsConstructor;
+import org.kurento.client.IceCandidate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+
+import java.io.IOException;
+
+<span class="nc" id="L21">@RequiredArgsConstructor</span>
+public class KurentoHandler extends TextWebSocketHandler {
+
+    // 로깅을 위한 객체 생성
+<span class="nc" id="L25">    private static final Logger log = LoggerFactory.getLogger(KurentoHandler.class);</span>
+
+    // 데이터를 json 으로 넘겨 받고, 넘기기 때문에 관련 라이브러리로 GSON 을 사용함
+    // gson은 json구조를 띄는 직렬화된 데이터를 JAVA의 객체로 역직렬화, 직렬화 해주는 자바 라이브러리 입니다.
+<span class="nc" id="L29">    private static final Gson gson = new GsonBuilder().create();</span>
+
+    // 유저 등록? 을 위한 객체 생성
+    @Autowired
+   private KurentoUserService registry;
+
+   // room 매니저
+    @Autowired
+    private KurentoService roomManager;
+    @Autowired
+    private ChatRoomService chatRoomService;
+
+    // 이전에 사용하던 그 메서드
+    @Override
+    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+<span class="nc" id="L44">        final JsonObject jsonMessage = gson.fromJson(message.getPayload(), JsonObject.class);</span>
+
+<span class="nc" id="L46">        final KurentoUserSession user = registry.getBySession(session);</span>
+
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (user != null) {</span>
+<span class="nc" id="L49">            log.debug(&quot;Incoming message from user '{}': {}&quot;, user.getName(), jsonMessage);</span>
+        } else {
+<span class="nc" id="L51">            log.debug(&quot;Incoming message from new user: {}&quot;, jsonMessage);</span>
+        }
+
+        // 일전에 내가 만들었던 시그널링 서버와 동일하게 handleTextMessage 파라미터 message 로 값이 들어오면
+        // swtich 문으로 해당 message 를 잘라서 사용한다.
+        // 이때 message 는 json 형태로 들어온다
+        // key : id 에 대하여
+<span class="nc bnc" id="L58" title="All 5 branches missed.">        switch (jsonMessage.get(&quot;id&quot;).getAsString()) {</span>
+            case &quot;joinRoom&quot;: // value : joinRoom 인 경우
+<span class="nc" id="L60">                joinRoom(jsonMessage, session); // joinRoom 메서드를 실행</span>
+<span class="nc" id="L61">                break;</span>
+
+            case &quot;receiveVideoFrom&quot;: // receiveVideoFrom 인 경우
+                // sender 명 - 사용자명 - 과
+<span class="nc" id="L65">                final String senderName = jsonMessage.get(&quot;sender&quot;).getAsString();</span>
+                // 유저명을 통해 session 값을 가져온다
+<span class="nc" id="L67">                final KurentoUserSession sender = registry.getByName(senderName);</span>
+                // jsonMessage 에서 sdpOffer 값을 가져온다
+<span class="nc" id="L69">                final String sdpOffer = jsonMessage.get(&quot;sdpOffer&quot;).getAsString();</span>
+                // 이후 receiveVideoFrom 실행 =&gt; 아마도 특정 유저로부터 받은 비디오를 다른 유저에게 넘겨주는게 아닌가...?
+<span class="nc" id="L71">                user.receiveVideoFrom(sender, sdpOffer);</span>
+<span class="nc" id="L72">                break;</span>
+
+            case &quot;leaveRoom&quot;: // 유저가 나간 경우
+<span class="nc" id="L75">                leaveRoom(user);</span>
+<span class="nc" id="L76">                break;</span>
+
+            case &quot;onIceCandidate&quot;: // 유저에 대해 IceCandidate 프로토콜을 실행할 때
+<span class="nc" id="L79">                JsonObject candidate = jsonMessage.get(&quot;candidate&quot;).getAsJsonObject();</span>
+
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                if (user != null) {</span>
+<span class="nc" id="L82">                    IceCandidate cand = new IceCandidate(candidate.get(&quot;candidate&quot;).getAsString(),</span>
+<span class="nc" id="L83">                            candidate.get(&quot;sdpMid&quot;).getAsString(), candidate.get(&quot;sdpMLineIndex&quot;).getAsInt());</span>
+<span class="nc" id="L84">                    user.addCandidate(cand, jsonMessage.get(&quot;name&quot;).getAsString());</span>
+<span class="nc" id="L85">                }</span>
+                break;
+
+            default:
+                break;
+        }
+<span class="nc" id="L91">    }</span>
+
+    // 유저의 연결이 끊어진 경우
+    // 참여자 목록에서 유저 제거
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+<span class="nc" id="L97">        KurentoUserSession user = registry.removeBySession(session);</span>
+//        roomManager.getRoom(user.getRoomName()).leave(user);
+<span class="nc" id="L99">    }</span>
+
+    // 유저가 Room 에 입장했을 때
+    public void joinRoom(JsonObject params, WebSocketSession session) throws IOException {
+        // json 형태의 params 에서 room 과 name 을 분리해온다
+<span class="nc" id="L104">        final String roomName = params.get(&quot;room&quot;).getAsString();</span>
+<span class="nc" id="L105">        final String name = params.get(&quot;name&quot;).getAsString();</span>
+<span class="nc" id="L106">        log.info(&quot;PARTICIPANT {}: trying to join room {}&quot;, name, roomName);</span>
+
+        // roomName 를 기준으로 room 으 ㄹ가져온다
+<span class="nc" id="L109">        KurentoRoomDto room = roomManager.getRoom(roomName);</span>
+<span class="nc" id="L110">        log.info(&quot;handler 룸 네임&quot;+room);</span>
+        // 유저명과 session 을 room 에 넘겨서 room 에 유저 저장
+<span class="nc" id="L112">        final KurentoUserSession user = room.join(name, session);</span>
+<span class="nc" id="L113">        chatRoomService.plusUserCnt(room.getRoomId());</span>
+        // 단순히 room 에 저장하는 것 외에도 user 를 저장하기 위한 메서드?
+<span class="nc" id="L115">        registry.register(user);</span>
+<span class="nc" id="L116">    }</span>
+
+    // 유저가 room 에서 떠났을 때
+    private void leaveRoom(KurentoUserSession user) throws IOException {
+        // 유저명을 기준으로 room 을 가져온다
+<span class="nc" id="L121">        final KurentoRoomDto room = roomManager.getRoom(user.getRoomName());</span>
+        // room 에서 유저를 제거하고
+<span class="nc" id="L123">        room.leave(user);</span>
+
+        // room 에서 userCount -1
+<span class="nc" id="L126">        chatRoomService.minusUserCnt(room.getRoomId());</span>
+
+<span class="nc" id="L128">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

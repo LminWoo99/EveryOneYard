@@ -1,5 +1,6 @@
 package com.example.VideoChatting.controller;
 
+import com.example.VideoChatting.dto.KurentoRoomDto;
 import com.example.VideoChatting.dto.WebSocketMessage;
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.service.rtc.RtcChatService;
@@ -43,10 +44,10 @@ class RtcChatControllerTest {
         String secretCheck2 = "true";
         String maxUserCnt2 = "100";
 
-        ChatRoom chatRoom = new ChatRoom();
+        KurentoRoomDto kurentoRoomDto = new KurentoRoomDto();
         rtcChatService.createChatRoom(roomName, roomPwd, secretCheck, maxUserCnt);
 
-        when(rtcChatService.createChatRoom(roomName, roomPwd, true, 100)).thenReturn(chatRoom);
+        when(rtcChatService.createChatRoom(roomName, roomPwd, true, 100)).thenReturn(kurentoRoomDto);
 
         mockMvc.perform(post("/chat/createRtcRoom")
                         .param("roomName", roomName)
