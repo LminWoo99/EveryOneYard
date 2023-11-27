@@ -16,9 +16,10 @@
 5️⃣ [현재 개발된 기능](#-현재-개발된-기능--current-development-function) <br/>
 6️⃣ [기술 스택](#-기술-스택--technology-stack) <br/>
 7️⃣ [기술적 의사결정](#-기술적-의사결정--technical-decision-making) <br/>
-8️⃣ [트러블 슈팅](#-트러블-슈팅--trouble-shooting) <br/>
-9️⃣ [성능 튜닝](#-성능-튜닝-및-개선--performance-tuning) <br/>
-🔟 [Api 문서](#-Api-문서--api-docs) <br/> 
+8️⃣ [Junit5 단위 테스트](#-junit5-단위-테스트--junit5-unit-test) <br/>
+9️⃣ [트러블 슈팅](#-트러블-슈팅--trouble-shooting) <br/>
+🔟 [성능 튜닝](#-성능-튜닝-및-개선--performance-tuning) <br/>
+#️⃣ [Api 문서](#-Api-문서--api-docs) <br/> 
 #️⃣ [시연 GIF](#-시연-gif--testing) <br/>
 
 
