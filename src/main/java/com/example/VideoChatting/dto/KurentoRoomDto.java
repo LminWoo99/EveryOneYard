@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentMap;
 @NoArgsConstructor
 @RequiredArgsConstructor
 public class KurentoRoomDto extends ChatRoom implements Closeable
+
 {
 
     // 로깅 객체 생성
@@ -74,12 +75,7 @@ public class KurentoRoomDto extends ChatRoom implements Closeable
     }
     public void createPipline(){
         this.pipeline = this.kurento.createMediaPipeline();
-//    log.info("pipline : {} ",this.pipeline);
     }
-
-    /**
-     * @desc 종료시 실행?
-     * */
     @PreDestroy
     private void shutdown() {
         this.close();

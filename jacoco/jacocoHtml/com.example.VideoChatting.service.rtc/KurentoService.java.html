@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KurentoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.rtc</a> &gt; <span class="el_source">KurentoService.java</span></div><h1>KurentoService.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.service.rtc;
+
+import com.example.VideoChatting.dto.ChatRoomMap;
+import com.example.VideoChatting.dto.KurentoRoomDto;
+import com.example.VideoChatting.entity.ChatRoom;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+
+import java.io.IOException;
+import java.util.concurrent.ConcurrentMap;
+
+@Service
+<span class="fc" id="L16">@RequiredArgsConstructor</span>
+public class KurentoService {
+
+  // 로깅을 위한 객체 생성
+<span class="fc" id="L20">  private final Logger log = LoggerFactory.getLogger(KurentoService.class);</span>
+
+  // kurento 미디어 서버 연결을 위한 객체 생성?
+//  private final KurentoClient kurento;
+
+  /**
+   * @desc room 정보를 담은 map
+   * */
+//  private final ConcurrentMap&lt;String, KurentoRoom&gt; rooms = new ConcurrentHashMap&lt;&gt;();
+<span class="fc" id="L29">  private final ConcurrentMap&lt;String, ChatRoom&gt; rooms = ChatRoomMap.getInstance().getChatRooms();</span>
+
+  /**
+   *
+   * @Desc room 정보 가져오기
+   * @param roomId room 이름
+   * @return 만약에 room 이 있다면 해당 room 객체 return 아니라면 새로운 room 생성 후 return
+   */
+  public KurentoRoomDto getRoom(String roomId) {
+<span class="fc" id="L38">    log.info(&quot;Searching for room {}&quot;, roomId);</span>
+
+    // roomName 기준으로 room 가져오기
+<span class="fc" id="L41">    KurentoRoomDto room = (KurentoRoomDto) rooms.get(roomId);</span>
+<span class="fc" id="L42">    log.info(&quot;Searching for room {}&quot; +rooms);</span>
+    // room return
+<span class="fc" id="L44">    return room;</span>
+  }
+
+  /**
+   *
+   * @param room
+   * @Desc room 삭제
+   */
+  public void removeRoom(KurentoRoomDto room) throws IOException {
+    // rooms 에서 room 객체 삭제 =&gt; 이때 room 의 Name 을 가져와서 조회 후 삭제
+<span class="fc" id="L54">    this.rooms.remove(room.getRoomId());</span>
+<span class="fc" id="L55">    room.close();</span>
+
+<span class="fc" id="L57">    log.info(&quot;Room {} removed and closed&quot;, room.getRoomId());</span>
+<span class="fc" id="L58">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

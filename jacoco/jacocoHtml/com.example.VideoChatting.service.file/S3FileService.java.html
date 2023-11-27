@@ -50,36 +50,36 @@ public class S3FileService implements FileService {
     public FileUploadDto uploadFile(MultipartFile file, String transaction, String roomId) {
         try{
 
-<span class="nc" id="L53">            String filename = file.getOriginalFilename(); // 파일원본 이름</span>
-<span class="nc" id="L54">            String key = roomId+&quot;/&quot;+transaction+&quot;/&quot;+filename; // S3 파일 경로</span>
+<span class="fc" id="L53">            String filename = file.getOriginalFilename(); // 파일원본 이름</span>
+<span class="fc" id="L54">            String key = roomId+&quot;/&quot;+transaction+&quot;/&quot;+filename; // S3 파일 경로</span>
 
             // 매개변수로 넘어온 multipartFile 을 File 객체로 변환 시켜서 저장하기 위한 메서드
-<span class="nc" id="L57">            File convertedFile = convertMultipartFileToFile(file, transaction + filename);</span>
+<span class="fc" id="L57">            File convertedFile = convertMultipartFileToFile(file, transaction + filename);</span>
 
             // 아마존 S3 에 파일 업로드를 위해 사용하는 TransferManagerBuilder
             TransferManager transferManager = TransferManagerBuilder
-<span class="nc" id="L61">                    .standard()</span>
-<span class="nc" id="L62">                    .withS3Client(amazonS3)</span>
-<span class="nc" id="L63">                    .build();</span>
+<span class="fc" id="L61">                    .standard()</span>
+<span class="fc" id="L62">                    .withS3Client(amazonS3)</span>
+<span class="fc" id="L63">                    .build();</span>
 
             // bucket 에 key 와 converedFile 을 이용해서 파일 업로드
-<span class="nc" id="L66">            Upload upload = transferManager.upload(bucket, key, convertedFile);</span>
-<span class="nc" id="L67">            upload.waitForUploadResult();</span>
+<span class="fc" id="L66">            Upload upload = transferManager.upload(bucket, key, convertedFile);</span>
+<span class="fc" id="L67">            upload.waitForUploadResult();</span>
 
             // 변환된 File 객체 삭제
-<span class="nc" id="L70">            removeFile(convertedFile);</span>
+<span class="fc" id="L70">            removeFile(convertedFile);</span>
 
             // uploadDTO 객체 빌드
-<span class="nc" id="L73">            FileUploadDto uploadReq = FileUploadDto.builder()</span>
-<span class="nc" id="L74">                    .transaction(transaction)</span>
-<span class="nc" id="L75">                    .chatRoom(roomId)</span>
-<span class="nc" id="L76">                    .originFileName(filename)</span>
-<span class="nc" id="L77">                    .fileDir(key)</span>
-<span class="nc" id="L78">                    .s3DataUrl(baseUrl+&quot;/&quot;+key)</span>
-<span class="nc" id="L79">                    .build();</span>
+<span class="fc" id="L73">            FileUploadDto uploadReq = FileUploadDto.builder()</span>
+<span class="fc" id="L74">                    .transaction(transaction)</span>
+<span class="fc" id="L75">                    .chatRoom(roomId)</span>
+<span class="fc" id="L76">                    .originFileName(filename)</span>
+<span class="fc" id="L77">                    .fileDir(key)</span>
+<span class="fc" id="L78">                    .s3DataUrl(baseUrl+&quot;/&quot;+key)</span>
+<span class="fc" id="L79">                    .build();</span>
 
             // uploadDTO 객체 리턴
-<span class="nc" id="L82">            return uploadReq;</span>
+<span class="fc" id="L82">            return uploadReq;</span>
 
 <span class="nc" id="L84">        } catch (Exception e) {</span>
 <span class="nc" id="L85">            log.error(&quot;fileUploadException {}&quot;, e.getMessage());</span>
@@ -89,36 +89,36 @@ public class S3FileService implements FileService {
 
     @Override
     public void deleteFileDir(String path) {
-<span class="nc bnc" id="L92" title="All 2 branches missed.">        for (S3ObjectSummary summary : amazonS3.listObjects(bucket, path).getObjectSummaries()) {</span>
-<span class="nc" id="L93">            amazonS3.deleteObject(bucket, summary.getKey());</span>
-<span class="nc" id="L94">        }</span>
-<span class="nc" id="L95">    }</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        for (S3ObjectSummary summary : amazonS3.listObjects(bucket, path).getObjectSummaries()) {</span>
+<span class="fc" id="L93">            amazonS3.deleteObject(bucket, summary.getKey());</span>
+<span class="fc" id="L94">        }</span>
+<span class="fc" id="L95">    }</span>
 
     // byte 배열 타입을 return 한다.
 
     @Override
     public ResponseEntity&lt;byte[]&gt; getObject(String fileDir, String fileName) throws IOException {
         // bucket 와 fileDir 을 사용해서 S3 에 있는 객체 - object - 를 가져온다.
-<span class="nc" id="L102">        S3Object object = amazonS3.getObject(new GetObjectRequest(bucket, fileDir));</span>
+<span class="fc" id="L102">        S3Object object = amazonS3.getObject(new GetObjectRequest(bucket, fileDir));</span>
 
         // object 를 S3ObjectInputStream 형태로 변환한다.
-<span class="nc" id="L105">        S3ObjectInputStream objectInputStream = object.getObjectContent();</span>
+<span class="fc" id="L105">        S3ObjectInputStream objectInputStream = object.getObjectContent();</span>
 
         // 이후 다시 byte 배열 형태로 변환한다.
         // 아마도 파일 다운로드를 위해서는 byte 형태로 변환할 필요가 있어서 그런듯하다
-<span class="nc" id="L109">        byte[] bytes = IOUtils.toByteArray(objectInputStream);</span>
+<span class="fc" id="L109">        byte[] bytes = IOUtils.toByteArray(objectInputStream);</span>
 
         // 여기는 httpHeader 에 파일 다운로드 요청을 하기 위한내용
-<span class="nc" id="L112">        HttpHeaders httpHeaders = new HttpHeaders();</span>
-<span class="nc" id="L113">        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);</span>
+<span class="fc" id="L112">        HttpHeaders httpHeaders = new HttpHeaders();</span>
+<span class="fc" id="L113">        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);</span>
 
         // 지정된 fileName 으로 파일이 다운로드 된다.
-<span class="nc" id="L116">        httpHeaders.setContentDispositionFormData(&quot;attachment&quot;, fileName);</span>
+<span class="fc" id="L116">        httpHeaders.setContentDispositionFormData(&quot;attachment&quot;, fileName);</span>
 
-<span class="nc" id="L118">        log.info(&quot;HttpHeader : [{}]&quot;, httpHeaders);</span>
+<span class="fc" id="L118">        log.info(&quot;HttpHeader : [{}]&quot;, httpHeaders);</span>
 
 
-<span class="nc" id="L121">        return new ResponseEntity&lt;&gt;(bytes, httpHeaders, HttpStatus.OK);</span>
+<span class="fc" id="L121">        return new ResponseEntity&lt;&gt;(bytes, httpHeaders, HttpStatus.OK);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

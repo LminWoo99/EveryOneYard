@@ -99,7 +99,7 @@ public class KurentoHandler extends TextWebSocketHandler {
     }
 
     // 유저가 Room 에 입장했을 때
-    private void joinRoom(JsonObject params, WebSocketSession session) throws IOException {
+    public void joinRoom(JsonObject params, WebSocketSession session) throws IOException {
         // json 형태의 params 에서 room 과 name 을 분리해온다
         final String roomName = params.get("room").getAsString();
         final String name = params.get("name").getAsString();

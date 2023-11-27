@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KurentoUserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.rtc</a> &gt; <span class="el_source">KurentoUserService.java</span></div><h1>KurentoUserService.java</h1><pre class="source lang-java linenums">package com.example.VideoChatting.service.rtc;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.util.concurrent.ConcurrentHashMap;
+
+
+@Service
+<span class="fc" id="L11">@RequiredArgsConstructor</span>
+public class KurentoUserService {
+
+  /**
+   * @Desc 유저명 - userSession 객체 저장 map
+   * */
+<span class="fc" id="L17">  private final ConcurrentHashMap&lt;String, KurentoUserSession&gt; usersByName = new ConcurrentHashMap&lt;&gt;();</span>
+
+  /**
+   * @Desc 세션아이디 - userSession 객체 저장 map
+   * */
+<span class="fc" id="L22">  private final ConcurrentHashMap&lt;String, KurentoUserSession&gt; usersBySessionId = new ConcurrentHashMap&lt;&gt;();</span>
+
+  /**
+   * @Desc userSession 을 파라미터로 받은 후 해당 객체에서 userName 과 sessionId 를 key 로해서 userSession 저장
+   * */
+  public void register(KurentoUserSession user) {
+<span class="fc" id="L28">    usersByName.put(user.getName(), user);</span>
+<span class="fc" id="L29">    usersBySessionId.put(user.getSession().getId(), user);</span>
+<span class="fc" id="L30">  }</span>
+
+  /**
+   * @Desc 유저명으로 userSession 을 가져옴
+   * @Param userName
+   * @Return userSession
+   * */
+  public KurentoUserSession getByName(String name) {
+<span class="fc" id="L38">    return usersByName.get(name);</span>
+  }
+
+  /**
+   * @Desc 파라미터로 받은 webSocketSession 로 userSession 을 가져옴
+   * @Param WebSocketSession
+   * @Return userSession
+   * */
+  public KurentoUserSession getBySession(WebSocketSession session) {
+<span class="fc" id="L47">    return usersBySessionId.get(session.getId());</span>
+  }
+
+  /**
+   * @Desc 파라미터로 받은 userName 이 usersByName map 에 있는지 검색
+   * @Param String userName
+   * @Return Boolean
+   * */
+  public boolean exists(String name) {
+<span class="fc" id="L56">    return usersByName.keySet().contains(name);</span>
+  }
+
+  /**
+   * @Desc 파라미터로 WebSocketSession 을 받은 후 이를 기준으로 해당 유저의 userSession 객체를 가져옴,
+   *        이후 userByName 과 userBySessionId 에서 해당 유저를 삭제함
+   * @Param WebSocketSession session
+   * @return userSession 객체
+   * */
+  public KurentoUserSession removeBySession(WebSocketSession session) {
+<span class="fc" id="L66">    final KurentoUserSession user = getBySession(session);</span>
+<span class="fc" id="L67">    usersByName.remove(user.getName());</span>
+<span class="fc" id="L68">    usersBySessionId.remove(session.getId());</span>
+<span class="fc" id="L69">    return user;</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

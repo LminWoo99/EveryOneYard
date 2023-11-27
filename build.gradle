@@ -78,10 +78,12 @@ jacocoTestReport {
 			fileTree(dir: it, exclude: [
 					"com/example/VideoChatting/dto/*",
 					"com/example/VideoChatting/entity/*",
+					'!com/example/VideoChatting/entity/ChatUser.class',
 					"**/config/*",
 					"**/exception/*",
 					"**/oAuth/*",
-					"**/SignalHandler.class"
+					"**/KurentoHandler.class",
+					"**/KurentoUserSession.class/**",
 			])
 		}))
 	}

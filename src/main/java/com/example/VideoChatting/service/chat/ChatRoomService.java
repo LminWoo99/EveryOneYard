@@ -146,6 +146,7 @@ public class ChatRoomService {
         return room.getUserList().get(userUUID);
     }
 
+
     // 채팅방 전체 userlist 조회
     public ArrayList<String> getUserList(String roomId){
         ArrayList<String> list = new ArrayList<>();
