@@ -17,21 +17,21 @@ public interface FileService {
 
     // 컨트롤러에서 받아온 multipartFile 을 File 로 변환시켜서 저장하기 위한 메서드
     default File convertMultipartFileToFile(MultipartFile mfile, String tmpPath) throws IOException {
-<span class="nc" id="L20">        File file = new File(tmpPath);</span>
+<span class="fc" id="L20">        File file = new File(tmpPath);</span>
 
-<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (file.createNewFile()) {</span>
-<span class="nc" id="L23">            try (FileOutputStream fos = new FileOutputStream(file)) {</span>
-<span class="nc" id="L24">                fos.write(mfile.getBytes());</span>
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (file.createNewFile()) {</span>
+<span class="fc" id="L23">            try (FileOutputStream fos = new FileOutputStream(file)) {</span>
+<span class="fc" id="L24">                fos.write(mfile.getBytes());</span>
             }
-<span class="nc" id="L26">            return file;</span>
+<span class="fc" id="L26">            return file;</span>
         }
 <span class="nc" id="L28">        throw new IOException();</span>
     }
 
     // 파일 삭제
     default void removeFile(File file){
-<span class="nc" id="L33">        file.delete();</span>
-<span class="nc" id="L34">    }</span>
+<span class="fc" id="L33">        file.delete();</span>
+<span class="fc" id="L34">    }</span>
 
     ResponseEntity&lt;byte[]&gt; getObject(String fileDir, String fileName) throws IOException;
 }

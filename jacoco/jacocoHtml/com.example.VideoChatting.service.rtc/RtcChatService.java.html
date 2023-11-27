@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RtcChatService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VideoChatting</a> &gt; <a href="index.source.html" class="el_package">com.example.VideoChatting.service.rtc</a> &gt; <span class="el_source">RtcChatService.java</span></div><h1>RtcChatService.java</h1><pre class="source lang-java linenums">
+package com.example.VideoChatting.service.rtc;
+import com.example.VideoChatting.dto.ChatRoomMap;
+import com.example.VideoChatting.dto.KurentoRoomDto;
+import com.example.VideoChatting.dto.WebSocketMessage;
+import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.entity.ChatType;
+import com.example.VideoChatting.repository.ChatRoomRepository;
+import com.example.VideoChatting.service.chat.ChatRoomService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.kurento.client.KurentoClient;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketSession;
+
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+<span class="fc" id="L23">@Slf4j</span>
+<span class="fc" id="L24">@RequiredArgsConstructor</span>
+@Service
+public class RtcChatService {
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomService chatRoomService;
+    // Redis
+    private static final String CHAT_ROOMS = &quot;CHAT_ROOM&quot;;
+    public static final String ENTER_INFO = &quot;ENTER_INFO&quot;;
+    private final RedisTemplate&lt;String, Object&gt; redisTemplate;
+    private HashOperations&lt;String, String, ChatRoom&gt; opsHashChatRoom;
+    // 채팅방의 대화 메시지를 발행하기 위한 redis topic 정보. 서버별로 채팅방에 매치되는 topic정보를 Map에 넣어 roomId로 찾을수 있도록 한다.
+    private Map&lt;String, ChannelTopic&gt; topics;
+    private Map&lt;String, ChatRoom&gt; chatRoomMap;
+    private final KurentoClient kurento;
+
+    @PostConstruct
+    private void init() {
+<span class="fc" id="L41">        chatRoomMap = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L42">        opsHashChatRoom = redisTemplate.opsForHash();</span>
+<span class="fc" id="L43">        topics = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L44">    }</span>
+    public KurentoRoomDto createChatRoom(String roomName, String roomPwd, boolean secretCheck, int maxUserCnt) {
+        // roomName 와 roomPwd 로 chatRoom 빌드 후 return
+//        ChatRoom room = new ChatRoom().create( roomName, roomPwd, secretCheck
+//                , maxUserCnt
+//        );
+<span class="fc" id="L50">        KurentoRoomDto room = new KurentoRoomDto();</span>
+<span class="fc" id="L51">        String roomId = UUID.randomUUID().toString();</span>
+<span class="fc" id="L52">        room.setRoomInfo(roomId, roomName, roomPwd, secretCheck, 0, maxUserCnt, ChatType.RTC, kurento);</span>
+<span class="fc" id="L53">        room.createPipline();</span>
+        // msg 타입이면 ChatType.MSG
+<span class="fc" id="L55">        room.setUserKurentoList(new ConcurrentHashMap&lt;String, WebSocketSession&gt;());</span>
+        // map 에 채팅룸 아이디와 만들어진 채팅룸을 저장
+<span class="fc" id="L57">        ChatRoom chatRoom = new ChatRoom().createRtc(roomId, roomName, roomPwd, secretCheck, maxUserCnt);</span>
+<span class="fc" id="L58">        chatRoom.setChatType(ChatType.RTC);</span>
+
+<span class="fc" id="L60">        opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);</span>
+<span class="fc" id="L61">        ChatRoomMap.getInstance().getChatRooms().put(room.getRoomId(), room);</span>
+
+
+<span class="fc" id="L64">        chatRoomRepository.save(chatRoom);</span>
+<span class="fc" id="L65">        return room;</span>
+    }
+
+    public Map&lt;String, WebSocketSession&gt; getClients(ChatRoom room) {
+
+<span class="fc" id="L70">        Optional&lt;ChatRoom&gt; roomDto = Optional.ofNullable(room);</span>
+
+<span class="fc" id="L72">        return roomDto.get().getUserRtcList();</span>
+    }
+
+    public Map&lt;String, WebSocketSession&gt; addClient(ChatRoom room, String name, WebSocketSession session) {
+<span class="fc" id="L76">        log.info(&quot;room info: []&quot;+ room.getRoomId());</span>
+<span class="fc" id="L77">        Map&lt;String, WebSocketSession&gt; userRtcList = room.getUserRtcList();</span>
+<span class="fc" id="L78">        log.info(&quot;세션 정보&quot;+ session);</span>
+<span class="fc" id="L79">        userRtcList.put(name, session);</span>
+<span class="fc" id="L80">        return userRtcList;</span>
+    }
+
+    // userList 에서 클라이언트 삭제
+    public void removeClientByName(ChatRoom room, String userUUID) {
+<span class="fc" id="L85">        room.getUserRtcList().remove(userUUID);</span>
+<span class="fc" id="L86">    }</span>
+
+    // 유저 카운터 return
+    public boolean findUserCount(WebSocketMessage webSocketMessage){
+<span class="fc" id="L90">        log.info(&quot;웹소켓 데이터 : &quot;+ webSocketMessage.getData());</span>
+<span class="fc" id="L91">        ChatRoom room = ChatRoomMap.getInstance().getChatRooms().get(webSocketMessage.getData());</span>
+
+<span class="fc" id="L93">        log.info(&quot;room 아이디는 : &quot;+ room.getRoomId());</span>
+<span class="fc" id="L94">        log.info(&quot;rtc size 22: &quot; + room.getUserRtcList().size());</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        return room.getUserRtcList().size() &gt; 1;</span>
+    }
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

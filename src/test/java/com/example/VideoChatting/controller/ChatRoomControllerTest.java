@@ -141,7 +141,7 @@ class ChatRoomControllerTest {
 
         //then
         perform.andExpect(status().isOk())
-                .andExpect(view().name("rtcroom"))
+                .andExpect(view().name("kurentoroom"))
                 .andExpect(model().attributeExists("room"));
     }
     @Test
@@ -183,6 +183,27 @@ class ChatRoomControllerTest {
         //then
         perform.andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(false));
+    }
+    @Test
+    @DisplayName("잠금상태 확인 컨트롤러 테스트")
+    void chatRoomSecretCheckTest() throws Exception{
+        //given
+        String roomName = "채팅방 입장";
+
+        String roomPwd = "1234";
+        ChatRoom createdChatRoom = new ChatRoom().create(roomName,roomPwd, Boolean.TRUE, 50);
+        String roomId = createdChatRoom.getRoomId();
+        when(chatRoomService.findRoomById(roomId)).thenReturn(createdChatRoom);
+        String expectedJson = String.format("{\"id\":null,\"roomId\":\"%s\",\"roomName\":\"채팅방 입장\",\"userCount\":0,\"maxUserCnt\":50,\"roomPwd\":\"1234\",\"secretCheck\":true,\"userList\":{},\"userKurentoList\":{},\"userRtcList\":{},\"chatType\":null}", roomId);
+        //then
+        mockMvc.perform(get("/chat/findSecretCheck")
+                        .param("roomId", roomId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson))
+                .andDo(print());
+
+
     }
     @Test
     @DisplayName("채팅방 삭제 컨트롤러 테스트")

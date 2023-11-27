@@ -4,8 +4,10 @@ import com.example.VideoChatting.dto.ChatDto;
 import com.example.VideoChatting.entity.ChatRoom;
 import com.example.VideoChatting.service.chat.ChatRoomService;
 import com.example.VideoChatting.service.chat.ChatService;
+
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.example.VideoChatting.service.chat.RedisPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,8 +27,10 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
@@ -165,6 +169,17 @@ class ChatControllerTest {
         perform.andExpect(status().isOk())
                 .andExpect(content().string("lee"));
 
+    }
+    @Test
+    @DisplayName("coturn 서버 설정 값 반환 테스트")
+    void turnConfigTest() throws Exception{
+        //when
+        ResultActions perform = mockMvc.perform(post("/turnconfig"));
+        //then
+        mockMvc.perform(post("/turnconfig"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
     }
     private static String asJsonString(final Object obj) {
         try {
