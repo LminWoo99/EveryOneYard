@@ -154,6 +154,34 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // roomId를 설정하는 로직 필요 (예: URL 파라미터에서 추출)
+        var roomId = [[${room.roomId}]];  // 실제 roomId로 대체 필요
+        console.log(roomId);
+        // EventSource 객체 생성
+        var eventSource = new EventSource(`/api/notification/subscribe?roomId=${roomId}`);
+
+        // 서버로부터 메시지 수신 시 처리할 이벤트 리스너
+        eventSource.onmessage = function(event) {
+            // 수신된 데이터 처리
+            console.log("Received message: ", event.data);
+
+            // 알림을 표시하는 로직 (예: 메시지 목록에 메시지 추가)
+            var messageList = document.getElementById('messageArea');
+            var li = document.createElement('li');
+            li.className = 'other-message';
+            li.textContent = event.data; // 서버로부터 수신된 메시지 표시
+            messageList.appendChild(li);
+        };
+
+        // 연결 오류 처리
+        eventSource.onerror = function(err) {
+            console.error("EventSource failed:", err);
+            eventSource.close(); // 연결 종료
+        };
+    });
+</script>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>

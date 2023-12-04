@@ -3,6 +3,7 @@ package com.example.VideoChatting.entity;
 import com.example.VideoChatting.service.rtc.KurentoUserSession;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.persistence.*;
@@ -35,6 +36,7 @@ public class ChatRoom implements Serializable {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<ChatMessage> chatMessageList = new ArrayList<>();
+
 
     public HashMap<String, String> userList = new HashMap<String, String>();
     @Transient
@@ -72,7 +74,6 @@ public class ChatRoom implements Serializable {
     public void setUserCount(int userCount) {
         this.userCount = userCount;
     }
-
     public void addChatMessages(ChatMessage chatMessage) {
         this.chatMessageList.add(chatMessage);
     }
