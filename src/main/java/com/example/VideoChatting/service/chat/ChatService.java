@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
-
     private final RedisTemplate<String, ChatDto> redisTemplate;
 
 
@@ -47,6 +46,7 @@ public class ChatService {
 
         // 3. expire 을 이용해서, Key 를 만료시킬 수 있음
         redisTemplate.expire(chatDto.getRoomId(), 1, TimeUnit.MINUTES);
+//        notificationService.notifyMessage(room.getRoomId(),chatDto.getSender());
     }
     // 6. 대화 조회 - Redis & DB
     public List<ChatDto> loadMessage(String roomId) {
