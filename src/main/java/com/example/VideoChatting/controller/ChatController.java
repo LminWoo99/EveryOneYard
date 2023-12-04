@@ -77,6 +77,8 @@ public class ChatController {
         // Websocket에 발행된 메시지를 redis로 발행(publish)
         redisPublisher.publish(chatRoomService.getTopic(chat.getRoomId()), message1);
         chatService.saveMessage(chat);
+//        notificationService.notifyMessage(chatRoom.getRoomId(), chat.getSender());
+
 //        template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
 
     }
