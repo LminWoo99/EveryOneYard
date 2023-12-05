@@ -23,16 +23,16 @@ jobs:
           distribution: 'temurin'
 
 
-      - name: make application-prod.yml
-        run: |
-          cd ./src/main/resources
-          touch ./application.yml
-          echo "${{ secrets.APPLICATION_PROD }}" > ./application.yml
-      - name: make application-prod.yaml
-        run: |
-          cd ./src/main/resources
-          touch ./application.yaml
-          echo "${{ secrets.APPLICATION_PRO }}" > ./application.yaml
+#      - name: make application-prod.yml
+#        run: |
+#          cd ./src/main/resources
+#          touch ./application.yml
+#          echo "${{ secrets.APPLICATION_PROD }}" > ./application.yml
+#      - name: make application-prod.yaml
+#        run: |
+#          cd ./src/main/resources
+#          touch ./application.yaml
+#          echo "${{ secrets.APPLICATION_PRO }}" > ./application.yaml
 
 
       - name: Grant execute permission for gradlew
@@ -58,6 +58,8 @@ jobs:
 #            docker pull ${{ secrets.DOCKER_USERNAME }}/chat
 #            docker stop $(docker ps -a -q | grep -v $(docker-compose ps -q kurento)) # Kurento 서비스를 제외한 다른 모든 컨테이너 중지
 #            docker rm $(docker ps --filter 'status=exited' -a -q) # 종료된(exited) 상태의 모든 컨테이너 삭제
+#            echo "${{ secrets.APPLICATION_PROD }}" > ./src/main/resources/application.yml
+#            echo "${{ secrets.APPLICATION_PRO }}" > ./src/main/resources/application.yaml
 #            docker-compose up -d
 #            docker image prune -a -f
 
@@ -72,5 +74,7 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/chat
             docker stop $(docker ps -a -q | grep -v $(docker-compose ps -q kurento)) # Kurento 서비스를 제외한 다른 모든 컨테이너 중지
             docker rm $(docker ps --filter 'status=exited' -a -q) # 종료된(exited) 상태의 모든 컨테이너 삭제
+            echo "${{ secrets.APPLICATION_PROD2 }}" > ./src/main/resources/application.yml
+            echo "${{ secrets.APPLICATION_PRO }}" > ./src/main/resources/application.yaml
             docker-compose up -d
             docker image prune -a -f
