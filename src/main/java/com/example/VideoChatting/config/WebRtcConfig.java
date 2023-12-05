@@ -38,11 +38,11 @@ public class WebRtcConfig implements WebSocketConfigurer {
     }
 
     // 웹 소켓에서 rtc 통신을 위한 최대 텍스트 버퍼와 바이너리 버퍼 사이즈를 설정한다
-//    @Bean
-//    public ServletServerContainerFactoryBean createWebSocketContainer() {
-//        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-//        container.setMaxTextMessageBufferSize(32768);
-//        container.setMaxBinaryMessageBufferSize(32768);
-//        return container;
-//    }
+    @Bean
+    public ServletServerContainerFactoryBean createWebSocketContainer() {
+        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+        container.setMaxTextMessageBufferSize(32768);
+        container.setMaxBinaryMessageBufferSize(32768);
+        return container;
+    }
 }
