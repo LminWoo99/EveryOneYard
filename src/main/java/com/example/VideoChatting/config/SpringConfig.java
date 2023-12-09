@@ -16,9 +16,11 @@ public class SpringConfig implements WebSocketMessageBrokerConfigurer {
         // stomp 접속 주소 url => /ws-stomp
         registry.addEndpoint("/ws-stomp") // 연결될 엔드포인트
                 .setAllowedOriginPatterns("https://everyoneyard.shop/") // 모든 도메인에서 접근 허용 (* 대신 특정 도메인을 지정할 수도 있습니다)
+                .setAllowedOriginPatterns("*")
                 .setHandshakeHandler(new DefaultHandshakeHandler())
                 .addInterceptors(new HttpSessionHandshakeInterceptor())
                 .withSockJS(); // SocketJS 를 연결한다는 설정
+
     }
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
