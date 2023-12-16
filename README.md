@@ -25,7 +25,7 @@
 
 ## 👬 개발 기간 | Project Period
 
-개발 기간 : 23.09~(진행중) 
+개발 기간 : 23.10~23.12
 
 ## ⭐️ 프로젝트 목표 | Project Goals
 1. 테스트 코드 커버리지 **최소 70%** 이상(**junit5**을 이용한 단위테스트)
@@ -47,9 +47,9 @@
 - [x] 채팅방 CRUD
 - [x] Websocket&&일반 채팅
 - [x] Redis를 통한 채팅 기록 불러오기
-- [x] webrtc&&화상 채팅(현재 1:1 화상 채팅만 가능)
-- [ ] Redis 실시간 알림
-- [ ] Kurento Media Server N:M 화상채팅
+- [x] webrtc&&화상 채팅
+- [x] Kurento Media Server N:M 화상채팅
+- [x] DataChannel 사용하여 화상채팅시 채팅
 
 ## 🌱 현재 개발된 기능 | Current Development Function
 
@@ -72,10 +72,11 @@
 - 채팅방 인원 , 방이름 , 잠금 상태 수정 기능
 
 ✔️ **화상채팅 기능 - WebRTC**
-  - WebRTC 화상 채팅(현재 1:1만 가능)
+  - WebRTC 화상 채팅(kurento, coturn)
        - P2P 기반 음성&영상 채팅, 화면 공유 기능
       - 화면 공유
        - 화면 좌우 반전
+      - DataChannel을 사용한 채팅 기능
 
   
 
@@ -151,17 +152,23 @@
       <td>WebRtc</td>
       <td>실시간 화상 채팅 기능을 제공하기 위해 Peer to Peer 연결을 통해 브라우저간에 직접적인 실시간 데이터 교환을 가능하게 하기 위해 사용하였습니다.</td>
     </tr>
+       <tr>
+      <td>Kurento</td>
+      <td> 화상채팅시 N:M 의 채팅을 구현했을 때 각 클라이언트 간의 연결 편의성과 클라이언트들에게 가해지는 부하 감소를 위해 KMS 사용</td>
+    </tr>
   </tbody>
 </table>
 
 ## 🧪 Junit5 단위 테스트 | Junit5 Unit Test
-<img width="564" alt="스크린샷 2023-11-11 오후 6 28 50" src="https://github.com/LminWoo99/EveryOneYard/assets/86508110/36694f7e-428e-4633-9295-b4d7c290f72f">
+<img width="556" alt="스크린샷 2023-12-16 오후 1 59 53" src="https://github.com/LminWoo99/EveryOneYard/assets/86508110/5d400744-5123-49a8-998e-bcb308bae1ad">
 
-**junit5** 와 **mockito** 를 사용하여 총 59개의 단위테스트를 진행하였습니다.
 
-<img width="1131" alt="스크린샷 2023-11-11 오후 6 28 36" src="https://github.com/LminWoo99/EveryOneYard/assets/86508110/29ed0dd5-7518-4fab-b197-debdfbbf3589">
+**junit5** 와 **mockito** 를 사용하여 총 69개의 단위테스트를 진행하였습니다.
 
--  핵심 로직, 컨트롤러, 서비스, 도메인 대상으로 <span style="color:red"> **`83%`** </span> 테스트 커버리지를 달성했습니다
+<img width="1171" alt="테스트 커버리지" src="https://github.com/LminWoo99/EveryOneYard/assets/86508110/bb2e85d3-f366-45f8-9993-8d20a3f86587">
+
+
+-  핵심 로직, 컨트롤러, 서비스, 도메인 대상으로 <span style="color:red"> **`85%`** </span> 테스트 커버리지를 달성했습니다
 - 프로젝트 목표였던 테스트 커버리지 70% 이상의 결과를 얻게 되었습니다.
 
 ## 🛠 트러블 슈팅 | Trouble Shooting
@@ -211,7 +218,68 @@ SecurityContextHolder.getContext().setAuthentication(authentication);
 -------
 
 ## 🛠 성능 튜닝 및 개선 | Performance Tuning
-### 성능 튜닝: 채팅 전체 메세지 조회 기능에서 Redis 도입을 통한 성능 개선
+### ⚙️성능 튜닝: 스케일 아웃을 통한 트래픽 분산 처리 및 Nginx Consistent Hashing을 통한 채팅 기능 성능 개선
+👉[자세한 과정은 블로그 참고](https://velog.io/@mw310/Nginx-%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%8B%B1-%EC%A0%81%EC%9A%A9%EC%9D%84-%ED%86%B5%ED%95%9C-%EC%B1%84%ED%8C%85-%EC%84%9C%EB%B9%84%EC%8A%A4-%EA%B0%9C%EC%84%A0-Consistent-Hashing)   
+### Consistent Hashing 적용전
+- **100명 유저**
+  - 샘플 수: 100
+  - 평균 응답 시간: 319ms
+  - 최대 응답 시간: 5069ms
+  - 평균 처리량: 145.4/sec
+    
+- **1000명 유저**
+  - 샘플 수: 1,000
+  - 평균 응답 시간: 1666ms
+  - 최대 응답 시간: 20003ms
+  - 평균 처리량: .0/hour
+    
+### Consistent Hashing 적용 후
+- **100명 유저**
+  - 샘플 수: 100
+  - 평균 응답 시간: 108ms
+  - 최대 응답 시간: 1305ms
+  - 평균 처리량: 309.3/sec
+- **1000명 유저**
+  - 샘플 수: 1,000
+  - 평균 응답 시간: 1097ms
+  - 최대 응답 시간: 1832.75ms
+  - 평균 처리량: 656.8/sec
+### User 100명 비교 분석
+
+- **평균 응답 시간(Average Response Time)**: 최적화 전에는 319ms 였던 반면, 최적화 후에는 108ms로 줄어들었습니다. 이는 약`66.1%`의 개선
+- **처리량(Throughput)**: 초당 처리량이 최적화 전 145.4개에서 최적화 후 309.3개로 증가했습니다. 이는 약 `112.7%` 증가
+- **오류(Error %)**: 두 경우 모두 0%
+- **표준 편차(STD.DEV)**: 최적화 전에는 921.10이었던 표준 편차가 최적화 후에는 255.11로 줄어들었습니다. 이는 약 `72.3%` 감소
+
+### User 1000명 비교 분석
+
+- **평균 응답 시간(Average Response Time)**: 최적화 전에 평균 1666ms 였던 반면, 최적화 후에는 1097ms로 감소하였습니다. 대략 `34.2%`의 개선
+- **처리량(Throughput)**: 최적화 전에는 처리량이 0으로 나타났으나, 최적화 후에는 초당 658.8건으로 크게 증가했습니다. 처리량이 0에서 측정 가능한 수치로 변화한 것은 상당한 개선
+- **오류(Error %)**:  오류율은 최적화 전 28.62%에서 최적화 후 9.09%로 감소했습니다. 이는 오류율이 `68.25%` 감소
+- **표준 편차(STD.DEV)**: 표준 편차는 최적화 전 4341.75에서 최적화 후 1832.75로 감소하여, 약 `57.8%` 줄어듬
+
+### Consistent Hashing nginx conf.d 설정
+```nginx
+http {
+    upstream myapp {
+        consistent_hash $request_uri;
+        server backend1.example.com;
+        server backend2.example.com;
+    }
+
+    server {
+        listen 80;
+        location / {
+            proxy_pass http://myapp;
+            # 기타 필요한 설정 ...
+        }
+    }
+}
+```
+
+
+
+### ⚙️성능 튜닝: 채팅 전체 메세지 조회 기능에서 Redis 도입을 통한 성능 개선
 👉[자세한 과정은 블로그 참고](https://velog.io/@mw310/WebSocket-Stomp-Redis-%EC%84%B1%EB%8A%A5-%EC%B5%9C%EC%A0%81%ED%99%94#%EC%84%B1%EB%8A%A5-%ED%8A%9C%EB%8B%9D-%EB%B6%84%EC%84%9D)   
 ### Redis 사용 전:
 
