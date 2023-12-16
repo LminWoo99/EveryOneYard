@@ -34,8 +34,9 @@
 
 
 ## 🛠 아키텍처 | Architecture
+<img width="782" alt="스크린샷 2023-12-16 오후 2 31 24" src="https://github.com/LminWoo99/EveryOneYard/assets/86508110/fc5bedb0-7f64-4ef6-aeea-75fbc399466c">
 
-<img width="782" alt="아키텍쳐" src="https://github.com/LminWoo99/EveryOneYard/assets/86508110/9bbc9a7a-7016-4d59-8a4a-d971c66cd2be">
+
 
 
 
