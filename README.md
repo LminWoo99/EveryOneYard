@@ -20,7 +20,7 @@
 9️⃣ [트러블 슈팅](#-트러블-슈팅--trouble-shooting) <br/>
 🔟 [성능 튜닝](#-성능-튜닝-및-개선--performance-tuning) <br/>
 #️⃣ [Api 문서](#-Api-문서--api-docs) <br/> 
-#️⃣ [시연 GIF](#-시연-gif--testing) <br/>
+#️⃣ [기능 시연 GIF](#-기능-시연-gif--testing) <br/>
 
 
 ## 👬 개발 기간 | Project Period
