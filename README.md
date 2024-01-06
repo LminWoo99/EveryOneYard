@@ -1,6 +1,6 @@
 # 모두의 마당
   
-> 👉 [서비스 이용하기](https://everyoneyard.shop/)   
+> 👉 [서비스 이용하기](https://everyoneyard.shop/)(현재 aws 과금으로 서비스는 중단하였습니다!)  
 
 ## 프로젝트 소개
 ✅ SpringBoot 기반 WebSocket 라이브러리와 STOMP프로토콜 기반 채팅 webrtc로 화상 채팅 구현한 **개인 프로젝트**입니다.
@@ -324,7 +324,7 @@ https://github.com/LminWoo99/EveryOneYard/blob/f421379ff377145300182a6cb84a64310
 
 
 ## 🎥 기능 시연 GIF | Testing
-- 현재 모든 개발이 완료된 상태가 아니라, 프로젝트 종료 이후에 시연 영상을 올릴 예정입니다 
+- 👉 [시연 영상](https://youtu.be/Jjzco4Xkkkg)
 
 <!--
 
