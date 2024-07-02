@@ -3,7 +3,7 @@
 > 👉 [서비스 이용하기](https://everyoneyard.shop/)(현재 서비스는 중단하였습니다!)  
 
 ## 프로젝트 소개
-✅ SpringBoot 기반 WebSocket 라이브러리와 STOMP 프로토콜 기반 채팅 webrtc로 화상 채팅 구현한 **개인 프로젝트**입니다.
+✅ SpringBoot 기반 WebSocket 라이브러리와 STOMP 프로토콜 기반 그룹 채팅과 webrtc로 화상 채팅을 구현한 **개인 프로젝트**입니다.
 - 모두가 주인인 마당, 여기서 회의 시작해요
   <br/>
   
@@ -29,6 +29,7 @@
 개발 기간 : 23.10~23.12
 
 ## ⭐️ 프로젝트 목표 | Project Goals
+
 1. 테스트 코드 커버리지 **최소 70%** 이상(**junit5**을 이용한 단위테스트)
 2. 부하테스트를 통한 성능 측정 후 **최적화** 작업
 3. git commit **컨벤션 규칙** 지키도록 노력하기
@@ -49,7 +50,7 @@
 - [x] 채팅방 CRUD
 - [x] Websocket&&일반 채팅
 - [x] Redis를 통한 채팅 기록 불러오기
-- [x] webrtc&&화상 채팅
+- [x] WebRtc&&화상 채팅
 - [x] Kurento Media Server N:M 화상채팅
 - [x] DataChannel 사용하여 화상채팅시 채팅
 
