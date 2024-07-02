@@ -1,14 +1,15 @@
 # 모두의 마당
   
-> 👉 [서비스 이용하기](https://everyoneyard.shop/)(현재 aws 과금으로 서비스는 중단하였습니다!)  
+> 👉 [서비스 이용하기](https://everyoneyard.shop/)(현재 서비스는 중단하였습니다!)  
 
 ## 프로젝트 소개
-✅ SpringBoot 기반 WebSocket 라이브러리와 STOMP프로토콜 기반 채팅 webrtc로 화상 채팅 구현한 **개인 프로젝트**입니다.
+✅ SpringBoot 기반 WebSocket 라이브러리와 STOMP 프로토콜 기반 채팅 webrtc로 화상 채팅 구현한 **개인 프로젝트**입니다.
 - 모두가 주인인 마당, 여기서 회의 시작해요
   <br/>
   
 
 ## 🔭 목차 | Contents
+
 1️⃣ [개발 기간](#-개발-기간--project-period) <br/>
 2️⃣ [프로젝트 목표](#-프로젝트-목표--project-goals) <br/>
 3️⃣ [아키텍처](#-아키텍처--architecture) <br/>
