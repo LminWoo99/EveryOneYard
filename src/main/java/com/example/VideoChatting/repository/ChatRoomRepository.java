@@ -12,9 +12,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
+
     ChatRoom findByRoomId(String roomId);
 
     boolean existsByRoomName(String roomName);
