@@ -49,12 +49,10 @@ public class ChatRoomService {
     }
     //채팅방
     //방 아이디로 검색
-//    @Cacheable(value = "ChatRoom", cacheManager = "testCacheManager")
     public List<ChatRoom> findAllRooms() {
         List<ChatRoom> chatRooms = chatRoomRepository.findAll();
         Collections.reverse(chatRooms);
 
-//        return opsHashChatRoom.values(CHAT_ROOMS);
         return chatRooms;
     }
 
@@ -62,7 +60,7 @@ public class ChatRoomService {
         return chatRoomRepository.findByRoomId(roomId);
     }
     /**
-     * 채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다.
+     * 채팅방 생성
      */
     public ChatRoom createChatRoom(String roomName,String roomPwd, boolean secretCheck, int maxUserCnt) {
         if (chatRoomRepository.existsByRoomName(roomName)) {
@@ -71,7 +69,9 @@ public class ChatRoomService {
             ChatRoom chatRoom = new ChatRoom().create(roomName, roomPwd, secretCheck, maxUserCnt);
             chatRoom.setChatType(ChatType.MSG);
             opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);
+
             log.info(chatRoom.getRoomName());
+
             chatRoomRepository.save(chatRoom);
             return chatRoom;
         }
@@ -119,7 +119,7 @@ public class ChatRoomService {
         ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS, roomId);
         String userUUID = UUID.randomUUID().toString();
         room.getUserList().put(userUUID, username);
-        System.out.println("userUUID = " + userUUID);
+
         return userUUID;
     }
     //채팅방 유저 이름 중복 확인
@@ -145,7 +145,6 @@ public class ChatRoomService {
         return room.getUserList().get(userUUID);
     }
 
-
     // 채팅방 전체 userlist 조회
     public ArrayList<String> getUserList(String roomId){
         ArrayList<String> list = new ArrayList<>();
@@ -153,16 +152,13 @@ public class ChatRoomService {
         ChatRoom room = opsHashChatRoom.get(CHAT_ROOMS, roomId);
 
         // hashmap 을 for 문을 돌린 후
-        // value 값만 뽑아내서 list 에 저장 후 reutrn
+        // value 값만 뽑아내서 list 에 저장 후 return
         room.getUserList().forEach((key, value) -> list.add(value));
         return list;
     }
     // 채팅방 최대 인원 체크
     public boolean checkRoomUserCnt(String roomId) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId);
-
-//        log.info(String.valueOf(room.getUserCount()));
-//        log.info("참여인원 확인 [{}, {}]", room.getUserCount(), room.getMaxUserCnt());
 
         if (room.getUserCount() + 1 > room.getMaxUserCnt()) {
             return false;
@@ -173,19 +169,18 @@ public class ChatRoomService {
     public boolean confirmPwd(String roomId, String roomPwd) {
         return roomPwd.equals(opsHashChatRoom.get(CHAT_ROOMS, roomId).getRoomPwd());
     }
-    @CacheEvict(value = "ChatRoom", key = "#roomId", cacheManager = "testCacheManager")
     public void deleteChatRoom(String roomId) {
         try {
             ChatRoom byRoomId = chatRoomRepository.findByRoomId(roomId);
+
             opsHashChatRoom.delete(roomId, byRoomId);
             chatRoomRepository.delete(byRoomId);
+
             fileService.deleteFileDir(roomId);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
-
-
     public void updateRoomName(String roomId, String roomName) {
         chatRoomRepository.updateRoomName(roomId, roomName);
         opsHashChatRoom.delete(CHAT_ROOMS, roomId);
