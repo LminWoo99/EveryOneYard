@@ -319,7 +319,7 @@ http {
 
 ### Look-aside 전략 관련 코드
 
-https://github.com/LminWoo99/EveryOneYard/blob/f421379ff377145300182a6cb84a64310a364a68/src/main/java/com/example/VideoChatting/service/chat/ChatService.java#L52-L77
+https://github.com/LminWoo99/EveryOneYard/blob/f421379ff377145300182a6cb84a64310a364a68/src/main/java/com/example/VideoChatting/service/chat/ChatService.java#L42-L64
 
 ## 📜 Api 문서 | Api Docs
 👉 [해당 링크 참조](https://everyoneyard.shop/swagger-ui/)
