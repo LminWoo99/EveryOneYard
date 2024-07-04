@@ -85,23 +85,41 @@ class ChatServiceTest {
     void loadMessageTest_NoRedisMessages() {
         // given
         String roomId = "testRoomId";
-
         List<ChatDto> redisMessageList = new ArrayList<>();
-
         ChatRoom mockChatRoom = new ChatRoom();
         when(chatRoomRepository.findByRoomId(anyString())).thenReturn(mockChatRoom);
 
         List<ChatMessage> mockDbMessageList = new ArrayList<>();
-        when(chatMessageRepository.findTop100ByChatRoomOrderByCreatedAtAsc(any())).thenReturn(mockDbMessageList);
+        ChatMessage message1 = new ChatMessage();
+        message1.setMessage("DB Message 1");
+        ChatMessage message2 = new ChatMessage();
+        message2.setMessage("DB Message 2");
+        mockDbMessageList.add(message1);
+        mockDbMessageList.add(message2);
+
+        when(chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(any())).thenReturn(mockDbMessageList);
 
         when(redisTemplate.opsForList()).thenReturn(listOperations);
-        when(listOperations.range(roomId, 0, 99)).thenReturn(redisMessageList);  // redisTemplate.opsForList().range() 호출 시 목 객체 반환 설정
+        when(listOperations.range(eq(roomId), eq(0L), eq(-1L))).thenReturn(redisMessageList);
 
-        //when
+        // Redis에 저장하는 동작 모킹
+        doNothing().when(listOperations).rightPush(eq(roomId), any(ChatDto.class));
+
+        // 만료 시간 설정 모킹
+        when(redisTemplate.expire(eq(roomId), eq(20L), eq(TimeUnit.MINUTES))).thenReturn(true);
+
+        // when
         List<ChatDto> result = chatService.loadMessage(roomId);
 
         // then
-        assertEquals(0, result.size());  // 결과 리스트의 크기가 0이어야 함
+        assertEquals(2, result.size());
+        assertEquals("DB Message 1", result.get(0).getMessage());
+        assertEquals("DB Message 2", result.get(1).getMessage());
+
+        // Redis에 저장되었는지 확인
+        verify(listOperations, times(2)).rightPush(eq(roomId), any(ChatDto.class));
+        // 만료 시간이 설정되었는지 확인
+        verify(redisTemplate).expire(eq(roomId), eq(20L), eq(TimeUnit.MINUTES));
     }
 
     @Test
@@ -109,8 +127,6 @@ class ChatServiceTest {
     void loadMessageTest_RedisMessages() {
         // given
         String roomId = "testRoomId";
-
-
         List<ChatDto> redisMessageList = new ArrayList<>();
         ChatDto chatDto1 = new ChatDto();
         chatDto1.setMessage("Hello");
@@ -119,9 +135,8 @@ class ChatServiceTest {
         redisMessageList.add(chatDto1);
         redisMessageList.add(chatDto2);
 
-
         when(redisTemplate.opsForList()).thenReturn(listOperations);
-        when(listOperations.range(roomId, 0, 99)).thenReturn(redisMessageList);
+        when(listOperations.range(eq(roomId), eq(0L), eq(-1L))).thenReturn(redisMessageList);
 
         // when
         List<ChatDto> result = chatService.loadMessage(roomId);
@@ -131,5 +146,7 @@ class ChatServiceTest {
         assertEquals("Hello", result.get(0).getMessage());
         assertEquals("World", result.get(1).getMessage());
 
+        // DB 조회가 일어나지 않았는지 확인
+        verify(chatMessageRepository, never()).findByChatRoomOrderByCreatedAtAsc(any());
     }
 }

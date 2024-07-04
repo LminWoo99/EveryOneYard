@@ -10,9 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
-    List<ChatMessage> findTop100ByChatRoomOrderByCreatedAtAsc(ChatRoom chatRoom);
+    List<ChatMessage> findByChatRoomOrderByCreatedAtAsc(ChatRoom chatRoom);
 
     Optional<ChatMessage> findById(Long id);
 
-//    ChatMessage findFirstBySenderOrderByCreatedAtDesc(String sender);
 }
