@@ -37,6 +37,8 @@ public class ChatService {
                 chatDto.getMessage(), chatDto.getS3DataUrl(), room, chatDto.getRoomId(), chatDto.getFileName(), chatDto.getFileDir());
         chatMessageRepository.save(chatMessage);
 
+        String cacheKey = "chat:" + chatDto.getRoomId();
+        redisTemplate.delete(cacheKey);
     }
     // 대화 조회 - Redis & DB
     public List<ChatDto> loadMessage(String roomId) {

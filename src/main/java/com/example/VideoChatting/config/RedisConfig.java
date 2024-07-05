@@ -58,15 +58,6 @@ public class RedisConfig {
         return redisTemplate;
     }
     @Bean
-    public CacheManager testCacheManager(RedisConnectionFactory cf) {
-        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
-                .entryTtl(Duration.ofMinutes(3L));
-
-        return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(cf).cacheDefaults(redisCacheConfiguration).build();
-    }
-    @Bean
     public RedisTemplate<String, ChatDto> redisTemplateForChatDto(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, ChatDto> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);

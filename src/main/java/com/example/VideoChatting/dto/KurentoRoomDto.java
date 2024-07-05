@@ -147,8 +147,6 @@ public class KurentoRoomDto extends ChatRoom implements Closeable
         // participants 를 list 형태로 변환 => 이때 list 는 한명의 유저가 새로 들어올 때마다
         // 즉 joinRoom 이 실행될 때마다 새로 생성 && return 됨
         final List<String> participantsList = new ArrayList<>(participants.values().size());
-//    log.debug("ROOM {}: notifying other participants of new participant {}", name,
-//        newParticipant.getName());
         log.debug("ROOM {}: 다른 참여자들에게 새로운 참여자가 들어왔음을 알림 {}", roomId,
                 newParticipant.getName());
 

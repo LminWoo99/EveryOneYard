@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentMap;
 @Setter
 public class ChatRoomMap {
     private static ChatRoomMap chatRoomMap = new ChatRoomMap();
-//    private Map<String, ChatRoom> chatRooms = new LinkedHashMap<>();
     private ConcurrentMap<String, ChatRoom> chatRooms = new ConcurrentHashMap<>();
     private ChatRoomMap(){}
 

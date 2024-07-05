@@ -25,7 +25,6 @@ public class KurentoService {
   /**
    * @desc room 정보를 담은 map
    * */
-//  private final ConcurrentMap<String, KurentoRoom> rooms = new ConcurrentHashMap<>();
   private final ConcurrentMap<String, ChatRoom> rooms = ChatRoomMap.getInstance().getChatRooms();
 
   /**

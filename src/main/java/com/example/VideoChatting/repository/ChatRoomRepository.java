@@ -31,14 +31,4 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("update ChatRoom t set t.secretCheck = :secretCheck where t.roomId = :roomId")
     void updateRoomSecretCheck(@Param("roomId")String roomId, @Param("secretCheck")Boolean secretCheck);
 
-////    @Override
-////    @EntityGraph(attributePaths = {"chatMessageList"})
-////    List<ChatRoom> findAll();
-//    @Override
-//    @Query("SELECT b FROM ChatRoom b order by b.id desc")
-//    @EntityGraph(attributePaths = {"chatMessageList"})
-//    Page<ChatRoom> findAll(Pageable pageable);
-//    @Query("SELECT b FROM ChatRoom b order by b.id desc")
-////    @EntityGraph(attributePaths = {"chatMessageList"})
-//    Slice<ChatRoom> findAllChatRooms(Pageable pageable);
 }
