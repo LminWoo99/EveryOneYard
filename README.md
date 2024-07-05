@@ -5,7 +5,7 @@
 - 👉 [시연 영상](https://youtu.be/Jjzco4Xkkkg)
 
 ## 프로젝트 소개
-✅ SpringBoot 기반 WebSocket 라이브러리와 STOMP 프로토콜 기반 그룹 채팅과 webrtc&kms 로 화상 채팅을 구현한 **개인 프로젝트**입니다.
+✅ SpringBoot 기반 WebSocket 라이브러리와 STOMP 프로토콜 기반 그룹 채팅과 WebRtc&KMS 로 화상 채팅을 구현한 **개인 프로젝트**입니다.
 - 모두가 주인인 마당, 여기서 회의 시작해요
   <br/>
   
