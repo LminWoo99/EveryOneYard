@@ -1,9 +1,11 @@
 # 모두의 마당
   
 > 👉 [서비스 이용하기](https://everyoneyard.shop/)(현재 서비스는 중단하였습니다!)  
+## 🎥 기능 시연 GIF | Testing
+- 👉 [시연 영상](https://youtu.be/Jjzco4Xkkkg)
 
 ## 프로젝트 소개
-✅ SpringBoot 기반 WebSocket 라이브러리와 STOMP 프로토콜 기반 그룹 채팅과 webrtc로 화상 채팅을 구현한 **개인 프로젝트**입니다.
+✅ SpringBoot 기반 WebSocket 라이브러리와 STOMP 프로토콜 기반 그룹 채팅과 webrtc&kms 로 화상 채팅을 구현한 **개인 프로젝트**입니다.
 - 모두가 주인인 마당, 여기서 회의 시작해요
   <br/>
   
@@ -317,16 +319,8 @@ http {
 - **처리량(Throughput)**: Redis 사용으로 100명의 유저 요청 시 처리량이 351.2/sec에서 1271.9/sec로 증가, **약 3.6배**의 증가
 - **최대 응답 시간**: 1084ms에서 268ms로 감소, **약 4배**의 개선
 
-### Look-aside 전략 관련 코드
-
-https://github.com/LminWoo99/EveryOneYard/blob/c12026f4332a48110a6d4c192e012ac9508b4f87/src/main/java/com/example/VideoChatting/service/chat/ChatService.java#L42-L64
-
-## 📜 Api 문서 | Api Docs
-👉 [해당 링크 참조](https://everyoneyard.shop/swagger-ui/)
 
 
-## 🎥 기능 시연 GIF | Testing
-- 👉 [시연 영상](https://youtu.be/Jjzco4Xkkkg)
 
 <!--
 
