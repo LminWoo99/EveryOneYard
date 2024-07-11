@@ -33,12 +33,8 @@ public class ChatRoom implements Serializable {
 
     private boolean secretCheck;
 
-    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    private List<ChatMessage> chatMessageList = new ArrayList<>();
-
-
     public HashMap<String, String> userList = new HashMap<String, String>();
+
     @Transient
     public ConcurrentMap<String, ?> userKurentoList = new ConcurrentHashMap<>();
     private HashMap<String, WebSocketSession> userRtcList = new HashMap<String, WebSocketSession>();
@@ -49,7 +45,7 @@ public class ChatRoom implements Serializable {
         this.chatType = chatType;
     }
 
-    public ChatRoom create(String roomName, String roomPwd, boolean secretCheck, int maxUserCnt){
+    public static ChatRoom create(String roomName, String roomPwd, boolean secretCheck, int maxUserCnt){
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.roomId = UUID.randomUUID().toString();
         chatRoom.roomName = roomName;
@@ -73,8 +69,5 @@ public class ChatRoom implements Serializable {
 
     public void setUserCount(int userCount) {
         this.userCount = userCount;
-    }
-    public void addChatMessages(ChatMessage chatMessage) {
-        this.chatMessageList.add(chatMessage);
     }
 }

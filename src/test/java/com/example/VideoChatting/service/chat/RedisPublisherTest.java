@@ -32,12 +32,12 @@ class RedisPublisherTest {
     @Test
     public void testPublish() {
         // given
-        ChatMessage chatMessage = new ChatMessage();
+        ChatDto chatDto = new ChatDto();
 
         // when
-        redisPublisher.publish(channelTopic, chatMessage);
+        redisPublisher.publish(channelTopic, chatDto);
 
         // then
-        verify(redisTemplate).convertAndSend(channelTopic.getTopic(), chatMessage);
+        verify(redisTemplate).convertAndSend(channelTopic.getTopic(), chatDto);
     }
 }

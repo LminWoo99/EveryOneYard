@@ -4,6 +4,7 @@ package com.example.VideoChatting.controller;
 import com.example.VideoChatting.dto.ChatDto;
 import com.example.VideoChatting.entity.ChatMessage;
 import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.entity.MessageType;
 import com.example.VideoChatting.service.chat.ChatRoomService;
 import com.example.VideoChatting.service.chat.ChatService;
 import com.example.VideoChatting.service.chat.RedisPublisher;
@@ -69,13 +70,9 @@ public class ChatController {
     @MessageMapping("/chat/sendMessage")
     public void sendMessage(@Payload ChatDto chat) {
         log.info("CHAT {}", chat);
-        ChatRoom chatRoom=chatRoomService.findRoomById(chat.getRoomId());
 
-        ChatMessage message1=ChatMessage.createChatMessage(chatRoom, chat.getSender(), chat.getMessage(), chat.getType(), chat.getS3DataUrl());
-
-        chatRoomService.createChatMessage(chatRoom, message1);
         // Websocket에 발행된 메시지를 redis로 발행(publish)
-        redisPublisher.publish(chatRoomService.getTopic(chat.getRoomId()), message1);
+        redisPublisher.publish(chatRoomService.getTopic(chat.getRoomId()),chat);
         chatService.saveMessage(chat);
 
     }
@@ -111,7 +108,7 @@ public class ChatController {
 
             // builder 어노테이션 활용
             ChatDto chat = ChatDto.builder()
-                    .type(ChatDto.MessageType.LEAVE)
+                    .type(MessageType.LEAVE)
                     .sender(username)
                     .message(username + " 님 퇴장!!")
                     .build();
@@ -123,7 +120,7 @@ public class ChatController {
     // 채팅에 참여한 유저 리스트 반환
     @GetMapping("/chat/userlist")
     @ResponseBody
-    public ArrayList<String> userList(String roomId) {
+    public List<String> userList(String roomId) {
 
         return chatRoomService.getUserList(roomId);
     }

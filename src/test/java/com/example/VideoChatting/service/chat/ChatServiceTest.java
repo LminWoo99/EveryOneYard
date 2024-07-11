@@ -3,6 +3,7 @@ package com.example.VideoChatting.service.chat;
 import com.example.VideoChatting.dto.ChatDto;
 import com.example.VideoChatting.entity.ChatMessage;
 import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.entity.MessageType;
 import com.example.VideoChatting.repository.ChatMessageRepository;
 import com.example.VideoChatting.repository.ChatRoomRepository;
 import org.assertj.core.api.Assertions;
@@ -20,12 +21,14 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ChatServiceTest {
@@ -36,117 +39,78 @@ class ChatServiceTest {
     @Mock
     private ChatMessageRepository chatMessageRepository;
 
-    @Mock
-    private ChatRoomRepository chatRoomRepository;
-
-    @Mock
-    private RedisTemplate<String, ChatDto> redisTemplate;
-
-    @Mock
-    private ListOperations<String, ChatDto> listOperations;
-
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(chatService, "redisTemplate", redisTemplate);
-    }
-
     @Test
     @DisplayName("대화 저장 테스트")
     void saveMessageTest() {
         //given
         ChatDto chatDto = ChatDto.builder()
-                .type(ChatDto.MessageType.TALK)
+                .type(MessageType.TALK)
                 .roomId("testRoomId")
                 .sender("testSender")
                 .message("Hello, World!")
-                .createdAt(new Date())
                 .s3DataUrl("https://example.com/some-file")
                 .fileName("example.txt")
                 .fileDir("/files")
                 .build();
-
-        ChatRoom mockChatRoom = new ChatRoom();
-        when(redisTemplate.opsForList()).thenReturn(listOperations);
-
-        when(chatRoomRepository.findByRoomId(anyString())).thenReturn(mockChatRoom);
-        System.out.println("chatDto = " + chatDto.getRoomId());
 
         //when
         chatService.saveMessage(chatDto);
 
         //then
         verify(chatMessageRepository, times(1)).save(any());
-        verify(redisTemplate, times(1)).setValueSerializer(any(Jackson2JsonRedisSerializer.class));
-        verify(redisTemplate, times(1)).expire(anyString(), anyLong(), any());
     }
-
     @Test
-    @DisplayName("대화 조회 테스트 - Redis에 메시지가 없을 때")
-    void loadMessageTest_NoRedisMessages() {
-        // given
-        String roomId = "testRoomId";
-        List<ChatDto> redisMessageList = new ArrayList<>();
-        ChatRoom mockChatRoom = new ChatRoom();
-        when(chatRoomRepository.findByRoomId(anyString())).thenReturn(mockChatRoom);
+    @DisplayName("대화 조회 테스트")
+    void loadMessage_ReturnsListOfChatDto() {
+        // Given
+        String roomId = "room1";
+        Date now = new Date();
 
-        List<ChatMessage> mockDbMessageList = new ArrayList<>();
-        ChatMessage message1 = new ChatMessage();
-        message1.setMessage("DB Message 1");
-        ChatMessage message2 = new ChatMessage();
-        message2.setMessage("DB Message 2");
-        mockDbMessageList.add(message1);
-        mockDbMessageList.add(message2);
+        ChatMessage message1 = ChatMessage.builder()
+                .type(MessageType.TALK)
+                .sender("user1")
+                .message("Hello")
+                .roomId(roomId)
+                .createdAt(now)
+                .build();
 
-        when(chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(any())).thenReturn(mockDbMessageList);
+        ChatMessage message2 = ChatMessage.builder()
+                .type(MessageType.TALK)
+                .sender("user2")
+                .message("Hi there")
+                .roomId(roomId)
+                .createdAt(now)
+                .build();
 
-        when(redisTemplate.opsForList()).thenReturn(listOperations);
-        when(listOperations.range(eq(roomId), eq(0L), eq(-1L))).thenReturn(redisMessageList);
+        List<ChatMessage> mockMessages = Arrays.asList(message1, message2);
 
-        // Redis에 저장하는 동작 모킹
-        doNothing().when(listOperations).rightPush(eq(roomId), any(ChatDto.class));
+        when(chatMessageRepository.findByRoomIdOrderByCreatedAtAsc(roomId)).thenReturn(mockMessages);
 
-        // 만료 시간 설정 모킹
-        when(redisTemplate.expire(eq(roomId), eq(20L), eq(TimeUnit.MINUTES))).thenReturn(true);
-
-        // when
+        // When
         List<ChatDto> result = chatService.loadMessage(roomId);
 
-        // then
+        // Then
         assertEquals(2, result.size());
-        assertEquals("DB Message 1", result.get(0).getMessage());
-        assertEquals("DB Message 2", result.get(1).getMessage());
-
-        // Redis에 저장되었는지 확인
-        verify(listOperations, times(2)).rightPush(eq(roomId), any(ChatDto.class));
-        // 만료 시간이 설정되었는지 확인
-        verify(redisTemplate).expire(eq(roomId), eq(20L), eq(TimeUnit.MINUTES));
-    }
-
-    @Test
-    @DisplayName("대화 조회 테스트 - Redis에 메시지가 있을 때")
-    void loadMessageTest_RedisMessages() {
-        // given
-        String roomId = "testRoomId";
-        List<ChatDto> redisMessageList = new ArrayList<>();
-        ChatDto chatDto1 = new ChatDto();
-        chatDto1.setMessage("Hello");
-        ChatDto chatDto2 = new ChatDto();
-        chatDto2.setMessage("World");
-        redisMessageList.add(chatDto1);
-        redisMessageList.add(chatDto2);
-
-        when(redisTemplate.opsForList()).thenReturn(listOperations);
-        when(listOperations.range(eq(roomId), eq(0L), eq(-1L))).thenReturn(redisMessageList);
-
-        // when
-        List<ChatDto> result = chatService.loadMessage(roomId);
-
-        // then
-        assertEquals(2, result.size());
+        assertEquals("user1", result.get(0).getSender());
         assertEquals("Hello", result.get(0).getMessage());
-        assertEquals("World", result.get(1).getMessage());
+        assertEquals("user2", result.get(1).getSender());
+        assertEquals("Hi there", result.get(1).getMessage());
 
-        // DB 조회가 일어나지 않았는지 확인
-        verify(chatMessageRepository, never()).findByChatRoomOrderByCreatedAtAsc(any());
+        verify(chatMessageRepository).findByRoomIdOrderByCreatedAtAsc(roomId);
+    }
+
+    @Test
+    @DisplayName("빈 대화 조회 테스트")
+    void loadMessage_EmptyList_ReturnsEmptyList() {
+        // Given
+        String roomId = "emptyRoom";
+        when(chatMessageRepository.findByRoomIdOrderByCreatedAtAsc(roomId)).thenReturn(Arrays.asList());
+
+        // When
+        List<ChatDto> result = chatService.loadMessage(roomId);
+
+        // Then
+        assertTrue(result.isEmpty());
+        verify(chatMessageRepository).findByRoomIdOrderByCreatedAtAsc(roomId);
     }
 }

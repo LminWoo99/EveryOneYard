@@ -1,6 +1,6 @@
 package com.example.VideoChatting.entity;
 
-import com.example.VideoChatting.dto.ChatDto.MessageType;
+import com.example.VideoChatting.dto.ChatDto;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -22,9 +22,6 @@ public class ChatMessage {
     private String message;
     private String s3DataUrl;
     private String roomId;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CHATROOM_ID")
-    private ChatRoom chatRoom;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @CreationTimestamp
@@ -37,7 +34,6 @@ public class ChatMessage {
         this.sender = sender;
         this.message = message;
         this.s3DataUrl = s3DataUrl;
-        this.chatRoom = chatRoom;
         this.roomId = roomId;
         this.fileName = fileName;
         this.fileDir = fileDir;
@@ -45,7 +41,6 @@ public class ChatMessage {
 
     public static ChatMessage createChatMessage(ChatRoom chatRoom, String sender, String message, MessageType type, String s3DataUrl) {
         ChatMessage chatMessage= ChatMessage.builder()
-                .chatRoom(chatRoom)
                 .sender(sender)
                 .message(message)
                 .type(type)
@@ -53,7 +48,18 @@ public class ChatMessage {
                 .build();
         return chatMessage;
     }
-
+    public ChatDto toDto() {
+        return ChatDto.builder()
+                .type(type)
+                .roomId(roomId)
+                .sender(sender)
+                .message(message)
+                .createdAt(createdAt)
+                .s3DataUrl(s3DataUrl)
+                .fileName(fileName)
+                .fileDir(fileDir)
+                .build();
+    }
     public void setMessage(String message){
         this.message=message;
     }

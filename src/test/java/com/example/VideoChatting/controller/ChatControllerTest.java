@@ -2,6 +2,7 @@ package com.example.VideoChatting.controller;
 
 import com.example.VideoChatting.dto.ChatDto;
 import com.example.VideoChatting.entity.ChatRoom;
+import com.example.VideoChatting.entity.MessageType;
 import com.example.VideoChatting.service.chat.ChatRoomService;
 import com.example.VideoChatting.service.chat.ChatService;
 
@@ -59,15 +60,12 @@ class ChatControllerTest {
     @Mock
     private ChatService chatService;
     @Mock
-    private RedisTemplate<String, ChatDto> redisTemplate;
-    @Mock
     private RedisPublisher redisPublisher;
     @InjectMocks
     private ChatController chatController;
     MockMvc mockMvc;
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(chatService, "redisTemplate", redisTemplate);
         mockMvc = MockMvcBuilders.standaloneSetup(chatController).build();
     }
     @Test
@@ -93,7 +91,7 @@ class ChatControllerTest {
     void sendMessageTest() throws Exception{
         //given
         ChatDto chatDto = ChatDto.builder()
-                .type(ChatDto.MessageType.TALK)
+                .type(MessageType.TALK)
                 .roomId("testRoomId")
                 .sender("testSender")
                 .message("Hello, World!")
@@ -103,7 +101,7 @@ class ChatControllerTest {
                 .fileDir("/files")
                 .build();
         ChatRoom chatRoom = new ChatRoom();
-        when(chatRoomService.findRoomById("testRoomId")).thenReturn(chatRoom);
+        doNothing().when(redisPublisher).publish(any(), any());
         //when
         chatController.sendMessage(chatDto);
 

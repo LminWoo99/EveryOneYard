@@ -31,4 +31,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("update ChatRoom t set t.secretCheck = :secretCheck where t.roomId = :roomId")
     void updateRoomSecretCheck(@Param("roomId")String roomId, @Param("secretCheck")Boolean secretCheck);
 
+    void deleteByRoomId(String roomId);
 }

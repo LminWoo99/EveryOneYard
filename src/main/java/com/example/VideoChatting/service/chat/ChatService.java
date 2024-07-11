@@ -26,43 +26,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
-    private final ChatRoomRepository chatRoomRepository;
-    private final RedisTemplate<String, ChatDto> redisTemplate;
+
 
     // 대화 저장
     public void saveMessage(ChatDto chatDto) {
-        ChatRoom room = chatRoomRepository.findByRoomId(chatDto.getRoomId());
         // DB 저장
-        ChatMessage chatMessage = new ChatMessage(chatDto.getSender(),
-                chatDto.getMessage(), chatDto.getS3DataUrl(), room, chatDto.getRoomId(), chatDto.getFileName(), chatDto.getFileDir());
-        chatMessageRepository.save(chatMessage);
-
-        String cacheKey = "chat:" + chatDto.getRoomId();
-        redisTemplate.delete(cacheKey);
+        chatMessageRepository.save(chatDto.toEntity());
     }
     // 대화 조회 - Redis & DB
     public List<ChatDto> loadMessage(String roomId) {
-        String cacheKey = "chat:" + roomId;
-        List<ChatDto> cachedMessages = redisTemplate.opsForList().range(cacheKey, 0, -1);
+        List<ChatMessage> chatMessageList = chatMessageRepository.findByRoomIdOrderByCreatedAtAsc(roomId);
+        return chatMessageList.stream().map(ChatMessage::toDto).collect(Collectors.toList());
 
-        if (cachedMessages != null && !cachedMessages.isEmpty()) {
-            return cachedMessages;
-        }
-
-        log.info("DB에서 가져오기");
-        ChatRoom room = chatRoomRepository.findByRoomId(roomId);
-        List<ChatMessage> dbMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(room);
-        List<ChatDto> messageList = dbMessages.stream()
-                .map(ChatDto::new)
-                .collect(Collectors.toList());
-
-        if (!messageList.isEmpty()) {
-            redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatDto.class));
-            redisTemplate.opsForList().rightPushAll(cacheKey, messageList);
-            redisTemplate.expire(cacheKey, 20, TimeUnit.MINUTES);
-        }
-
-        return messageList;
     }
 
 }

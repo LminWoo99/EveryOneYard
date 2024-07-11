@@ -36,11 +36,9 @@ class ChatRoomControllerTest {
     @Mock
     private RtcChatService rtcChatService;
     private MockMvc mockMvc;
-    @Mock
-    private HashOperations<String, String, ChatRoom> opsHashChatRoom;
+
     @BeforeEach
     public void init() { // mockMvc 초기화, 각메서드가 실행되기전에 초기화 되게 함
-        ReflectionTestUtils.setField(chatRoomService, "opsHashChatRoom", opsHashChatRoom);
         mockMvc = MockMvcBuilders.standaloneSetup(chatRoomController).build();
     }
     @Test
